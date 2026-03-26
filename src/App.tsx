@@ -172,7 +172,14 @@ function App() {
   }, [page, gameStartTime, gameEndTime, username]);
 
   async function handleStartGame(nextUsername: string, nextHost: string) {
-    await applyLobbyIdentity(nextUsername, nextHost);
+    return applyLobbyIdentity(nextUsername, nextHost);
+  }
+
+  function handleBeginUsernameEdit() {
+    setUsernameError('');
+    gameService.clearUser();
+    localStorage.removeItem(USERNAME_STORAGE_KEY);
+    setUsername('');
   }
 
   async function handleEnterHost(nextHost: string) {
@@ -204,13 +211,14 @@ function App() {
       await gameService.setUsername(nextUsername);
     } catch {
       setUsernameError('이미 사용 중이거나 사용할 수 없는 사용자명입니다.');
-      return;
+      return false;
     }
 
     localStorage.setItem(USERNAME_STORAGE_KEY, nextUsername.trim());
     localStorage.setItem(HOST_STORAGE_KEY, normalizedHost);
-    setUsername(nextUsername);
+    setUsername(nextUsername.trim());
     setHost(normalizedHost);
+    return true;
   }
 
   return (
@@ -231,6 +239,7 @@ function App() {
           initialHost={host}
           onEnterHost={handleEnterHost}
           onStartGame={handleStartGame}
+          onBeginUsernameEdit={handleBeginUsernameEdit}
           gameStartTime={gameStartTime}
           now={now}
           isLoadingGameStartTime={isLoadingGameStartTime}

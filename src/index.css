@@ -288,6 +288,13 @@ h2 {
   color: black;
 }
 
+.lobby-step input[type='text'][readonly] {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #475569;
+  cursor: not-allowed;
+}
+
 .lobby-step-actions {
   display: flex;
   justify-content: space-between;
@@ -966,6 +973,13 @@ body.dark .lobby-step input[type='text'] {
   background: #111827;
   color: #fafafa;
   border-color: #4b5563;
+}
+
+body.dark .lobby-step input[type='text'][readonly] {
+  background: #1f2937;
+  color: #aeb9ca;
+  border-color: #5b6575;
+  cursor: not-allowed;
 }
 
 body.dark .lobby-step button.lobby-step-submit,

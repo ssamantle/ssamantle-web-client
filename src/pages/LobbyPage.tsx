@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Props {
   initialUsername: string;
   initialHost: string;
   onEnterHost: (host: string) => Promise<void>;
-  onStartGame: (username: string, host: string) => Promise<void>;
+  onStartGame: (username: string, host: string) => Promise<boolean>;
+  onBeginUsernameEdit: () => void;
   gameStartTime: number | null;
   now: number;
   isLoadingGameStartTime: boolean;
@@ -24,6 +25,7 @@ export function LobbyPage({
   initialHost,
   onEnterHost,
   onStartGame,
+  onBeginUsernameEdit,
   gameStartTime,
   now,
   isLoadingGameStartTime,
@@ -33,15 +35,24 @@ export function LobbyPage({
   const [username, setUsername] = useState(initialUsername);
   const [host, setHost] = useState(initialHost);
   const [step, setStep] = useState(initialHost.trim() ? 1 : 0);
+  const previousHostRef = useRef(initialHost);
   const countdown = gameStartTime === null ? null : formatCountdown(gameStartTime - now);
-  const hasSubmittedUsername = Boolean(initialUsername.trim());
+  const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const hasSubmittedUsername = Boolean(initialUsername.trim()) && !isEditingUsername;
 
   useEffect(() => {
-    setUsername(initialUsername);
+    if (initialUsername.trim()) {
+      setUsername(initialUsername);
+      setIsEditingUsername(false);
+    }
   }, [initialUsername]);
 
   useEffect(() => {
+    if (previousHostRef.current === initialHost) return;
+    previousHostRef.current = initialHost;
     setHost(initialHost);
+    setUsername('');
+    setIsEditingUsername(false);
   }, [initialHost]);
 
   async function handleEnterHost(e: React.FormEvent) {
@@ -58,11 +69,19 @@ export function LobbyPage({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (hasSubmittedUsername) {
+      onBeginUsernameEdit();
+      setIsEditingUsername(true);
+      return;
+    }
     const trimmed = username.trim();
     const trimmedHost = host.trim();
     if (!trimmed || !trimmedHost) return;
     try {
-      await onStartGame(trimmed, trimmedHost);
+      const didStartWaiting = await onStartGame(trimmed, trimmedHost);
+      if (didStartWaiting) {
+        setIsEditingUsername(false);
+      }
     } catch {
       // Username errors are surfaced in the UI.
     }
@@ -131,10 +150,11 @@ export function LobbyPage({
                   type="text"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
-                placeholder="사용자 명을 입력하세요"
-                autoComplete="nickname"
-                autoFocus={step === 1}
-              />
+                  placeholder="사용자 명을 입력하세요"
+                  autoComplete="nickname"
+                  autoFocus={step === 1}
+                  readOnly={hasSubmittedUsername}
+                />
                 {usernameErrorMessage && (
                   <p className="lobby-error">{usernameErrorMessage}</p>
                 )}
