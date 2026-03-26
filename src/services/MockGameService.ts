@@ -53,6 +53,13 @@ export class MockGameService extends GameService {
     this.host = this.normalizeHost(host);
   }
 
+  async connectHost(host: string): Promise<void> {
+    this.setHost(host);
+    if (!this.host || this.host.includes('bad') || this.host.includes('invalid')) {
+      throw new Error('HOST_UNREACHABLE');
+    }
+  }
+
   async getGameStartTime(): Promise<number | null> {
     const saved = localStorage.getItem(MOCK_GAME_START_TIME_KEY);
     if (saved) return Number(saved);

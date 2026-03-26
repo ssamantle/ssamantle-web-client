@@ -3,11 +3,13 @@ import React, { useState } from 'react';
 interface Props {
   initialUsername: string;
   initialHost: string;
+  onEnterHost: (host: string) => Promise<void>;
   onStartGame: (username: string, host: string) => Promise<void>;
   gameStartTime: number | null;
   now: number;
   isLoadingGameStartTime: boolean;
-  errorMessage: string;
+  hostErrorMessage: string;
+  usernameErrorMessage: string;
 }
 
 function formatCountdown(ms: number) {
@@ -20,11 +22,13 @@ function formatCountdown(ms: number) {
 export function LobbyPage({
   initialUsername,
   initialHost,
+  onEnterHost,
   onStartGame,
   gameStartTime,
   now,
   isLoadingGameStartTime,
-  errorMessage,
+  hostErrorMessage,
+  usernameErrorMessage,
 }: Props) {
   const [username, setUsername] = useState(initialUsername);
   const [host, setHost] = useState(initialHost);
@@ -32,10 +36,16 @@ export function LobbyPage({
   const countdown = gameStartTime === null ? null : formatCountdown(gameStartTime - now);
   const hasSubmittedUsername = Boolean(initialUsername.trim());
 
-  function handleEnterHost(e: React.FormEvent) {
+  async function handleEnterHost(e: React.FormEvent) {
     e.preventDefault();
-    if (!host.trim()) return;
-    setStep(1);
+    const trimmedHost = host.trim();
+    if (!trimmedHost) return;
+    try {
+      await onEnterHost(trimmedHost);
+      setStep(1);
+    } catch {
+      // Host connection errors are surfaced in the UI.
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -43,7 +53,11 @@ export function LobbyPage({
     const trimmed = username.trim();
     const trimmedHost = host.trim();
     if (!trimmed || !trimmedHost) return;
-    await onStartGame(trimmed, trimmedHost);
+    try {
+      await onStartGame(trimmed, trimmedHost);
+    } catch {
+      // Username errors are surfaced in the UI.
+    }
   }
 
   return (
@@ -81,6 +95,9 @@ export function LobbyPage({
                 autoCorrect="off"
                 autoFocus
               />
+              {hostErrorMessage && (
+                <p className="lobby-error">{hostErrorMessage}</p>
+              )}
               <button
                 className="lobby-step-submit lobby-step-submit-secondary"
                 type="submit"
@@ -106,12 +123,12 @@ export function LobbyPage({
                   type="text"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
-                  placeholder="사용자 명을 입력하세요"
-                  autoComplete="nickname"
-                  autoFocus={step === 1}
-                />
-                {errorMessage && (
-                  <p className="lobby-error">{errorMessage}</p>
+                placeholder="사용자 명을 입력하세요"
+                autoComplete="nickname"
+                autoFocus={step === 1}
+              />
+                {usernameErrorMessage && (
+                  <p className="lobby-error">{usernameErrorMessage}</p>
                 )}
               </div>
 

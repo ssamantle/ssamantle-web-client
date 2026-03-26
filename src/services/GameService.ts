@@ -12,6 +12,7 @@ export abstract class GameService {
 
   abstract setUsername(username: string): Promise<void>;
   abstract setHost(host: string): void;
+  abstract connectHost(host: string): Promise<void>;
   abstract getGameStartTime(): Promise<number | null>;
   abstract getGameEndTime(): Promise<number | null>;
   abstract getLeaderboard(): Promise<LeaderboardEntry[]>;

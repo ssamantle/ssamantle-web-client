@@ -24,7 +24,8 @@ function App() {
   const [now, setNow] = useState(() => Date.now());
   const [isLoadingGameStartTime, setIsLoadingGameStartTime] = useState(false);
   const [pageError, setPageError] = useState('');
-  const [lobbyError, setLobbyError] = useState('');
+  const [hostError, setHostError] = useState('');
+  const [usernameError, setUsernameError] = useState('');
   const { settings, settingsOpen, setSettingsOpen, updateSetting } = useSettings();
   const {
     guesses,
@@ -49,6 +50,8 @@ function App() {
       setGameStartTime(null);
       setGameEndTime(null);
       setLeaderboard([]);
+      setHostError('');
+      setUsernameError('');
       return;
     }
 
@@ -57,9 +60,23 @@ function App() {
     async function loadGameTimes() {
       setIsLoadingGameStartTime(true);
       setPageError('');
-      setLobbyError('');
+      setHostError('');
+      setUsernameError('');
 
-      gameService.setHost(host);
+      try {
+        await gameService.connectHost(host);
+      } catch {
+        if (!cancelled) {
+          setIsLoadingGameStartTime(false);
+          setPage('lobby');
+          setGameStartTime(null);
+          setGameEndTime(null);
+          setLeaderboard([]);
+          setHostError('서버에 연결할 수 없습니다. 호스트 주소를 확인해주세요.');
+        }
+        return;
+      }
+
       try {
         await gameService.setUsername(username);
       } catch {
@@ -69,7 +86,7 @@ function App() {
           setGameStartTime(null);
           setGameEndTime(null);
           setLeaderboard([]);
-          setLobbyError('이미 사용 중이거나 사용할 수 없는 사용자명입니다.');
+          setUsernameError('이미 사용 중이거나 사용할 수 없는 사용자명입니다.');
         }
         return;
       }
@@ -151,15 +168,31 @@ function App() {
     await applyLobbyIdentity(nextUsername, nextHost);
   }
 
+  async function handleEnterHost(nextHost: string) {
+    const normalizedHost = nextHost.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/.*$/, '');
+    setHostError('');
+    gameService.setHost(nextHost);
+
+    try {
+      await gameService.connectHost(nextHost);
+    } catch {
+      setHostError('서버에 연결할 수 없습니다. 호스트 주소를 확인해주세요.');
+      throw new Error('HOST_UNREACHABLE');
+    }
+
+    localStorage.setItem(HOST_STORAGE_KEY, normalizedHost);
+    setHost(normalizedHost);
+  }
+
   async function applyLobbyIdentity(nextUsername: string, nextHost: string) {
     const normalizedHost = nextHost.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/.*$/, '');
     gameService.setHost(nextHost);
-    setLobbyError('');
+    setUsernameError('');
 
     try {
       await gameService.setUsername(nextUsername);
     } catch {
-      setLobbyError('이미 사용 중이거나 사용할 수 없는 사용자명입니다.');
+      setUsernameError('이미 사용 중이거나 사용할 수 없는 사용자명입니다.');
       return;
     }
 
@@ -185,11 +218,13 @@ function App() {
         <LobbyPage
           initialUsername={username}
           initialHost={host}
+          onEnterHost={handleEnterHost}
           onStartGame={handleStartGame}
           gameStartTime={gameStartTime}
           now={now}
           isLoadingGameStartTime={isLoadingGameStartTime}
-          errorMessage={lobbyError}
+          hostErrorMessage={hostError}
+          usernameErrorMessage={usernameError}
         />
       )}
 

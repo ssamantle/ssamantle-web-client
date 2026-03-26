@@ -56,6 +56,20 @@ export class ApiGameService extends GameService {
     this.host = this.normalizeHost(host);
   }
 
+  async connectHost(host: string): Promise<void> {
+    this.setHost(host);
+    if (!this.host) {
+      throw new Error('HOST_UNREACHABLE');
+    }
+
+    try {
+      const res = await fetch(this.buildUrl('/start-time'));
+      if (!res.ok) throw new Error('HOST_UNREACHABLE');
+    } catch {
+      throw new Error('HOST_UNREACHABLE');
+    }
+  }
+
   async getGameStartTime(): Promise<number | null> {
     try {
       const res = await fetch(this.buildUrl('/start-time'));
