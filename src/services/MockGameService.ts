@@ -1,5 +1,5 @@
 import { GameService } from './GameService';
-import { GuessApiResponse } from '../types';
+import { GuessApiResponse, LeaderboardEntry } from '../types';
 
 const MOCK_ANSWER = '사과';
 const MOCK_GAME_START_TIME_KEY = 'mockGameStartTime';
@@ -62,6 +62,25 @@ export class MockGameService extends GameService {
     const endTime = startTime + 10 * 60_000;
     localStorage.setItem(MOCK_GAME_END_TIME_KEY, String(endTime));
     return endTime;
+  }
+
+  async getLeaderboard(): Promise<LeaderboardEntry[]> {
+    const entries: LeaderboardEntry[] = [
+      { username: 'alpha', similarity: 97.2 },
+      { username: 'beta', similarity: 93.8 },
+      { username: 'gamma', similarity: 88.4 },
+      { username: 'delta', similarity: 82.1 },
+      { username: 'epsilon', similarity: 77.5 },
+    ];
+
+    if (this.user.username.trim()) {
+      entries.splice(2, 0, {
+        username: this.user.username,
+        similarity: 84.6,
+      });
+    }
+
+    return entries.sort((a, b) => b.similarity - a.similarity);
   }
 
   async submitGuess(word: string): Promise<GuessApiResponse | null> {

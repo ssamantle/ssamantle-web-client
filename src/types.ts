@@ -29,6 +29,11 @@ export interface User {
   username: string;
 }
 
+export interface LeaderboardEntry {
+  username: string;
+  similarity: number;
+}
+
 export interface GuessApiResponse {
   guess: string;
   sim: number;

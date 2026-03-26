@@ -1,5 +1,5 @@
 import { GameService } from './GameService';
-import { GuessApiResponse } from '../types';
+import { GuessApiResponse, LeaderboardEntry } from '../types';
 
 /**
  * 실제 HTTP API 서버와 통신하는 GameService 구현체.
@@ -62,6 +62,16 @@ export class ApiGameService extends GameService {
       return this.parseTimeValue(data);
     } catch {
       return null;
+    }
+  }
+
+  async getLeaderboard(): Promise<LeaderboardEntry[]> {
+    try {
+      const res = await fetch(this.buildUrl('/leaderboard'));
+      const data: LeaderboardEntry[] = await res.json();
+      return Array.isArray(data) ? data : [];
+    } catch {
+      return [];
     }
   }
 

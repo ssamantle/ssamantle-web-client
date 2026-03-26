@@ -2,10 +2,11 @@ import React from 'react';
 import { GameResult } from '../components/GameResult';
 import { GuessForm } from '../components/GuessForm';
 import { GuessTable } from '../components/GuessTable';
-import { GuessEntry, GameStats } from '../types';
+import { GuessEntry, GameStats, LeaderboardEntry } from '../types';
 
 interface Props {
   guesses: GuessEntry[];
+  leaderboard: LeaderboardEntry[];
   gameOver: boolean;
   stats: GameStats | null;
   currentGuess: string;
@@ -32,6 +33,7 @@ function formatCountdown(ms: number) {
 
 export function InGamePage({
   guesses,
+  leaderboard,
   gameOver,
   stats,
   currentGuess,
@@ -95,10 +97,34 @@ export function InGamePage({
         />
       )}
 
-      <GuessTable
-        guesses={guesses}
-        currentGuess={currentGuess}
-      />
+      <div className="game-panels">
+        <div className="game-panel-main">
+          <GuessTable
+            guesses={guesses}
+            currentGuess={currentGuess}
+          />
+        </div>
+        <aside className="leaderboard-panel" aria-label="실시간 리더보드">
+          <div className="leaderboard-card">
+            <h3>실시간 리더보드</h3>
+            {leaderboard.length > 0 ? (
+              <ol className="leaderboard-list">
+                {leaderboard.map((entry, index) => (
+                  <li className="leaderboard-row" key={`${entry.username}-${index}`}>
+                    <span className="leaderboard-rank">#{index + 1}</span>
+                    <span className={`leaderboard-name${index === 0 ? ' leaderboard-name-top' : ''}`}>
+                      {entry.username}
+                    </span>
+                    <span className="leaderboard-score">{entry.similarity.toFixed(2)}</span>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="leaderboard-empty">표시할 참가자 기록이 없습니다.</p>
+            )}
+          </div>
+        </aside>
+      </div>
     </>
   );
 }

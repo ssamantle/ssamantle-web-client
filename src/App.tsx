@@ -6,6 +6,7 @@ import { useSettings } from './hooks/useSettings';
 import { InGamePage } from './pages/InGamePage';
 import { LobbyPage } from './pages/LobbyPage';
 import { gameService } from './services';
+import { LeaderboardEntry } from './types';
 
 type Page = 'lobby' | 'in-game';
 
@@ -18,6 +19,7 @@ function App() {
   const [host, setHost] = useState(() => localStorage.getItem(HOST_STORAGE_KEY) || '');
   const [gameStartTime, setGameStartTime] = useState<number | null>(null);
   const [gameEndTime, setGameEndTime] = useState<number | null>(null);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [now, setNow] = useState(() => Date.now());
   const [isLoadingGameStartTime, setIsLoadingGameStartTime] = useState(false);
   const [pageError, setPageError] = useState('');
@@ -49,6 +51,7 @@ function App() {
       setPage('lobby');
       setGameStartTime(null);
       setGameEndTime(null);
+      setLeaderboard([]);
       return;
     }
 
@@ -84,6 +87,27 @@ function App() {
       cancelled = true;
     };
   }, [username, host]);
+
+  useEffect(() => {
+    if (page !== 'in-game' || !username || !host) return;
+
+    let cancelled = false;
+
+    async function loadLeaderboard() {
+      const nextLeaderboard = await gameService.getLeaderboard();
+      if (!cancelled) setLeaderboard(nextLeaderboard);
+    }
+
+    void loadLeaderboard();
+    const intervalId = window.setInterval(() => {
+      void loadLeaderboard();
+    }, 5000);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [page, username, host]);
 
   useEffect(() => {
     if ((page !== 'lobby' && page !== 'in-game') || (gameStartTime === null && gameEndTime === null)) return;
@@ -136,6 +160,7 @@ function App() {
       {page === 'in-game' && (
         <InGamePage
           guesses={guesses}
+          leaderboard={leaderboard}
           gameOver={gameOver}
           stats={stats}
           currentGuess={currentGuess}

@@ -414,6 +414,17 @@ input[type='submit']:disabled {
 }
 
 /* ── Guesses table ── */
+.game-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 16rem;
+  gap: 1rem;
+  align-items: start;
+}
+
+.game-panel-main {
+  min-width: 0;
+}
+
 #guesses {
   margin-top: 1.5em;
   margin-bottom: 40px;
@@ -438,6 +449,68 @@ input[type='submit']:disabled {
 #alphaOrder:hover,
 #similarityOrder:hover {
   text-decoration: underline;
+}
+
+.leaderboard-panel {
+  margin-top: 1.5em;
+}
+
+.leaderboard-card {
+  border: 1px solid #d7e4ea;
+  border-radius: 0.9em;
+  background: #f8fcfe;
+  padding: 1rem;
+}
+
+.leaderboard-card h3 {
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
+}
+
+.leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 2.4rem minmax(0, 1fr) auto;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.22rem 0;
+  border-top: 1px solid #e8f0f4;
+}
+
+.leaderboard-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.leaderboard-rank {
+  color: #5b7380;
+  font-variant-numeric: tabular-nums;
+}
+
+.leaderboard-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-name-top {
+  font-weight: 700;
+}
+
+.leaderboard-score {
+  color: #0c6887;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.leaderboard-empty {
+  color: #5b7380;
 }
 
 /* ── Weird word tooltip ── */
@@ -492,6 +565,16 @@ footer {
 
   #guesses th {
     padding-right: 0.5em;
+  }
+
+  .game-panels {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .leaderboard-panel {
+    margin-top: 0;
+    margin-bottom: 1.5em;
   }
 
   .game-timer {
@@ -554,6 +637,24 @@ body.dark .game-timer-stat {
 
 body.dark .game-timer-stat-name {
   color: #9fb7c4;
+}
+
+body.dark .leaderboard-card {
+  background: #17212a;
+  border-color: #2f4756;
+}
+
+body.dark .leaderboard-row {
+  border-color: #243543;
+}
+
+body.dark .leaderboard-rank,
+body.dark .leaderboard-empty {
+  color: #9fb7c4;
+}
+
+body.dark .leaderboard-score {
+  color: #77d0ed;
 }
 
 body.dark #response.gaveup {
