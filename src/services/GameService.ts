@@ -10,7 +10,7 @@ export abstract class GameService {
     protected host: string,
   ) {}
 
-  abstract setUsername(username: string): void;
+  abstract setUsername(username: string): Promise<void>;
   abstract setHost(host: string): void;
   abstract getGameStartTime(): Promise<number | null>;
   abstract getGameEndTime(): Promise<number | null>;

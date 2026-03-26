@@ -210,6 +210,13 @@ h2 {
   color: #4b5563;
 }
 
+.lobby-error {
+  padding: 0.3rem 0.5rem;
+  color: #c62828;
+  font-size: 0.82rem;
+  line-height: 1.15;
+}
+
 .lobby-status-block {
   margin-top: 1rem;
   padding-top: 1rem;
@@ -231,6 +238,11 @@ h2 {
 .lobby-form {
   display: grid;
   gap: 0.75rem;
+}
+
+.lobby-field-group {
+  display: grid;
+  gap: 0.1rem;
 }
 
 .lobby-label {
@@ -837,6 +849,10 @@ body.dark .lobby-card {
 
 body.dark .lobby-copy {
   color: #cbd5e1;
+}
+
+body.dark .lobby-error {
+  color: #ff8f8f;
 }
 
 body.dark .lobby-status-block {

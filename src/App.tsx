@@ -24,6 +24,7 @@ function App() {
   const [now, setNow] = useState(() => Date.now());
   const [isLoadingGameStartTime, setIsLoadingGameStartTime] = useState(false);
   const [pageError, setPageError] = useState('');
+  const [lobbyError, setLobbyError] = useState('');
   const { settings, settingsOpen, setSettingsOpen, updateSetting } = useSettings();
   const {
     guesses,
@@ -36,11 +37,6 @@ function App() {
     endTime,
     submitGuess,
   } = useGame();
-
-  useEffect(() => {
-    if (!username) return;
-    gameService.setUsername(username);
-  }, [username]);
 
   useEffect(() => {
     if (!host) return;
@@ -61,6 +57,22 @@ function App() {
     async function loadGameTimes() {
       setIsLoadingGameStartTime(true);
       setPageError('');
+      setLobbyError('');
+
+      gameService.setHost(host);
+      try {
+        await gameService.setUsername(username);
+      } catch {
+        if (!cancelled) {
+          setIsLoadingGameStartTime(false);
+          setPage('lobby');
+          setGameStartTime(null);
+          setGameEndTime(null);
+          setLeaderboard([]);
+          setLobbyError('이미 사용 중이거나 사용할 수 없는 사용자명입니다.');
+        }
+        return;
+      }
 
       const [nextGameStartTime, nextGameEndTime] = await Promise.all([
         gameService.getGameStartTime(),
@@ -135,13 +147,22 @@ function App() {
     };
   }, [page, gameStartTime, gameEndTime]);
 
-  function handleStartGame(nextUsername: string, nextHost: string) {
-    gameService.setUsername(nextUsername);
+  async function handleStartGame(nextUsername: string, nextHost: string) {
+    const normalizedHost = nextHost.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/.*$/, '');
     gameService.setHost(nextHost);
-    localStorage.setItem(USERNAME_STORAGE_KEY, nextUsername);
-    localStorage.setItem(HOST_STORAGE_KEY, nextHost.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/.*$/, ''));
+    setLobbyError('');
+
+    try {
+      await gameService.setUsername(nextUsername);
+    } catch {
+      setLobbyError('이미 사용 중이거나 사용할 수 없는 사용자명입니다.');
+      return;
+    }
+
+    localStorage.setItem(USERNAME_STORAGE_KEY, nextUsername.trim());
+    localStorage.setItem(HOST_STORAGE_KEY, normalizedHost);
     setUsername(nextUsername);
-    setHost(nextHost.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/.*$/, ''));
+    setHost(normalizedHost);
   }
 
   return (
@@ -164,6 +185,7 @@ function App() {
           gameStartTime={gameStartTime}
           now={now}
           isLoadingGameStartTime={isLoadingGameStartTime}
+          errorMessage={lobbyError}
         />
       )}
 

@@ -24,6 +24,7 @@ const KNOWN_WORDS: Record<string, number> = {
  */
 export class MockGameService extends GameService {
   private readonly cache: Record<string, GuessApiResponse> = {};
+  private readonly takenUsernames = new Set(['alpha', 'beta', 'gamma', 'delta', 'epsilon']);
 
   private normalizeHost(host: string) {
     return host
@@ -32,10 +33,19 @@ export class MockGameService extends GameService {
       .replace(/\/.*$/, '');
   }
 
-  setUsername(username: string) {
+  async setUsername(username: string): Promise<void> {
+    const trimmed = username.trim();
+    if (!trimmed) {
+      throw new Error('USERNAME_UNAVAILABLE');
+    }
+
+    if (this.takenUsernames.has(trimmed) && trimmed !== this.user.username) {
+      throw new Error('USERNAME_UNAVAILABLE');
+    }
+
     this.user = {
       ...this.user,
-      username,
+      username: trimmed,
     };
   }
 

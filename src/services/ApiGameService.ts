@@ -34,10 +34,21 @@ export class ApiGameService extends GameService {
     return null;
   }
 
-  setUsername(username: string) {
+  async setUsername(username: string): Promise<void> {
+    const trimmed = username.trim();
+    if (!trimmed) {
+      throw new Error('USERNAME_UNAVAILABLE');
+    }
+
+    const leaderboard = await this.getLeaderboard();
+    const isDuplicate = leaderboard.some(entry => entry.username === trimmed && entry.username !== this.user.username);
+    if (isDuplicate) {
+      throw new Error('USERNAME_UNAVAILABLE');
+    }
+
     this.user = {
       ...this.user,
-      username,
+      username: trimmed,
     };
   }
 

@@ -3,10 +3,11 @@ import React, { useState } from 'react';
 interface Props {
   initialUsername: string;
   initialHost: string;
-  onStartGame: (username: string, host: string) => void;
+  onStartGame: (username: string, host: string) => Promise<void>;
   gameStartTime: number | null;
   now: number;
   isLoadingGameStartTime: boolean;
+  errorMessage: string;
 }
 
 function formatCountdown(ms: number) {
@@ -23,18 +24,19 @@ export function LobbyPage({
   gameStartTime,
   now,
   isLoadingGameStartTime,
+  errorMessage,
 }: Props) {
   const [username, setUsername] = useState(initialUsername);
   const [host, setHost] = useState(initialHost);
   const countdown = gameStartTime === null ? null : formatCountdown(gameStartTime - now);
   const hasSubmittedUsername = Boolean(initialUsername.trim());
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = username.trim();
     const trimmedHost = host.trim();
     if (!trimmed || !trimmedHost) return;
-    onStartGame(trimmed, trimmedHost);
+    await onStartGame(trimmed, trimmedHost);
   }
 
   return (
@@ -49,15 +51,20 @@ export function LobbyPage({
           <label className="lobby-label" htmlFor="lobby-username">
             사용자 명
           </label>
-          <input
-            id="lobby-username"
-            type="text"
-            value={username}
-            onChange={e => setUsername(e.target.value)}
-            placeholder="사용자 명을 입력하세요"
-            autoComplete="nickname"
-            autoFocus
-          />
+          <div className="lobby-field-group">
+            <input
+              id="lobby-username"
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="사용자 명을 입력하세요"
+              autoComplete="nickname"
+              autoFocus
+            />
+            {errorMessage && (
+              <p className="lobby-error">{errorMessage}</p>
+            )}
+          </div>
           <label className="lobby-label" htmlFor="lobby-host">
             서버 호스트
           </label>
