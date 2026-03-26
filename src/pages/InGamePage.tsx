@@ -69,7 +69,7 @@ export function InGamePage({
                 </span>
                 <span className="game-timer-stat">
                   <span className="game-timer-stat-name">단어</span>
-                  <strong className="game-timer-stat-value">{bestGuess.word}</strong>
+                  <strong className="game-timer-stat-value game-timer-stat-spoiler">{bestGuess.word}</strong>
                 </span>
               </>
             ) : (

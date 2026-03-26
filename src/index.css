@@ -317,6 +317,15 @@ h2 {
   line-height: 1.2;
 }
 
+.game-timer-stat-spoiler {
+  filter: blur(0.3em);
+  transition: filter 120ms ease;
+}
+
+.game-timer-stat-spoiler:hover {
+  filter: blur(0);
+}
+
 #form {
   margin: 1em 0;
 }
