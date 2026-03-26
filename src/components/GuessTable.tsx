@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { GuessEntry, Rank } from '../types';
+import { GuessEntry } from '../types';
 
 type SortOrder = 'similarity' | 'chrono-asc' | 'chrono-desc' | 'alpha';
 
@@ -9,28 +9,7 @@ interface RowProps {
 }
 
 function GuessRow({ entry, isCurrentGuess }: RowProps) {
-  const { similarity, word, rank: percentile, guessNumber } = entry;
-
-  function renderRank(rank: Rank) {
-    if (typeof rank === 'number') {
-      return (
-        <>
-          <span className="percentile">{rank}</span>&nbsp;
-          <span className="progress-container">
-            <span
-              className="progress-bar"
-              style={{ width: `${(1001 - rank) / 10}%` }}
-            >
-              &nbsp;
-            </span>
-          </span>
-        </>
-      );
-    }
-    return <>{rank}</>;
-  }
-
-  const isClose = typeof percentile === 'number';
+  const { similarity, word, guessNumber } = entry;
 
   return (
     <tr>
@@ -39,7 +18,6 @@ function GuessRow({ entry, isCurrentGuess }: RowProps) {
         {word}
       </td>
       <td>{similarity.toFixed(2)}</td>
-      <td className={isClose ? 'close' : ''}>{renderRank(percentile)}</td>
     </tr>
   );
 }
@@ -79,7 +57,6 @@ export function GuessTable({ guesses, currentGuess }: Props) {
           <th id="chronoOrder" onClick={handleChronoClick}>#</th>
           <th id="alphaOrder" onClick={() => setSortOrder('alpha')}>추측한 단어</th>
           <th id="similarityOrder" onClick={() => setSortOrder('similarity')}>유사도</th>
-          <th>유사도 순위</th>
         </tr>
         {currentEntry && (
           <GuessRow
@@ -90,7 +67,7 @@ export function GuessTable({ guesses, currentGuess }: Props) {
         )}
         {currentEntry && (
           <tr>
-            <td colSpan={4}>
+            <td colSpan={3}>
               <hr />
             </td>
           </tr>
