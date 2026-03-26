@@ -47,6 +47,8 @@ export function InGamePage({
   const remainingText = gameEndTime === null ? null : formatCountdown(gameEndTime - now);
   const bestGuess = guesses[0] || null;
   const bestRank = bestGuess ? bestGuess.rank : null;
+  const upperLeaderboard = leaderboard.slice(0, 3);
+  const lowerLeaderboard = leaderboard.slice(3);
 
   return (
     <>
@@ -105,24 +107,40 @@ export function InGamePage({
           />
         </div>
         <aside className="leaderboard-panel" aria-label="실시간 리더보드">
-          <div className="leaderboard-card">
-            <h3>실시간 리더보드</h3>
-            {leaderboard.length > 0 ? (
-              <ol className="leaderboard-list">
-                {leaderboard.map((entry, index) => (
-                  <li className="leaderboard-row" key={`${entry.username}-${index}`}>
-                    <span className="leaderboard-rank">#{index + 1}</span>
-                    <span className={`leaderboard-name${index === 0 ? ' leaderboard-name-top' : ''}`}>
-                      {entry.username}
-                    </span>
-                    <span className="leaderboard-score">{entry.similarity.toFixed(2)}</span>
-                  </li>
-                ))}
-              </ol>
-            ) : (
+          {leaderboard.length > 0 ? (
+            <>
+              <div className="leaderboard-card">
+                <h3>실시간 리더보드</h3>
+                <ol className="leaderboard-list leaderboard-list-upper">
+                  {upperLeaderboard.map((entry, index) => (
+                    <li className="leaderboard-row leaderboard-row-upper" key={`${entry.username}-${index}`}>
+                      <span className="leaderboard-rank">#{index + 1}</span>
+                      <span className={`leaderboard-name${index === 0 ? ' leaderboard-name-top' : ''}`}>
+                        {entry.username}
+                      </span>
+                      <span className="leaderboard-score">{entry.similarity.toFixed(2)}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+              {lowerLeaderboard.length > 0 && (
+                <ol className="leaderboard-list leaderboard-list-lower" start={4}>
+                  {lowerLeaderboard.map((entry, index) => (
+                    <li className="leaderboard-row leaderboard-row-lower" key={`${entry.username}-${index + 3}`}>
+                      <span className="leaderboard-rank">#{index + 4}</span>
+                      <span className="leaderboard-name">{entry.username}</span>
+                      <span className="leaderboard-score">{entry.similarity.toFixed(2)}</span>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </>
+          ) : (
+            <div className="leaderboard-card">
+              <h3>실시간 리더보드</h3>
               <p className="leaderboard-empty">표시할 참가자 기록이 없습니다.</p>
-            )}
-          </div>
+            </div>
+          )}
         </aside>
       </div>
     </>

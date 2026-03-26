@@ -263,9 +263,9 @@ h2 {
   gap: 1.25em;
   margin: 1em 0 0.4em;
   padding: 0.85em 1em;
-  border: 1px solid #cfe8f3;
-  border-radius: 0.8em;
-  background: #f4fbfe;
+  border: 1px solid #b4bfd6;
+  border-radius: 3px;
+  background: #edf1f8;
 }
 
 .game-timer-main {
@@ -456,9 +456,9 @@ input[type='submit']:disabled {
 }
 
 .leaderboard-card {
-  border: 1px solid #d7e4ea;
-  border-radius: 0.9em;
-  background: #f8fcfe;
+  border: 1px solid #b4bfd6;
+  border-radius: 3px;
+  background: #edf1f8;
   padding: 1rem;
 }
 
@@ -473,6 +473,17 @@ input[type='submit']:disabled {
   padding: 0;
 }
 
+.leaderboard-list-upper {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.leaderboard-list-lower {
+  margin-top: 0.55rem;
+  padding: 0 1rem;
+  border-top: 1px solid #e8f0f4;
+}
+
 .leaderboard-row {
   display: grid;
   grid-template-columns: 2.4rem minmax(0, 1fr) auto;
@@ -485,6 +496,16 @@ input[type='submit']:disabled {
 .leaderboard-row:first-child {
   border-top: 0;
   padding-top: 0;
+}
+
+.leaderboard-row-upper {
+  padding: 0.18rem 0;
+  border-top: 0;
+}
+
+.leaderboard-row-lower {
+  padding: 0.2rem 0;
+  color: #5f7480;
 }
 
 .leaderboard-rank {
@@ -507,6 +528,11 @@ input[type='submit']:disabled {
   color: #0c6887;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
+}
+
+.leaderboard-row-lower .leaderboard-score {
+  color: #6c8491;
+  font-weight: 500;
 }
 
 .leaderboard-empty {
@@ -577,6 +603,11 @@ footer {
     margin-bottom: 1.5em;
   }
 
+  .leaderboard-list-lower {
+    margin-top: 0.35rem;
+    padding: 0 1rem;
+  }
+
   .game-timer {
     flex-direction: column;
     align-items: flex-start;
@@ -619,8 +650,8 @@ body.dark .dialog-close {
 }
 
 body.dark .game-timer {
-  background: #1a2730;
-  border-color: #2f4756;
+  background: #31405f;
+  border-color: #5f7399;
 }
 
 body.dark .game-timer-label {
@@ -640,11 +671,15 @@ body.dark .game-timer-stat-name {
 }
 
 body.dark .leaderboard-card {
-  background: #17212a;
-  border-color: #2f4756;
+  background: #31405f;
+  border-color: #5f7399;
 }
 
 body.dark .leaderboard-row {
+  border-color: #243543;
+}
+
+body.dark .leaderboard-list-lower {
   border-color: #243543;
 }
 
@@ -655,6 +690,14 @@ body.dark .leaderboard-empty {
 
 body.dark .leaderboard-score {
   color: #77d0ed;
+}
+
+body.dark .leaderboard-row-lower {
+  color: #93a9b5;
+}
+
+body.dark .leaderboard-row-lower .leaderboard-score {
+  color: #88a6b3;
 }
 
 body.dark #response.gaveup {
