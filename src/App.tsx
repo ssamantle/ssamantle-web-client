@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import { Header } from './components/Header';
 import { SettingsDialog } from './components/SettingsDialog';
 import { useGame } from './hooks/useGame';
+import { FinalResultsPage } from './pages/FinalResultsPage';
 import { useSettings } from './hooks/useSettings';
 import { InGamePage } from './pages/InGamePage';
 import { LobbyPage } from './pages/LobbyPage';
 import { gameService } from './services';
 import { LeaderboardEntry } from './types';
 
-type Page = 'lobby' | 'in-game';
+type Page = 'lobby' | 'in-game' | 'final-results';
 
 const USERNAME_STORAGE_KEY = 'username';
 const HOST_STORAGE_KEY = 'host';
@@ -78,7 +79,14 @@ function App() {
       setGameStartTime(nextGameStartTime);
       setGameEndTime(nextGameEndTime);
       setNow(Date.now());
-      setPage(Date.now() >= nextGameStartTime ? 'in-game' : 'lobby');
+      const currentTime = Date.now();
+      if (nextGameEndTime !== null && currentTime >= nextGameEndTime) {
+        setPage('final-results');
+      } else if (currentTime >= nextGameStartTime) {
+        setPage('in-game');
+      } else {
+        setPage('lobby');
+      }
     }
 
     void loadGameTimes();
@@ -89,7 +97,7 @@ function App() {
   }, [username, host]);
 
   useEffect(() => {
-    if (page !== 'in-game' || !username || !host) return;
+    if ((page !== 'in-game' && page !== 'final-results') || !username || !host) return;
 
     let cancelled = false;
 
@@ -110,12 +118,14 @@ function App() {
   }, [page, username, host]);
 
   useEffect(() => {
-    if ((page !== 'lobby' && page !== 'in-game') || (gameStartTime === null && gameEndTime === null)) return;
+    if ((page !== 'lobby' && page !== 'in-game' && page !== 'final-results') || (gameStartTime === null && gameEndTime === null)) return;
 
     const intervalId = window.setInterval(() => {
       const currentTime = Date.now();
       setNow(currentTime);
-      if (gameStartTime !== null && currentTime >= gameStartTime) {
+      if (gameEndTime !== null && currentTime >= gameEndTime) {
+        setPage('final-results');
+      } else if (gameStartTime !== null && currentTime >= gameStartTime) {
         setPage('in-game');
       }
     }, 1000);
@@ -170,6 +180,14 @@ function App() {
           gameEndTime={gameEndTime}
           now={now}
           submitGuess={submitGuess}
+        />
+      )}
+
+      {page === 'final-results' && (
+        <FinalResultsPage
+          username={username}
+          guesses={guesses}
+          leaderboard={leaderboard}
         />
       )}
     </div>
