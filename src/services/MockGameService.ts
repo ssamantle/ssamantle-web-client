@@ -33,6 +33,10 @@ export class MockGameService extends GameService {
       .replace(/\/.*$/, '');
   }
 
+  private getStorageKey(baseKey: string) {
+    return `${baseKey}:${this.host || 'default'}`;
+  }
+
   async setUsername(username: string): Promise<void> {
     const trimmed = username.trim();
     if (!trimmed) {
@@ -68,23 +72,23 @@ export class MockGameService extends GameService {
   }
 
   async getGameStartTime(): Promise<number | null> {
-    const saved = localStorage.getItem(MOCK_GAME_START_TIME_KEY);
+    const saved = localStorage.getItem(this.getStorageKey(MOCK_GAME_START_TIME_KEY));
     if (saved) return Number(saved);
 
     const startTime = Date.now() + 15_000;
-    localStorage.setItem(MOCK_GAME_START_TIME_KEY, String(startTime));
+    localStorage.setItem(this.getStorageKey(MOCK_GAME_START_TIME_KEY), String(startTime));
     return startTime;
   }
 
   async getGameEndTime(): Promise<number | null> {
-    const saved = localStorage.getItem(MOCK_GAME_END_TIME_KEY);
+    const saved = localStorage.getItem(this.getStorageKey(MOCK_GAME_END_TIME_KEY));
     if (saved) return Number(saved);
 
     const startTime = await this.getGameStartTime();
     if (startTime === null) return null;
 
     const endTime = startTime + 10 * 60_000;
-    localStorage.setItem(MOCK_GAME_END_TIME_KEY, String(endTime));
+    localStorage.setItem(this.getStorageKey(MOCK_GAME_END_TIME_KEY), String(endTime));
     return endTime;
   }
 

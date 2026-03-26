@@ -6,6 +6,7 @@ interface Props {
   onEnterHost: (host: string) => Promise<void>;
   onStartGame: (username: string, host: string) => Promise<boolean>;
   onBeginUsernameEdit: () => void;
+  onLeaveHost: () => void;
   gameStartTime: number | null;
   now: number;
   isLoadingGameStartTime: boolean;
@@ -26,6 +27,7 @@ export function LobbyPage({
   onEnterHost,
   onStartGame,
   onBeginUsernameEdit,
+  onLeaveHost,
   gameStartTime,
   now,
   isLoadingGameStartTime,
@@ -85,6 +87,11 @@ export function LobbyPage({
     } catch {
       // Username errors are surfaced in the UI.
     }
+  }
+
+  function handleBackToHostStep() {
+    onLeaveHost();
+    setStep(0);
   }
 
   return (
@@ -164,7 +171,7 @@ export function LobbyPage({
                 <button
                   className="lobby-step-back"
                   type="button"
-                  onClick={() => setStep(0)}
+                  onClick={handleBackToHostStep}
                 >
                   이전
                 </button>

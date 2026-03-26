@@ -182,6 +182,22 @@ function App() {
     setUsername('');
   }
 
+  function handleLeaveHost() {
+    setPage('lobby');
+    setPageError('');
+    setHostError('');
+    setUsernameError('');
+    setGameStartTime(null);
+    setGameEndTime(null);
+    setLeaderboard([]);
+    gameService.clearUser();
+    gameService.setHost('');
+    localStorage.removeItem(USERNAME_STORAGE_KEY);
+    localStorage.removeItem(HOST_STORAGE_KEY);
+    setUsername('');
+    setHost('');
+  }
+
   async function handleEnterHost(nextHost: string) {
     const normalizedHost = nextHost.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/.*$/, '');
     setHostError('');
@@ -240,6 +256,7 @@ function App() {
           onEnterHost={handleEnterHost}
           onStartGame={handleStartGame}
           onBeginUsernameEdit={handleBeginUsernameEdit}
+          onLeaveHost={handleLeaveHost}
           gameStartTime={gameStartTime}
           now={now}
           isLoadingGameStartTime={isLoadingGameStartTime}
