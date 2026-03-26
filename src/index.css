@@ -257,11 +257,19 @@ h2 {
 
 /* ── Guess form ── */
 .game-timer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25em;
   margin: 1em 0 0.4em;
   padding: 0.85em 1em;
   border: 1px solid #cfe8f3;
   border-radius: 0.8em;
   background: #f4fbfe;
+}
+
+.game-timer-main {
+  flex: 0 0 auto;
 }
 
 .game-timer-label {
@@ -274,6 +282,39 @@ h2 {
 .game-timer-value {
   font-size: 1.4em;
   font-variant-numeric: tabular-nums;
+}
+
+.game-timer-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.45em 1em;
+  text-align: right;
+}
+
+.game-timer-stat-label {
+  width: 100%;
+  color: #45606d;
+  font-size: 0.9em;
+}
+
+.game-timer-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  color: #27343c;
+  white-space: nowrap;
+}
+
+.game-timer-stat-name {
+  color: #6b7d88;
+  font-size: 0.76em;
+  line-height: 1.1;
+}
+
+.game-timer-stat-value {
+  font-size: 1.05em;
+  line-height: 1.2;
 }
 
 #form {
@@ -472,6 +513,21 @@ footer {
   .progress-container {
     width: 8em;
   }
+
+  .game-timer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .game-timer-stats {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .game-timer-stat {
+    align-items: flex-start;
+  }
 }
 
 /* ── Dark mode ── */
@@ -510,6 +566,18 @@ body.dark .game-timer {
 
 body.dark .game-timer-label {
   color: #bfd4df;
+}
+
+body.dark .game-timer-stat-label {
+  color: #bfd4df;
+}
+
+body.dark .game-timer-stat {
+  color: #e2edf3;
+}
+
+body.dark .game-timer-stat-name {
+  color: #9fb7c4;
 }
 
 body.dark #response.gaveup {
