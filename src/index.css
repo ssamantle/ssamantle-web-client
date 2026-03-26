@@ -235,9 +235,39 @@ h2 {
   letter-spacing: 0.04em;
 }
 
-.lobby-form {
+.lobby-drawer {
+  overflow: hidden;
+}
+
+.lobby-drawer-track {
+  display: flex;
+  width: 200%;
+  transition: transform 220ms ease;
+}
+
+.lobby-step {
   display: grid;
+  width: 50%;
   gap: 0.75rem;
+  padding-right: 0.5rem;
+}
+
+.lobby-step-eyebrow {
+  margin-bottom: 0.2rem;
+  color: #6c7d99;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.lobby-step h3 {
+  margin-bottom: 0.35rem;
+}
+
+.lobby-step-copy {
+  margin-bottom: 0.95rem;
+  color: #5b6678;
 }
 
 .lobby-field-group {
@@ -249,7 +279,7 @@ h2 {
   font-weight: 600;
 }
 
-.lobby-form input[type='text'] {
+.lobby-step input[type='text'] {
   width: 100%;
   padding: 0.75rem 0.85rem;
   border: 1px solid #666666;
@@ -258,11 +288,71 @@ h2 {
   color: black;
 }
 
-.lobby-form input[type='submit'] {
+.lobby-step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.lobby-step button.lobby-step-submit,
+.lobby-step input.lobby-submit {
+  min-width: 8rem;
+  padding: 0.72rem 1.1rem;
+  border: 1px solid #6e84a8;
+  border-radius: 0.7rem;
+  background: linear-gradient(180deg, #5d77a2 0%, #496286 100%);
+  color: #f7fafe;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  box-shadow: 0 10px 24px rgba(54, 77, 115, 0.18);
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    background-color 120ms ease,
+    border-color 120ms ease;
+}
+
+.lobby-step button.lobby-step-submit {
   justify-self: start;
-  background: #00b5ef;
-  color: #07202a;
-  border-color: #00b5ef;
+  min-width: 8rem;
+  margin-top: 0;
+}
+
+.lobby-step input.lobby-submit {
+  justify-self: end;
+  margin-top: 0;
+}
+
+.lobby-step button.lobby-step-submit:hover:not(:disabled),
+.lobby-step input.lobby-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: #60789e;
+  background: linear-gradient(180deg, #6984b1 0%, #506a90 100%);
+  box-shadow: 0 14px 28px rgba(54, 77, 115, 0.22);
+}
+
+.lobby-step button.lobby-step-submit:active:not(:disabled),
+.lobby-step input.lobby-submit:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 8px 18px rgba(54, 77, 115, 0.18);
+}
+
+.lobby-step button.lobby-step-submit:disabled,
+.lobby-step input.lobby-submit:disabled {
+  background: linear-gradient(180deg, #c3cad8 0%, #b5bfd1 100%);
+  border-color: #b5bfd1;
+  color: #eef2f8;
+  box-shadow: none;
+}
+
+.lobby-step-back {
+  padding: 0.72rem 0.9rem;
+  border: 1px solid #b8c2d4;
+  border-radius: 0.7rem;
+  background: #f5f7fb;
+  color: #4b5970;
   font-weight: 600;
   cursor: pointer;
 }
@@ -679,6 +769,10 @@ footer {
     gap: 0;
   }
 
+  .lobby-step {
+    padding-right: 0;
+  }
+
   .final-results-layout {
     grid-template-columns: 1fr;
     gap: 0.75rem;
@@ -863,12 +957,40 @@ body.dark .lobby-status {
   color: #cbd5e1;
 }
 
-body.dark .lobby-form input[type='text'] {
+body.dark .lobby-step-eyebrow,
+body.dark .lobby-step-copy {
+  color: #b8c6df;
+}
+
+body.dark .lobby-step input[type='text'] {
   background: #111827;
   color: #fafafa;
   border-color: #4b5563;
 }
 
-body.dark .lobby-form input[type='submit'] {
-  color: #07131a;
+body.dark .lobby-step button.lobby-step-submit,
+body.dark .lobby-step input.lobby-submit {
+  border-color: #6f86ae;
+  background: linear-gradient(180deg, #6a84b2 0%, #50688f 100%);
+  color: #f8fbff;
+  box-shadow: 0 10px 24px rgba(9, 13, 24, 0.3);
+}
+
+body.dark .lobby-step button.lobby-step-submit:hover:not(:disabled),
+body.dark .lobby-step input.lobby-submit:hover:not(:disabled) {
+  border-color: #8197bd;
+  background: linear-gradient(180deg, #7792c0 0%, #58739d 100%);
+}
+
+body.dark .lobby-step button.lobby-step-submit:disabled,
+body.dark .lobby-step input.lobby-submit:disabled {
+  background: linear-gradient(180deg, #566277 0%, #465165 100%);
+  border-color: #5a667c;
+  color: #d4dbe7;
+}
+
+body.dark .lobby-step-back {
+  background: #1f2937;
+  color: #e5ebf5;
+  border-color: #4b5563;
 }

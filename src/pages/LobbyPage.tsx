@@ -28,8 +28,15 @@ export function LobbyPage({
 }: Props) {
   const [username, setUsername] = useState(initialUsername);
   const [host, setHost] = useState(initialHost);
+  const [step, setStep] = useState(initialHost.trim() ? 1 : 0);
   const countdown = gameStartTime === null ? null : formatCountdown(gameStartTime - now);
   const hasSubmittedUsername = Boolean(initialUsername.trim());
+
+  function handleEnterHost(e: React.FormEvent) {
+    e.preventDefault();
+    if (!host.trim()) return;
+    setStep(1);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -45,45 +52,88 @@ export function LobbyPage({
         <p className="lobby-eyebrow">Lobby</p>
         <h2>게임 시작 대기 중</h2>
         <p className="lobby-copy">
-          사용자 이름을 입력한 뒤 서버가 전달한 시작 시각까지 대기합니다. 시작 시각이 되면 자동으로 플레이 화면으로 이동합니다.
+          먼저 서버에 입장한 뒤 사용자 이름을 정하고 게임 시작 시각까지 대기합니다. 시작 시각이 되면 자동으로 플레이 화면으로 이동합니다.
         </p>
-        <form className="lobby-form" onSubmit={handleSubmit}>
-          <label className="lobby-label" htmlFor="lobby-username">
-            사용자 명
-          </label>
-          <div className="lobby-field-group">
-            <input
-              id="lobby-username"
-              type="text"
-              value={username}
-              onChange={e => setUsername(e.target.value)}
-              placeholder="사용자 명을 입력하세요"
-              autoComplete="nickname"
-              autoFocus
-            />
-            {errorMessage && (
-              <p className="lobby-error">{errorMessage}</p>
-            )}
+
+        <div className="lobby-drawer">
+          <div
+            className="lobby-drawer-track"
+            style={{ transform: `translateX(-${step * 50}%)` }}
+          >
+            <form className="lobby-step" onSubmit={handleEnterHost}>
+              <p className="lobby-step-eyebrow">1 / 2</p>
+              <h3>서버 입장</h3>
+              <p className="lobby-step-copy">
+                접속할 게임 서버 호스트를 입력한 뒤 다음 단계로 이동합니다.
+              </p>
+
+              <label className="lobby-label" htmlFor="lobby-host">
+                서버 호스트
+              </label>
+              <input
+                id="lobby-host"
+                type="text"
+                value={host}
+                onChange={e => setHost(e.target.value)}
+                placeholder="127.0.0.1:8080 또는 game.example.com"
+                autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                autoFocus
+              />
+              <button
+                className="lobby-step-submit lobby-step-submit-secondary"
+                type="submit"
+                disabled={!host.trim()}
+              >
+                입장
+              </button>
+            </form>
+
+            <form className="lobby-step" onSubmit={handleSubmit}>
+              <p className="lobby-step-eyebrow">2 / 2</p>
+              <h3>참가 대기</h3>
+              <p className="lobby-step-copy">
+                사용할 사용자명을 입력하고 참가 대기를 시작합니다.
+              </p>
+
+              <label className="lobby-label" htmlFor="lobby-username">
+                사용자 명
+              </label>
+              <div className="lobby-field-group">
+                <input
+                  id="lobby-username"
+                  type="text"
+                  value={username}
+                  onChange={e => setUsername(e.target.value)}
+                  placeholder="사용자 명을 입력하세요"
+                  autoComplete="nickname"
+                  autoFocus={step === 1}
+                />
+                {errorMessage && (
+                  <p className="lobby-error">{errorMessage}</p>
+                )}
+              </div>
+
+              <div className="lobby-step-actions">
+                <button
+                  className="lobby-step-back"
+                  type="button"
+                  onClick={() => setStep(0)}
+                >
+                  이전
+                </button>
+                <input
+                  className="lobby-submit"
+                  type="submit"
+                  value={hasSubmittedUsername ? '대기 정보 갱신' : '참가 대기'}
+                  disabled={!username.trim() || !host.trim()}
+                />
+              </div>
+            </form>
           </div>
-          <label className="lobby-label" htmlFor="lobby-host">
-            서버 호스트
-          </label>
-          <input
-            id="lobby-host"
-            type="text"
-            value={host}
-            onChange={e => setHost(e.target.value)}
-            placeholder="127.0.0.1:8080 또는 game.example.com"
-            autoComplete="off"
-            autoCapitalize="none"
-            autoCorrect="off"
-          />
-          <input
-            type="submit"
-            value={hasSubmittedUsername ? '대기 정보 갱신' : '대기 시작'}
-            disabled={!username.trim() || !host.trim()}
-          />
-        </form>
+        </div>
+
         {isLoadingGameStartTime && (
           <p className="lobby-status">게임 시작 시간을 확인하는 중입니다.</p>
         )}

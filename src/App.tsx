@@ -148,6 +148,10 @@ function App() {
   }, [page, gameStartTime, gameEndTime]);
 
   async function handleStartGame(nextUsername: string, nextHost: string) {
+    await applyLobbyIdentity(nextUsername, nextHost);
+  }
+
+  async function applyLobbyIdentity(nextUsername: string, nextHost: string) {
     const normalizedHost = nextHost.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/.*$/, '');
     gameService.setHost(nextHost);
     setLobbyError('');
