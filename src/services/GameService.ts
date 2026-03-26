@@ -11,6 +11,7 @@ export abstract class GameService {
   ) {}
 
   abstract setUsername(username: string): Promise<void>;
+  abstract clearUser(): void;
   abstract setHost(host: string): void;
   abstract connectHost(host: string): Promise<void>;
   abstract getGameStartTime(): Promise<number | null>;

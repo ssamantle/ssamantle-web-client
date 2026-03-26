@@ -45,7 +45,7 @@ function App() {
   }, [host]);
 
   useEffect(() => {
-    if (!username || !host) {
+    if (!host) {
       setPage('lobby');
       setGameStartTime(null);
       setGameEndTime(null);
@@ -77,29 +77,14 @@ function App() {
         return;
       }
 
-      try {
-        await gameService.setUsername(username);
-      } catch {
-        if (!cancelled) {
-          setIsLoadingGameStartTime(false);
-          setPage('lobby');
-          setGameStartTime(null);
-          setGameEndTime(null);
-          setLeaderboard([]);
-          setUsernameError('이미 사용 중이거나 사용할 수 없는 사용자명입니다.');
-        }
-        return;
-      }
-
       const [nextGameStartTime, nextGameEndTime] = await Promise.all([
         gameService.getGameStartTime(),
         gameService.getGameEndTime(),
       ]);
       if (cancelled) return;
 
-      setIsLoadingGameStartTime(false);
-
       if (nextGameStartTime === null) {
+        setIsLoadingGameStartTime(false);
         setPage('lobby');
         setPageError('게임 시작 시간을 불러오지 못했습니다.');
         return;
@@ -108,6 +93,26 @@ function App() {
       setGameStartTime(nextGameStartTime);
       setGameEndTime(nextGameEndTime);
       setNow(Date.now());
+
+      if (!username) {
+        setIsLoadingGameStartTime(false);
+        setPage('lobby');
+        return;
+      }
+
+      try {
+        await gameService.setUsername(username);
+      } catch {
+        if (!cancelled) {
+          setIsLoadingGameStartTime(false);
+          setPage('lobby');
+          setLeaderboard([]);
+          setUsernameError('이미 사용 중이거나 사용할 수 없는 사용자명입니다.');
+        }
+        return;
+      }
+
+      setIsLoadingGameStartTime(false);
       const currentTime = Date.now();
       if (nextGameEndTime !== null && currentTime >= nextGameEndTime) {
         setPage('final-results');
@@ -154,15 +159,17 @@ function App() {
       setNow(currentTime);
       if (gameEndTime !== null && currentTime >= gameEndTime) {
         setPage('final-results');
-      } else if (gameStartTime !== null && currentTime >= gameStartTime) {
+      } else if (username && gameStartTime !== null && currentTime >= gameStartTime) {
         setPage('in-game');
+      } else {
+        setPage('lobby');
       }
     }, 1000);
 
     return () => {
       window.clearInterval(intervalId);
     };
-  }, [page, gameStartTime, gameEndTime]);
+  }, [page, gameStartTime, gameEndTime, username]);
 
   async function handleStartGame(nextUsername: string, nextHost: string) {
     await applyLobbyIdentity(nextUsername, nextHost);
@@ -171,6 +178,7 @@ function App() {
   async function handleEnterHost(nextHost: string) {
     const normalizedHost = nextHost.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/.*$/, '');
     setHostError('');
+    setUsernameError('');
     gameService.setHost(nextHost);
 
     try {
@@ -180,6 +188,9 @@ function App() {
       throw new Error('HOST_UNREACHABLE');
     }
 
+    gameService.clearUser();
+    localStorage.removeItem(USERNAME_STORAGE_KEY);
+    setUsername('');
     localStorage.setItem(HOST_STORAGE_KEY, normalizedHost);
     setHost(normalizedHost);
   }

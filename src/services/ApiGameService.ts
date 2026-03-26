@@ -52,6 +52,13 @@ export class ApiGameService extends GameService {
     };
   }
 
+  clearUser() {
+    this.user = {
+      ...this.user,
+      username: '',
+    };
+  }
+
   setHost(host: string) {
     this.host = this.normalizeHost(host);
   }

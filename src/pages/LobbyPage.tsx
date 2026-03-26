@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface Props {
   initialUsername: string;
@@ -35,6 +35,14 @@ export function LobbyPage({
   const [step, setStep] = useState(initialHost.trim() ? 1 : 0);
   const countdown = gameStartTime === null ? null : formatCountdown(gameStartTime - now);
   const hasSubmittedUsername = Boolean(initialUsername.trim());
+
+  useEffect(() => {
+    setUsername(initialUsername);
+  }, [initialUsername]);
+
+  useEffect(() => {
+    setHost(initialHost);
+  }, [initialHost]);
 
   async function handleEnterHost(e: React.FormEvent) {
     e.preventDefault();
