@@ -277,6 +277,7 @@ function App() {
           endTime={endTime}
           gameEndTime={gameEndTime}
           now={now}
+          username={username}
           submitGuess={submitGuess}
         />
       )}

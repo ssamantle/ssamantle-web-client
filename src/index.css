@@ -381,8 +381,9 @@ h2 {
 
 /* ── Guess form ── */
 .game-timer {
+  position: relative;
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 1.25em;
   margin: 1em 0 0.4em;
@@ -390,6 +391,15 @@ h2 {
   border: 1px solid #b4bfd6;
   border-radius: 3px;
   background: #edf1f8;
+}
+
+.game-timer-username {
+  position: absolute;
+  top: 0.85em;
+  right: 1em;
+  font-size: 0.72em;
+  color: #7a8aaa;
+  font-weight: 500;
 }
 
 .game-timer-main {
@@ -897,6 +907,10 @@ body.dark .game-timer-stat {
 
 body.dark .game-timer-stat-name {
   color: #9fb7c4;
+}
+
+body.dark .game-timer-username {
+  color: #8fa8c8;
 }
 
 body.dark .leaderboard-card {

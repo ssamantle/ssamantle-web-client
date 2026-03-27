@@ -15,6 +15,7 @@ interface Props {
   endTime: number | null;
   gameEndTime: number | null;
   now: number;
+  username: string;
   submitGuess: (guess: string) => Promise<void>;
 }
 
@@ -42,6 +43,7 @@ export function InGamePage({
   endTime,
   gameEndTime,
   now,
+  username,
   submitGuess,
 }: Props) {
   const remainingText = gameEndTime === null ? null : formatCountdown(gameEndTime - now);
@@ -58,6 +60,7 @@ export function InGamePage({
             <span className="game-timer-label">게임 종료까지</span>
             <strong className="game-timer-value">{remainingText}</strong>
           </div>
+          {username && <span className="game-timer-username">{username}</span>}
           <div className="game-timer-stats">
             {bestGuess ? (
               <>
