@@ -15,7 +15,7 @@ export function solveStory(
   const guessCount = guesses.length;
 
   if (guessCount === 1) {
-    return `이럴 수가! 첫번째 추측에서 ${pNumber}번째 꼬맨틀 정답 단어를 맞혔습니다!\nhttps://semantle-ko.newsjel.ly/`;
+    return `이럴 수가! 첫번째 추측에서 ${pNumber}번째 싸맨틀 정답 단어를 맞혔습니다!`;
   }
 
   function describe(similarity: number, percentile: Rank) {
@@ -36,5 +36,5 @@ export function solveStory(
     }
   }
 
-  return `${pNumber}번째 꼬맨틀을 풀었습니다!\n추측 횟수: ${guessCount}\n${timeInfo}${topGuessMsg}https://semantle-ko.newsjel.ly/`;
+  return `${pNumber}번째 싸맨틀을 풀었습니다!\n추측 횟수: ${guessCount}\n${timeInfo}${topGuessMsg}https://semantle-ko.newsjel.ly/`;
 }

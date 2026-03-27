@@ -27,10 +27,8 @@ export function GameResult({ guessCount, stats, storedGuesses, startTime, endTim
     <div id="response" className="gaveup">
       <p>
         <b>정답 단어를 맞혔습니다. {guessCount}번째 추측만에 정답을 맞혔네요!</b>
-        <br />
-        정답 단어와 비슷한,{' '}
-        <a href={`/nearest1k/${puzzleNumber}`}>상위 1,000개의 단어</a>를 확인해보세요.
       </p>
+      <br />
       <input
         type="button"
         value="기록 복사하기"
@@ -38,9 +36,6 @@ export function GameResult({ guessCount, stats, storedGuesses, startTime, endTim
         onClick={handleShare}
         className="button"
       />
-      <br />
-      <br />
-      {puzzleNumber + 1}번째 꼬맨틀은 오늘 밤 자정(한국 시간 기준)에 열립니다.
       <br />
       <br />
       <b>나의 플레이 기록</b>:
