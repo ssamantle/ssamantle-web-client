@@ -17,8 +17,7 @@ export function InGameDashboard({ gameEndTime, username, bestGuess }: Props) {
   return (
     <div className="game-timer">
       <CountdownTimer label="게임 종료까지" targetTime={gameEndTime} />
-      {username && <span className="game-timer-username">{username}</span>}
-      <MyBestGuessSummary bestGuess={bestGuess} />
+      <MyBestGuessSummary bestGuess={bestGuess} username={username} />
     </div>
   );
 }

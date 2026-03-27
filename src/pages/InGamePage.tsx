@@ -2,6 +2,7 @@ import React from 'react';
 import { GameResult } from '../components/GameResult';
 import { GuessForm } from '../components/GuessForm';
 import { InGameDashboard } from '../components/InGameDashboard';
+import { LeaderboardRaceMap } from '../components/LeaderboardRaceMap';
 import { GuessTable } from '../components/GuessTable';
 import { GuessEntry, GameStats, LeaderboardEntry } from '../types';
 
@@ -44,6 +45,8 @@ export function InGamePage({
         bestGuess={bestGuess}
       />
 
+      <LeaderboardRaceMap leaderboard={leaderboard} currentUsername={username} />
+
       <GuessForm
         onSubmit={submitGuess}
         gameOver={gameOver}
@@ -62,10 +65,6 @@ export function InGamePage({
 
       <div className="game-panels">
         <div className="game-panel-main">
-          <GuessTable
-            guesses={guesses}
-            currentGuess={currentGuess}
-          />
         </div>
         <aside className="leaderboard-panel" aria-label="실시간 리더보드">
           {leaderboard.length > 0 ? (
