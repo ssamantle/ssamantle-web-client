@@ -228,13 +228,6 @@ h2 {
   color: #4b5563;
 }
 
-.lobby-countdown {
-  margin-top: 0.35rem;
-  font-size: 2.2rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-}
-
 .step-carousel {
   overflow: hidden;
   padding: 0.25em 0 1em;
@@ -437,20 +430,20 @@ h2 {
   font-weight: 500;
 }
 
-.game-timer-main {
+.countdown-timer {
   flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   gap: 0.2em;
 }
 
-.game-timer-label {
+.countdown-timer-label {
   color: #45606d;
   font-size: 0.76em;
   line-height: 1.1;
 }
 
-.game-timer-value {
+.countdown-timer-value {
   font-size: 1.6em;
   line-height: 1.2;
   font-variant-numeric: tabular-nums;
@@ -917,7 +910,7 @@ body.dark .game-timer {
   border-color: #5f7399;
 }
 
-body.dark .game-timer-label {
+body.dark .countdown-timer-label {
   color: #bfd4df;
 }
 

@@ -12,7 +12,6 @@ interface Props {
   onBeginUsernameEdit: () => void;
   onLeaveHost: () => void;
   gameStartTime: number | null;
-  now: number;
   isLoadingGameStartTime: boolean;
   hostErrorMessage: string;
   usernameErrorMessage: string;
@@ -26,7 +25,6 @@ export function LobbyPage({
   onBeginUsernameEdit,
   onLeaveHost,
   gameStartTime,
-  now,
   isLoadingGameStartTime,
   hostErrorMessage,
   usernameErrorMessage,
@@ -176,7 +174,6 @@ export function LobbyPage({
         <LobbyGameStatus
           isLoading={isLoadingGameStartTime}
           gameStartTime={gameStartTime}
-          now={now}
         />
       </div>
     </section>

@@ -21,7 +21,6 @@ function App() {
   const [gameStartTime, setGameStartTime] = useState<number | null>(null);
   const [gameEndTime, setGameEndTime] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
-  const [now, setNow] = useState(() => Date.now());
   const [isLoadingGameStartTime, setIsLoadingGameStartTime] = useState(false);
   const [pageError, setPageError] = useState('');
   const [hostError, setHostError] = useState('');
@@ -92,8 +91,6 @@ function App() {
 
       setGameStartTime(nextGameStartTime);
       setGameEndTime(nextGameEndTime);
-      setNow(Date.now());
-
       if (!username) {
         setIsLoadingGameStartTime(false);
         setPage('lobby');
@@ -156,7 +153,6 @@ function App() {
 
     const intervalId = window.setInterval(() => {
       const currentTime = Date.now();
-      setNow(currentTime);
       if (gameEndTime !== null && currentTime >= gameEndTime) {
         setPage('final-results');
       } else if (username && gameStartTime !== null && currentTime >= gameStartTime) {
@@ -258,7 +254,6 @@ function App() {
           onBeginUsernameEdit={handleBeginUsernameEdit}
           onLeaveHost={handleLeaveHost}
           gameStartTime={gameStartTime}
-          now={now}
           isLoadingGameStartTime={isLoadingGameStartTime}
           hostErrorMessage={hostError}
           usernameErrorMessage={usernameError}
@@ -276,7 +271,6 @@ function App() {
           startTime={startTime}
           endTime={endTime}
           gameEndTime={gameEndTime}
-          now={now}
           username={username}
           submitGuess={submitGuess}
         />

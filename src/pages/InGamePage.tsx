@@ -1,6 +1,7 @@
 import React from 'react';
 import { GameResult } from '../components/GameResult';
 import { GuessForm } from '../components/GuessForm';
+import { InGameDashboard } from '../components/InGameDashboard';
 import { GuessTable } from '../components/GuessTable';
 import { GuessEntry, GameStats, LeaderboardEntry } from '../types';
 
@@ -14,22 +15,8 @@ interface Props {
   startTime: number | null;
   endTime: number | null;
   gameEndTime: number | null;
-  now: number;
   username: string;
   submitGuess: (guess: string) => Promise<void>;
-}
-
-function formatCountdown(ms: number) {
-  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-
-  if (hours > 0) {
-    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-  }
-
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
 export function InGamePage({
@@ -42,49 +29,20 @@ export function InGamePage({
   startTime,
   endTime,
   gameEndTime,
-  now,
   username,
   submitGuess,
 }: Props) {
-  const remainingText = gameEndTime === null ? null : formatCountdown(gameEndTime - now);
   const bestGuess = guesses[0] || null;
-  const bestRank = bestGuess ? bestGuess.rank : null;
   const upperLeaderboard = leaderboard.slice(0, 3);
   const lowerLeaderboard = leaderboard.slice(3);
 
   return (
     <>
-      {remainingText && (
-        <div className="game-timer">
-          <div className="game-timer-main">
-            <span className="game-timer-label">게임 종료까지</span>
-            <strong className="game-timer-value">{remainingText}</strong>
-          </div>
-          {username && <span className="game-timer-username">{username}</span>}
-          <div className="game-timer-stats">
-            {bestGuess ? (
-              <>
-                <span className="game-timer-stat">
-                  <span className="game-timer-stat-name">내 순위</span>
-                  <strong className="game-timer-stat-value">
-                    {typeof bestRank === 'number' ? `#${bestRank}` : bestRank}
-                  </strong>
-                </span>
-                <span className="game-timer-stat">
-                  <span className="game-timer-stat-name">최대 유사도</span>
-                  <strong className="game-timer-stat-value">{bestGuess.similarity.toFixed(2)}</strong>
-                </span>
-                <span className="game-timer-stat">
-                  <span className="game-timer-stat-name">단어</span>
-                  <strong className="game-timer-stat-value game-timer-stat-spoiler">{bestGuess.word}</strong>
-                </span>
-              </>
-            ) : (
-              <span className="game-timer-stat">아직 제출한 단어가 없습니다.</span>
-            )}
-          </div>
-        </div>
-      )}
+      <InGameDashboard
+        gameEndTime={gameEndTime}
+        username={username}
+        bestGuess={bestGuess}
+      />
 
       <GuessForm
         onSubmit={submitGuess}
@@ -141,7 +99,7 @@ export function InGamePage({
           ) : (
             <div className="leaderboard-card">
               <h3>실시간 리더보드</h3>
-              <p className="leaderboard-empty">표시할 참가자 기록이 없습니다.</p>
+              <p className="leaderboard-empty">아직 참여 기록이 없습니다.</p>
             </div>
           )}
         </aside>
