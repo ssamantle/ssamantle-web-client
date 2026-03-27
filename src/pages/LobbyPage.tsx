@@ -40,6 +40,7 @@ export function LobbyPage({
   const previousHostRef = useRef(initialHost);
   const countdown = gameStartTime === null ? null : formatCountdown(gameStartTime - now);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
+  const [isConnectingHost, setIsConnectingHost] = useState(false);
   const hasSubmittedUsername = Boolean(initialUsername.trim()) && !isEditingUsername;
 
   useEffect(() => {
@@ -61,11 +62,14 @@ export function LobbyPage({
     e.preventDefault();
     const trimmedHost = host.trim();
     if (!trimmedHost) return;
+    setIsConnectingHost(true);
     try {
       await onEnterHost(trimmedHost);
       setStep(1);
     } catch {
       // Host connection errors are surfaced in the UI.
+    } finally {
+      setIsConnectingHost(false);
     }
   }
 
@@ -135,9 +139,9 @@ export function LobbyPage({
               <button
                 className="lobby-step-submit lobby-step-submit-secondary"
                 type="submit"
-                disabled={!host.trim()}
+                disabled={!host.trim() || isConnectingHost}
               >
-                입장
+                {isConnectingHost ? <span className="lobby-spinner" /> : '입장'}
               </button>
             </form>
 

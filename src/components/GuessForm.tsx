@@ -58,14 +58,15 @@ export function GuessForm({ onSubmit, gameOver, isLoading }: Props) {
           aria-disabled={gameOver || isLoading}
           autoFocus
         />
-        <input
+        <button
           type="submit"
-          value="추측하기"
           id="guess-btn"
           className="button"
           onMouseDown={e => e.preventDefault()}
           disabled={gameOver || isLoading}
-        />
+        >
+          {isLoading ? <span className="guess-spinner" /> : '추측하기'}
+        </button>
       </div>
 
     </form>

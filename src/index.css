@@ -354,6 +354,21 @@ h2 {
   box-shadow: none;
 }
 
+@keyframes lobby-spin {
+  to { transform: rotate(360deg); }
+}
+
+.lobby-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid rgba(247, 250, 254, 0.35);
+  border-top-color: #f7fafe;
+  border-radius: 50%;
+  animation: lobby-spin 0.7s linear infinite;
+  vertical-align: middle;
+}
+
 .lobby-step-back {
   padding: 0.72rem 0.9rem;
   border: 1px solid #b8c2d4;
@@ -468,6 +483,26 @@ h2 {
   border-left: none;
   white-space: nowrap;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-width: 5.5em;
+}
+
+.guess-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: lobby-spin 0.7s linear infinite;
+}
+
+body.dark .guess-spinner {
+  border-color: rgba(255, 255, 255, 0.2);
+  border-top-color: currentColor;
 }
 
 /* ── Give-up wrapper ── */
@@ -486,7 +521,8 @@ h2 {
 
 /* ── Buttons ── */
 input[type='button'],
-input[type='submit'] {
+input[type='submit'],
+#guess-btn {
   color: black;
   padding: 0.5em;
   border: 1px solid #666666;
@@ -494,7 +530,8 @@ input[type='submit'] {
 }
 
 input[type='button']:disabled,
-input[type='submit']:disabled {
+input[type='submit']:disabled,
+#guess-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -827,7 +864,8 @@ body.dark a {
 }
 
 body.dark input[type='button'],
-body.dark input[type='submit'] {
+body.dark input[type='submit'],
+body.dark #guess-btn {
   color: #fafafa;
   border: 1px solid #555;
 }

@@ -66,6 +66,7 @@ export class MockGameService extends GameService {
 
   async connectHost(host: string): Promise<void> {
     this.setHost(host);
+    await new Promise(resolve => setTimeout(resolve, 800));
     if (!this.host || this.host.includes('bad') || this.host.includes('invalid')) {
       throw new Error('HOST_UNREACHABLE');
     }
@@ -113,6 +114,7 @@ export class MockGameService extends GameService {
 
   async submitGuess(word: string): Promise<GuessApiResponse | null> {
     if (this.cache[word]) return this.cache[word];
+    await new Promise(resolve => setTimeout(resolve, 500));
 
     let result: GuessApiResponse;
 
