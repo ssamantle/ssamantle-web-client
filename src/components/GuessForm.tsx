@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { SpinnerButton } from './SpinnerButton';
 
 interface Props {
   onSubmit: (guess: string) => Promise<void>;
@@ -58,15 +59,16 @@ export function GuessForm({ onSubmit, gameOver, isLoading }: Props) {
           aria-disabled={gameOver || isLoading}
           autoFocus
         />
-        <button
+        <SpinnerButton
           type="submit"
           id="guess-btn"
           className="button"
           onMouseDown={e => e.preventDefault()}
-          disabled={gameOver || isLoading}
+          disabled={gameOver}
+          isLoading={isLoading}
         >
-          {isLoading ? <span className="guess-spinner" /> : '추측하기'}
-        </button>
+          추측하기
+        </SpinnerButton>
       </div>
 
     </form>

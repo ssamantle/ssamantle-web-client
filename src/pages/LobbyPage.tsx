@@ -1,4 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { LobbyField } from '../components/LobbyField';
+import { LobbyGameStatus } from '../components/LobbyGameStatus';
+import { SpinnerButton } from '../components/SpinnerButton';
+import { StepCarousel } from '../components/StepCarousel';
 
 interface Props {
   initialUsername: string;
@@ -12,13 +16,6 @@ interface Props {
   isLoadingGameStartTime: boolean;
   hostErrorMessage: string;
   usernameErrorMessage: string;
-}
-
-function formatCountdown(ms: number) {
-  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
-  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 }
 
 export function LobbyPage({
@@ -38,10 +35,9 @@ export function LobbyPage({
   const [host, setHost] = useState(initialHost);
   const [step, setStep] = useState(initialHost.trim() ? 1 : 0);
   const previousHostRef = useRef(initialHost);
-  const gameStarted = gameStartTime !== null && now >= gameStartTime;
-  const countdown = gameStartTime === null ? null : gameStarted ? '게임이 시작되었습니다!' : formatCountdown(gameStartTime - now);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [isConnectingHost, setIsConnectingHost] = useState(false);
+  const [isSubmittingUsername, setIsSubmittingUsername] = useState(false);
   const hasSubmittedUsername = Boolean(initialUsername.trim()) && !isEditingUsername;
 
   useEffect(() => {
@@ -84,6 +80,7 @@ export function LobbyPage({
     const trimmed = username.trim();
     const trimmedHost = host.trim();
     if (!trimmed || !trimmedHost) return;
+    setIsSubmittingUsername(true);
     try {
       const didStartWaiting = await onStartGame(trimmed, trimmedHost);
       if (didStartWaiting) {
@@ -91,6 +88,8 @@ export function LobbyPage({
       }
     } catch {
       // Username errors are surfaced in the UI.
+    } finally {
+      setIsSubmittingUsername(false);
     }
   }
 
@@ -108,70 +107,52 @@ export function LobbyPage({
           먼저 서버에 입장한 뒤 사용자 이름을 정하고 게임 시작 시각까지 대기합니다. 시작 시각이 되면 자동으로 플레이 화면으로 이동합니다.
         </p>
 
-        <div className="lobby-drawer">
-          <div
-            className="lobby-drawer-track"
-            style={{ transform: `translateX(-${step * 50}%)` }}
-          >
-            <form className="lobby-step" onSubmit={handleEnterHost}>
-              <p className="lobby-step-eyebrow">1 / 2</p>
-              <h3>서버 입장</h3>
-              <p className="lobby-step-copy">
-                접속할 게임 서버 호스트를 입력한 뒤 다음 단계로 이동합니다.
-              </p>
-
-              <label className="lobby-label" htmlFor="lobby-host">
-                서버 호스트
-              </label>
-              <input
+        <StepCarousel step={step} showIndicators>
+          <StepCarousel.Item eyebrow="1 / 2">
+            <h3>서버 입장</h3>
+            <p className="step-carousel-item-copy">접속할 게임 서버 호스트를 입력한 뒤 다음 단계로 이동합니다.</p>
+            <form onSubmit={handleEnterHost}>
+              <LobbyField
                 id="lobby-host"
-                type="text"
+                label="서버 호스트"
                 value={host}
-                onChange={e => setHost(e.target.value)}
+                onChange={setHost}
                 placeholder="127.0.0.1:8080 또는 game.example.com"
                 autoComplete="off"
                 autoCapitalize="none"
                 autoCorrect="off"
                 autoFocus
+                errorMessage={hostErrorMessage}
               />
-              {hostErrorMessage && (
-                <p className="lobby-error">{hostErrorMessage}</p>
-              )}
-              <button
-                className="lobby-step-submit lobby-step-submit-secondary"
-                type="submit"
-                disabled={!host.trim() || isConnectingHost}
-              >
-                {isConnectingHost ? <span className="lobby-spinner" /> : '입장'}
-              </button>
-            </form>
 
-            <form className="lobby-step" onSubmit={handleSubmit}>
-              <p className="lobby-step-eyebrow">2 / 2</p>
-              <h3>참가 대기</h3>
-              <p className="lobby-step-copy">
-                사용할 사용자명을 입력하고 참가 대기를 시작합니다.
-              </p>
-
-              <label className="lobby-label" htmlFor="lobby-username">
-                사용자 명
-              </label>
-              <div className="lobby-field-group">
-                <input
-                  id="lobby-username"
-                  type="text"
-                  value={username}
-                  onChange={e => setUsername(e.target.value)}
-                  placeholder="사용자 명을 입력하세요"
-                  autoComplete="nickname"
-                  autoFocus={step === 1}
-                  readOnly={hasSubmittedUsername}
-                />
-                {usernameErrorMessage && (
-                  <p className="lobby-error">{usernameErrorMessage}</p>
-                )}
+              <div className="lobby-step-actions">
+                <SpinnerButton
+                  className="lobby-step-submit lobby-step-submit-secondary"
+                  type="submit"
+                  disabled={!host.trim()}
+                  isLoading={isConnectingHost}
+                >
+                  입장
+                </SpinnerButton>
               </div>
+            </form>
+          </StepCarousel.Item>
 
+          <StepCarousel.Item eyebrow="2 / 2">
+            <h3>참가 대기</h3>
+            <p className="step-carousel-item-copy">사용할 사용자명을 입력하고 참가 대기를 시작합니다.</p>
+            <form onSubmit={handleSubmit}>
+              <LobbyField
+                id="lobby-username"
+                label="사용자 명"
+                value={username}
+                onChange={setUsername}
+                placeholder="사용자 명을 입력하세요"
+                autoComplete="nickname"
+                autoFocus={step === 1}
+                readOnly={hasSubmittedUsername}
+                errorMessage={usernameErrorMessage}
+              />
               <div className="lobby-step-actions">
                 <button
                   className="lobby-step-back"
@@ -180,28 +161,23 @@ export function LobbyPage({
                 >
                   이전
                 </button>
-                <input
+                <SpinnerButton
                   className="lobby-submit"
                   type="submit"
-                  value={hasSubmittedUsername ? '대기 정보 갱신' : '참가 대기'}
                   disabled={!username.trim() || !host.trim()}
-                />
+                  isLoading={isSubmittingUsername}
+                >
+                  {hasSubmittedUsername ? '대기 정보 갱신' : '참가 대기'}
+                </SpinnerButton>
               </div>
             </form>
-          </div>
-        </div>
-
-        {isLoadingGameStartTime && (
-          <p className="lobby-status">게임 시작 시간을 확인하는 중입니다.</p>
-        )}
-        {!isLoadingGameStartTime && gameStartTime !== null && (
-          <div className="lobby-status-block">
-            <p className="lobby-status">
-              시작 예정 시각: {new Date(gameStartTime).toLocaleTimeString('ko-KR')}
-            </p>
-            <p className="lobby-countdown">{countdown}</p>
-          </div>
-        )}
+          </StepCarousel.Item>
+        </StepCarousel>
+        <LobbyGameStatus
+          isLoading={isLoadingGameStartTime}
+          gameStartTime={gameStartTime}
+          now={now}
+        />
       </div>
     </section>
   );
