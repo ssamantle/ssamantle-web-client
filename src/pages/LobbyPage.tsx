@@ -38,7 +38,8 @@ export function LobbyPage({
   const [host, setHost] = useState(initialHost);
   const [step, setStep] = useState(initialHost.trim() ? 1 : 0);
   const previousHostRef = useRef(initialHost);
-  const countdown = gameStartTime === null ? null : formatCountdown(gameStartTime - now);
+  const gameStarted = gameStartTime !== null && now >= gameStartTime;
+  const countdown = gameStartTime === null ? null : gameStarted ? '게임이 시작되었습니다!' : formatCountdown(gameStartTime - now);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [isConnectingHost, setIsConnectingHost] = useState(false);
   const hasSubmittedUsername = Boolean(initialUsername.trim()) && !isEditingUsername;
