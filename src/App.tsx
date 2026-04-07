@@ -13,17 +13,17 @@ type Page = 'lobby' | 'in-game' | 'final-results';
 
 const USERNAME_STORAGE_KEY = 'username';
 const HOST_STORAGE_KEY = 'host';
+const DEFAULT_HOST = window.location.host || 'localhost:3000';
 
 function App() {
   const [page, setPage] = useState<Page>('lobby');
   const [username, setUsername] = useState(() => localStorage.getItem(USERNAME_STORAGE_KEY) || '');
-  const [host, setHost] = useState(() => localStorage.getItem(HOST_STORAGE_KEY) || '');
+  const [host, setHost] = useState(() => localStorage.getItem(HOST_STORAGE_KEY) || DEFAULT_HOST);
   const [gameStartTime, setGameStartTime] = useState<number | null>(null);
   const [gameEndTime, setGameEndTime] = useState<number | null>(null);
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [isLoadingGameStartTime, setIsLoadingGameStartTime] = useState(false);
   const [pageError, setPageError] = useState('');
-  const [hostError, setHostError] = useState('');
   const [usernameError, setUsernameError] = useState('');
   const { settings, settingsOpen, setSettingsOpen, updateSetting } = useSettings();
   const {
@@ -49,7 +49,6 @@ function App() {
       setGameStartTime(null);
       setGameEndTime(null);
       setLeaderboard([]);
-      setHostError('');
       setUsernameError('');
       return;
     }
@@ -59,7 +58,6 @@ function App() {
     async function loadGameTimes() {
       setIsLoadingGameStartTime(true);
       setPageError('');
-      setHostError('');
       setUsernameError('');
 
       try {
@@ -71,7 +69,7 @@ function App() {
           setGameStartTime(null);
           setGameEndTime(null);
           setLeaderboard([]);
-          setHostError('서버에 연결할 수 없습니다. 호스트 주소를 확인해주세요.');
+          setPageError('서버에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.');
         }
         return;
       }
@@ -167,8 +165,8 @@ function App() {
     };
   }, [page, gameStartTime, gameEndTime, username]);
 
-  async function handleStartGame(nextUsername: string, nextHost: string) {
-    return applyLobbyIdentity(nextUsername, nextHost);
+  async function handleStartGame(nextUsername: string) {
+    return applyLobbyIdentity(nextUsername, host);
   }
 
   function handleBeginUsernameEdit() {
@@ -176,42 +174,6 @@ function App() {
     gameService.clearUser();
     localStorage.removeItem(USERNAME_STORAGE_KEY);
     setUsername('');
-  }
-
-  function handleLeaveHost() {
-    setPage('lobby');
-    setPageError('');
-    setHostError('');
-    setUsernameError('');
-    setGameStartTime(null);
-    setGameEndTime(null);
-    setLeaderboard([]);
-    gameService.clearUser();
-    gameService.setHost('');
-    localStorage.removeItem(USERNAME_STORAGE_KEY);
-    localStorage.removeItem(HOST_STORAGE_KEY);
-    setUsername('');
-    setHost('');
-  }
-
-  async function handleEnterHost(nextHost: string) {
-    const normalizedHost = nextHost.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/.*$/, '');
-    setHostError('');
-    setUsernameError('');
-    gameService.setHost(nextHost);
-
-    try {
-      await gameService.connectHost(nextHost);
-    } catch {
-      setHostError('서버에 연결할 수 없습니다. 호스트 주소를 확인해주세요.');
-      throw new Error('HOST_UNREACHABLE');
-    }
-
-    gameService.clearUser();
-    localStorage.removeItem(USERNAME_STORAGE_KEY);
-    setUsername('');
-    localStorage.setItem(HOST_STORAGE_KEY, normalizedHost);
-    setHost(normalizedHost);
   }
 
   async function applyLobbyIdentity(nextUsername: string, nextHost: string) {
@@ -249,13 +211,10 @@ function App() {
         <LobbyPage
           initialUsername={username}
           initialHost={host}
-          onEnterHost={handleEnterHost}
           onStartGame={handleStartGame}
           onBeginUsernameEdit={handleBeginUsernameEdit}
-          onLeaveHost={handleLeaveHost}
           gameStartTime={gameStartTime}
           isLoadingGameStartTime={isLoadingGameStartTime}
-          hostErrorMessage={hostError}
           usernameErrorMessage={usernameError}
         />
       )}

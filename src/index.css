@@ -210,13 +210,6 @@ h2 {
   color: #4b5563;
 }
 
-.lobby-error {
-  padding: 0.3rem 0.5rem;
-  color: #c62828;
-  font-size: 0.82rem;
-  line-height: 1.15;
-}
-
 .lobby-status-block {
   margin-top: 1rem;
   padding-top: 1rem;
@@ -285,124 +278,6 @@ h2 {
 .step-carousel-item-copy {
   margin-bottom: 0.95rem;
   color: #5b6678;
-}
-
-.lobby-field-group {
-  display: grid;
-  gap: 0.1rem;
-}
-
-.lobby-label {
-  font-weight: 600;
-}
-
-.step-carousel-item input[type='text'] {
-  width: 100%;
-  padding: 0.75rem 0.85rem;
-  border: 1px solid #666666;
-  border-radius: 0.6rem;
-  background: #ffffff;
-  color: black;
-}
-
-.step-carousel-item input[type='text'][readonly] {
-  background: #e2e8f0;
-  border-color: #94a3b8;
-  color: #475569;
-  cursor: not-allowed;
-}
-
-.lobby-step-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.75rem;
-  margin-top: 0.75rem;
-}
-
-.step-carousel-item button.lobby-step-submit,
-.step-carousel-item button.lobby-submit {
-  min-width: 8rem;
-  padding: 0.72rem 1.1rem;
-  border: 1px solid #6e84a8;
-  border-radius: 0.7rem;
-  background: linear-gradient(180deg, #5d77a2 0%, #496286 100%);
-  color: #f7fafe;
-  font-weight: 700;
-  letter-spacing: 0.01em;
-  box-shadow: 0 10px 24px rgba(54, 77, 115, 0.18);
-  cursor: pointer;
-  transition:
-    transform 120ms ease,
-    box-shadow 120ms ease,
-    background-color 120ms ease,
-    border-color 120ms ease;
-}
-
-.step-carousel-item button.lobby-step-submit {
-  justify-self: start;
-  min-width: 8rem;
-  margin-top: 0;
-}
-
-.step-carousel-item button.lobby-submit {
-  justify-self: end;
-  margin-top: 0;
-}
-
-.step-carousel-item button.lobby-step-submit:hover:not(:disabled),
-.step-carousel-item button.lobby-submit:hover:not(:disabled) {
-  transform: translateY(-1px);
-  border-color: #60789e;
-  background: linear-gradient(180deg, #6984b1 0%, #506a90 100%);
-  box-shadow: 0 14px 28px rgba(54, 77, 115, 0.22);
-}
-
-.step-carousel-item button.lobby-step-submit:active:not(:disabled),
-.step-carousel-item button.lobby-submit:active:not(:disabled) {
-  transform: translateY(0);
-  box-shadow: 0 8px 18px rgba(54, 77, 115, 0.18);
-}
-
-.step-carousel-item button.lobby-step-submit:disabled,
-.step-carousel-item button.lobby-submit:disabled {
-  background: linear-gradient(180deg, #c3cad8 0%, #b5bfd1 100%);
-  border-color: #b5bfd1;
-  color: #eef2f8;
-  box-shadow: none;
-}
-
-@keyframes lobby-spin {
-  to { transform: rotate(360deg); }
-}
-
-.spinner-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 2.4em;
-  padding-inline: 0.75em;
-}
-
-.btn-spinner {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
-  border-top-color: currentColor;
-  border-radius: 50%;
-  animation: lobby-spin 0.7s linear infinite;
-  vertical-align: middle;
-}
-
-.lobby-step-back {
-  padding: 0.72rem 0.9rem;
-  border: 1px solid #b8c2d4;
-  border-radius: 0.7rem;
-  background: #f5f7fb;
-  color: #4b5970;
-  font-weight: 600;
-  cursor: pointer;
 }
 
 /* ── Guess form ── */
@@ -1147,10 +1022,6 @@ body.dark .lobby-copy {
   color: #cbd5e1;
 }
 
-body.dark .lobby-error {
-  color: #ff8f8f;
-}
-
 body.dark .lobby-status-block {
   border-color: #374151;
 }
@@ -1162,44 +1033,4 @@ body.dark .lobby-status {
 body.dark .step-carousel-item-eyebrow,
 body.dark .step-carousel-item-copy {
   color: #b8c6df;
-}
-
-body.dark .step-carousel-item input[type='text'] {
-  background: #111827;
-  color: #fafafa;
-  border-color: #4b5563;
-}
-
-body.dark .step-carousel-item input[type='text'][readonly] {
-  background: #1f2937;
-  color: #aeb9ca;
-  border-color: #5b6575;
-  cursor: not-allowed;
-}
-
-body.dark .step-carousel-item button.lobby-step-submit,
-body.dark .step-carousel-item button.lobby-submit {
-  border-color: #6f86ae;
-  background: linear-gradient(180deg, #6a84b2 0%, #50688f 100%);
-  color: #f8fbff;
-  box-shadow: 0 10px 24px rgba(9, 13, 24, 0.3);
-}
-
-body.dark .step-carousel-item button.lobby-step-submit:hover:not(:disabled),
-body.dark .step-carousel-item button.lobby-submit:hover:not(:disabled) {
-  border-color: #8197bd;
-  background: linear-gradient(180deg, #7792c0 0%, #58739d 100%);
-}
-
-body.dark .step-carousel-item button.lobby-step-submit:disabled,
-body.dark .step-carousel-item button.lobby-submit:disabled {
-  background: linear-gradient(180deg, #566277 0%, #465165 100%);
-  border-color: #5a667c;
-  color: #d4dbe7;
-}
-
-body.dark .lobby-step-back {
-  background: #1f2937;
-  color: #e5ebf5;
-  border-color: #4b5563;
 }
