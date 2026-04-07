@@ -1,0 +1,101 @@
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.fieldGroup {
+  display: grid;
+  gap: 0.1rem;
+}
+
+.label {
+  font-weight: 600;
+}
+
+.inputWrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.6em;
+}
+
+.input {
+  color: #000000;
+  background-color: #ffffff;
+  width: 100%;
+  padding: 0.5em;
+  border: 1px solid #666666;
+  border-radius: 0.2em;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.input[readonly] {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #475569;
+  cursor: not-allowed;
+}
+
+.button {
+  color: #000000;
+  background-color: #eeeeee;
+  padding: 0.5em;
+  border: 1px solid #666666;
+  border-radius: 0.2em;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: none;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-width: 5.5em;
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid color-mix(in srgb, currentColor 30%, transparent);
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+}
+
+.error {
+  padding: 0.3rem 0.5rem;
+  color: #c62828;
+  font-size: 0.82rem;
+  line-height: 1.15;
+}
+
+:global(body.dark) .input {
+  color: #fafafa;
+  background-color: #333333;
+  border-color: #555555;
+}
+
+:global(body.dark) .input[readonly] {
+  background: #1f2937;
+  color: #aeb9ca;
+  border-color: #5b6575;
+}
+
+:global(body.dark) .button {
+  color: #fafafa;
+  background-color: #333333;
+  border-color: #555555;
+}
+
+:global(body.dark) .error {
+  color: #ff8f8f;
+}
