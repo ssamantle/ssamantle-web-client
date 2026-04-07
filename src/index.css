@@ -305,25 +305,6 @@ h2 {
   font-weight: 500;
 }
 
-.countdown-timer {
-  flex: 0 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 0.2em;
-}
-
-.countdown-timer-label {
-  color: #45606d;
-  font-size: 0.76em;
-  line-height: 1.1;
-}
-
-.countdown-timer-value {
-  font-size: 1.6em;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-}
-
 .game-timer-stats {
   display: flex;
   flex-wrap: wrap;
@@ -877,10 +858,6 @@ body.dark .dialog-close {
 body.dark .game-timer {
   background: #31405f;
   border-color: #5f7399;
-}
-
-body.dark .countdown-timer-label {
-  color: #bfd4df;
 }
 
 body.dark .game-timer-stat-label {
