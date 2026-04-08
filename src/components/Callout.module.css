@@ -1,0 +1,29 @@
+.callout {
+  border: 1px solid #b4bfd6;
+  border-radius: 3px;
+  background: #edf1f8;
+  padding: 1rem;
+}
+
+.title {
+  margin: 0 0 0.8rem;
+  color: #1f3d56;
+  font-size: 1rem;
+}
+
+.content {
+  color: #5f7480;
+}
+
+:global(body.dark) .callout {
+  background: #31405f;
+  border-color: #5f7399;
+}
+
+:global(body.dark) .title {
+  color: #d8e7ef;
+}
+
+:global(body.dark) .content {
+  color: #9fb7c4;
+}
