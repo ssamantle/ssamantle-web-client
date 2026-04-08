@@ -1,11 +1,11 @@
-import { GameService } from './GameService';
+import { GameServiceLegacy } from './GameServiceLegacy';
 import { GuessApiResponse, LeaderboardEntry } from '../types';
 
 /**
  * 실제 HTTP API 서버와 통신하는 GameService 구현체.
  * 서버가 준비되면 services/index.ts 에서 이 구현체로 전환합니다.
  */
-export class ApiGameService extends GameService {
+export class ApiGameService extends GameServiceLegacy {
   private readonly cache: Record<string, GuessApiResponse> = {};
 
   private normalizeHost(host: string) {

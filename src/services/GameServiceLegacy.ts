@@ -4,7 +4,7 @@ import { GuessApiResponse, LeaderboardEntry, User } from '../types';
  * 게임 서버와의 통신을 추상화한 서비스 인터페이스.
  * 구현체를 교체하는 것으로 목업↔실서버를 전환할 수 있습니다.
  */
-export abstract class GameService {
+export abstract class GameServiceLegacy {
   constructor(
     protected user: User,
     protected host: string,

@@ -1,4 +1,4 @@
-import { GameService } from './GameService';
+import { GameServiceLegacy } from './GameServiceLegacy';
 import { GuessApiResponse, LeaderboardEntry } from '../types';
 
 const MOCK_ANSWER = '사과';
@@ -22,7 +22,7 @@ const KNOWN_WORDS: Record<string, number> = {
  * 서버 없이 동작하는 GameService 목업 구현체.
  * 정답은 '사과'이며, 미리 정의된 단어 외에는 낮은 임의 유사도를 반환합니다.
  */
-export class MockGameService extends GameService {
+export class MockGameService extends GameServiceLegacy {
   private readonly cache: Record<string, GuessApiResponse> = {};
   private readonly takenUsernames = new Set(['alpha', 'beta', 'gamma', 'delta', 'epsilon']);
 
