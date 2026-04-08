@@ -1,10 +1,16 @@
-import { GameInfo, UserInfo, Guess } from './GameService';
+import { GameInfo, UserInfo, Guess, GameState, IN_GAME, POST_GAME, PRE_GAME } from './GameService';
 import { AbstractGameService } from './AbstractGameService';
 import { UserSession } from './UserService';
 
 const MOCK_ANSWER = '사과';
-const MOCK_GAME_START_TIME_KEY = 'mockGameStartTime';
-const MOCK_GAME_DURATION_MS = 10 * 60 * 1000;
+const MOCK_PRE_GAME_DURATION_MS = 1.5 * 60 * 1000;
+const MOCK_IN_GAME_DURATION_MS = 10 * 60 * 1000;
+const MOCK_FORCE_STATE = (
+  null
+  // PRE_GAME
+  // IN_GAME
+  // POST_GAME
+);
 
 /** 유사도가 미리 정해진 단어 목록 (테스트용) */
 const KNOWN_WORDS: Record<string, number> = {
@@ -33,10 +39,11 @@ const MOCK_USERS: UserInfo[] = [
  */
 export class MockGameService extends AbstractGameService {
   private readonly guessCache: Record<string, Guess> = {};
+  private readonly initiatedAt = Date.now();
 
   protected async fetchGameInfo(): Promise<GameInfo> {
-    const startAt = await this.fetchMockStartTime();
-    const endAt = startAt !== null ? startAt + MOCK_GAME_DURATION_MS : null;
+    const startAt = this.initiatedAt + MOCK_PRE_GAME_DURATION_MS;
+    const endAt = startAt + MOCK_IN_GAME_DURATION_MS;
     return { startAt, endAt, users: [...MOCK_USERS] };
   }
 
@@ -63,12 +70,9 @@ export class MockGameService extends AbstractGameService {
     return result;
   }
 
-  private async fetchMockStartTime(): Promise<number | null> {
-    const saved = localStorage.getItem(MOCK_GAME_START_TIME_KEY);
-    if (saved) return Number(saved);
-
-    const startAt = Date.now() + 15_000;
-    localStorage.setItem(MOCK_GAME_START_TIME_KEY, String(startAt));
-    return startAt;
+  getCurrentGameState(now?: number): GameState {
+    if (MOCK_FORCE_STATE !== null)
+      return MOCK_FORCE_STATE;
+    return super.getCurrentGameState(now);
   }
 }
