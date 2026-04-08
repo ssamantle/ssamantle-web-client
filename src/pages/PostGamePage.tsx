@@ -7,7 +7,7 @@ interface Props {
   leaderboard: LeaderboardEntry[];
 }
 
-export function FinalResultsPage({ username, guesses, leaderboard }: Props) {
+export function PostGamePage({ username, guesses, leaderboard }: Props) {
   const bestGuess = guesses[0] || null;
   const myFinalRank = leaderboard.findIndex(entry => entry.username === username);
   const upperLeaderboard = leaderboard.slice(0, 3);

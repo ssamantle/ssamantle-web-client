@@ -1,7 +1,7 @@
 import { Component } from 'react';
 import { Header } from './components/Header';
 import { SettingsDialog } from './components/SettingsDialog';
-import { FinalResultsPage } from './pages/FinalResultsPage';
+import { PostGamePage } from './pages/PostGamePage';
 import { InGamePage } from './pages/InGamePage';
 import { PreGamePage } from './pages/PreGamePage';
 import { gameService, userService } from './services';
@@ -332,7 +332,7 @@ export default class App extends Component<{}, State> {
         )}
 
         {page === 'final-results' && (
-          <FinalResultsPage
+          <PostGamePage
             username={username}
             guesses={guesses}
             leaderboard={leaderboard}
