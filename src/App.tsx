@@ -3,7 +3,7 @@ import { Header } from './components/Header';
 import { SettingsDialog } from './components/SettingsDialog';
 import { FinalResultsPage } from './pages/FinalResultsPage';
 import { InGamePage } from './pages/InGamePage';
-import { LobbyPage } from './pages/LobbyPage';
+import { PreGamePage } from './pages/PreGamePage';
 import { gameService, userService } from './services';
 import { Guess } from './services/GameService';
 import { UserSession } from './services/UserService';
@@ -307,7 +307,7 @@ export default class App extends Component<{}, State> {
         {error && <div id="error">{error}</div>}
 
         {page === 'lobby' && (
-          <LobbyPage
+          <PreGamePage
             currentUser={session}
             gameStartTime={gameStartTime}
             isLoadingGameInfo={gameStartTime === null}

@@ -17,7 +17,7 @@ interface State {
   usernameErrorMessage: string;
 }
 
-export class LobbyPage extends React.Component<Props, State> {
+export class PreGamePage extends React.Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
