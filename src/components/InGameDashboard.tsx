@@ -1,6 +1,5 @@
 import React from 'react';
 import { GuessEntry } from '../types';
-import { CountdownTimer } from './CountdownTimer';
 import { MyBestGuessSummary } from './MyBestGuessSummary';
 
 interface Props {
@@ -15,8 +14,7 @@ export function InGameDashboard({ gameEndTime, username, bestGuess }: Props) {
   }
 
   return (
-    <div className="game-timer">
-      <CountdownTimer label="게임 종료까지" targetTime={gameEndTime} />
+    <div className="game-summary">
       <MyBestGuessSummary bestGuess={bestGuess} username={username} />
     </div>
   );

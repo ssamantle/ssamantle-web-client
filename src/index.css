@@ -1,6 +1,6 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.6/dist/web/static/pretendard.css");
 
-/* ── Reset ── */
+/* Reset */
 *,
 *::before,
 *::after {
@@ -25,7 +25,7 @@ hr {
   border: 0;
 }
 
-/* ── Base ── */
+/* Base */
 body,
 input {
   font-size: 17px;
@@ -40,14 +40,14 @@ body {
   word-break: keep-all;
 }
 
-/* ── Layout ── */
+/* Layout */
 .container {
   margin: 0 auto;
   max-width: 900px;
   padding: 1em 1em 2em;
 }
 
-/* ── Header ── */
+/* Header */
 header {
   align-items: center;
   display: flex;
@@ -65,7 +65,7 @@ h2 {
   column-gap: 0.5em;
 }
 
-/* ── Overlay button (gear icon) ── */
+/* Overlay button (gear icon) */
 .overlay-button {
   position: relative;
   color: black;
@@ -85,7 +85,7 @@ h2 {
   transform: translate(-50%, -50%);
 }
 
-/* ── Settings dialog ── */
+/* Settings dialog */
 .dialog-underlay {
   background: rgba(0, 0, 0, 0.5);
   bottom: 0;
@@ -162,14 +162,14 @@ h2 {
   margin-left: 0.4em;
 }
 
-/* ── Info paragraphs ── */
+/* Info paragraphs */
 #yesterday2,
 #similarity-story {
   margin: 0.8em 0;
   line-height: 1.6;
 }
 
-/* ── Error ── */
+/* Error */
 #error {
   min-height: 1.4em;
   margin-bottom: 0.4em;
@@ -207,17 +207,6 @@ h2 {
 
 .lobby-copy {
   margin-bottom: 1.25rem;
-  color: #4b5563;
-}
-
-.lobby-status-block {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #d5d5d5;
-}
-
-.lobby-status {
-  margin-top: 1rem;
   color: #4b5563;
 }
 
@@ -280,8 +269,8 @@ h2 {
   color: #5b6678;
 }
 
-/* ── Guess form ── */
-.game-timer {
+/* Guess form */
+.game-summary {
   position: relative;
   display: flex;
   align-items: flex-end;
@@ -296,16 +285,7 @@ h2 {
   background: #edf1f8;
 }
 
-.game-timer-username {
-  position: absolute;
-  top: 0.85em;
-  right: 1em;
-  font-size: 0.72em;
-  color: #7a8aaa;
-  font-weight: 500;
-}
-
-.game-timer-stats {
+.game-summary-stats {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
@@ -313,13 +293,7 @@ h2 {
   text-align: right;
 }
 
-.game-timer-stat-label {
-  width: 100%;
-  color: #45606d;
-  font-size: 0.9em;
-}
-
-.game-timer-stat {
+.game-summary-stat {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -327,13 +301,13 @@ h2 {
   white-space: nowrap;
 }
 
-.game-timer-stat-name {
+.game-summary-stat-name {
   color: #6b7d88;
   font-size: 0.76em;
   line-height: 1.1;
 }
 
-.game-timer-stat-value {
+.game-summary-stat-value {
   font-size: 1.05em;
   line-height: 1.2;
 }
@@ -379,7 +353,7 @@ h2 {
 }
 
 
-/* ── Give-up wrapper ── */
+/* Give-up wrapper */
 .give-up-btn-wrapper {
   display: flex;
   justify-content: flex-start;
@@ -393,7 +367,7 @@ h2 {
   cursor: pointer;
 }
 
-/* ── Buttons ── */
+/* Buttons */
 input[type='button'],
 input[type='submit'],
 #guess-btn {
@@ -410,7 +384,7 @@ input[type='submit']:disabled,
   cursor: not-allowed;
 }
 
-/* ── Game result box ── */
+/* Game result box */
 #response.gaveup {
   border: 1px solid black;
   margin-bottom: 1em;
@@ -433,7 +407,7 @@ input[type='submit']:disabled,
   font-weight: 600;
 }
 
-/* ── Guesses table ── */
+/* Guesses table */
 .game-panels {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 16rem;
@@ -727,7 +701,7 @@ input[type='submit']:disabled,
   color: #5f7480;
 }
 
-/* ── Weird word tooltip ── */
+/* Weird word tooltip */
 .weirdWord {
   display: inline-block;
   border-bottom: 1px dotted black;
@@ -752,7 +726,7 @@ input[type='submit']:disabled,
   visibility: visible;
 }
 
-/* ── Misc ── */
+/* Misc */
 .subtext {
   color: #666666;
 }
@@ -766,7 +740,7 @@ footer {
   margin-top: 5em;
 }
 
-/* ── Responsive ── */
+/* Responsive */
 @media only screen and (max-width: 640px) {
   body,
   input {
@@ -813,23 +787,23 @@ footer {
     margin-bottom: 0.8rem;
   }
 
-  .game-timer {
+  .game-summary {
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .game-timer-stats {
+  .game-summary-stats {
     width: 100%;
     justify-content: flex-start;
     text-align: left;
   }
 
-  .game-timer-stat {
+  .game-summary-stat {
     align-items: flex-start;
   }
 }
 
-/* ── Dark mode ── */
+/* Dark mode */
 body.dark {
   background: #111;
   color: #fafafa;
@@ -855,25 +829,17 @@ body.dark .dialog-close {
   color: #fafafa;
 }
 
-body.dark .game-timer {
+body.dark .game-summary {
   background: #31405f;
   border-color: #5f7399;
 }
 
-body.dark .game-timer-stat-label {
-  color: #bfd4df;
-}
-
-body.dark .game-timer-stat {
+body.dark .game-summary-stat {
   color: #e2edf3;
 }
 
-body.dark .game-timer-stat-name {
+body.dark .game-summary-stat-name {
   color: #9fb7c4;
-}
-
-body.dark .game-timer-username {
-  color: #8fa8c8;
 }
 
 body.dark .leaderboard-card {
@@ -999,15 +965,8 @@ body.dark .lobby-copy {
   color: #cbd5e1;
 }
 
-body.dark .lobby-status-block {
-  border-color: #374151;
-}
-
-body.dark .lobby-status {
-  color: #cbd5e1;
-}
-
 body.dark .step-carousel-item-eyebrow,
 body.dark .step-carousel-item-copy {
   color: #b8c6df;
 }
+
