@@ -1,5 +1,5 @@
 import { GameService } from './GameService';
-import { GuessApiResponse } from '../types';
+import { GuessApiResponse } from '../../types';
 
 /**
  * 실제 HTTP API 서버와 통신하는 GameService 구현체.

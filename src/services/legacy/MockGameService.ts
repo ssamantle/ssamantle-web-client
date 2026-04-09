@@ -1,5 +1,5 @@
 import { GameService } from './GameService';
-import { GuessApiResponse } from '../types';
+import { GuessApiResponse } from '../../types';
 
 const MOCK_ANSWER = '사과';
 const MOCK_GAME_START_TIME_KEY = 'mockGameStartTime';

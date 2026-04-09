@@ -1,4 +1,4 @@
-import { GuessApiResponse, User } from '../types';
+import { GuessApiResponse, User } from '../../types';
 
 /**
  * 게임 서버와의 통신을 추상화한 서비스 인터페이스.

@@ -1,7 +1,7 @@
 import { GameService } from './GameService';
 import { MockGameService } from './MockGameService';
 // import { ApiGameService } from './ApiGameService'; // 서버 연결 시 이쪽으로 전환
-import { User } from '../types';
+import { User } from '../../types';
 
 export type { GameService };
 
