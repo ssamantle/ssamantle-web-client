@@ -1,20 +1,60 @@
-import { GuessApiResponse, User } from '../types';
+import { UserSession } from "./UserService";
 
-/**
- * 게임 서버와의 통신을 추상화한 서비스 인터페이스.
- * 구현체를 교체하는 것으로 목업↔실서버를 전환할 수 있습니다.
- */
-export abstract class GameService {
-  constructor(
-    protected user: User,
-    protected host: string,
-  ) {}
+export interface GameInfo {
+  startAt: number | null;
+  endAt: number | null;
+  users: UserInfo[];
+}
 
-  abstract setUsername(username: string): void;
-  abstract setHost(host: string): void;
-  abstract getGameStartTime(): Promise<number | null>;
-  abstract getGameEndTime(): Promise<number | null>;
+export interface UserInfo {
+  name: string;
+  bestSimilarity: number;
+  rank: number;
+}
 
-  /** 단어를 추측하고 유사도·순위 결과를 가져옵니다. */
-  abstract submitGuess(word: string): Promise<GuessApiResponse | null>;
+export interface Guess {
+  label: string;
+  similarity: number;
+  rank: number;
+}
+
+export enum GameState {
+  PRE_GAME = 'pre-game',
+  IN_GAME = 'in-game',
+  POST_GAME = 'post-game',
+};
+
+export interface GameService {
+  /** 현재 사용자 세션을 변경합니다. */
+  setUserSession(userSession: UserSession): Promise<void>;
+
+  /** 게임 상태 캐시를 갱신합니다. */
+  syncGameInfo(): Promise<void>;
+
+  /** 캐시된 게임 시작 시간을 반환합니다. */
+  getGameStartTime(): number | null;
+
+  /** 캐시된 게임 종료 시간을 반환합니다. */
+  getGameEndTime(): number | null;
+
+  /** 현재 게임의 상태를 반환합니다. */
+  getCurrentGameState(): GameState;
+
+  /** 캐시된 단어 제출 기록을 반환합니다. */
+  getMyGuessHistory(): Guess[];
+
+  /** 캐시된 현재 사용자 정보를 반환합니다. */
+  getMyInfo(): UserInfo | null;
+
+  /** 캐시된 현재 사용자의 최고 제출을 반환합니다. */
+  getMyBestGuess(): Guess | null;
+
+  /** 캐시된 사용자 목록을 반환합니다. */
+  listUsers(): UserInfo[];
+
+  /** 캐시된 사용자 목록에서 특정 사용자 정보를 반환합니다. 발견되지 않는다면 null을 반환합니다. */
+  findUserByName(name: string): UserInfo | null;
+
+  /** 단어를 제출하고 유사도와 순위를 받아옵니다. */
+  submitGuess(word: string): Promise<Guess | null>;
 }

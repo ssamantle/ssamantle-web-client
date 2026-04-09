@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GuessEntry, GameStats, GuessApiResponse } from '../types';
 import { puzzleNumber } from '../utils/puzzle';
-import { GameService, gameService as defaultGameService } from '../services';
+import { GameService, gameService as defaultGameService } from '../services/legacy';
 
 function loadStats(): GameStats {
   const raw = localStorage.getItem('stats');

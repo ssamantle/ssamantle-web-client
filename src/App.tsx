@@ -5,7 +5,7 @@ import { useGame } from './hooks/useGame';
 import { useSettings } from './hooks/useSettings';
 import { InGamePage } from './pages/InGamePage';
 import { LobbyPage } from './pages/LobbyPage';
-import { gameService } from './services';
+import { gameService } from './services/legacy';
 
 type Page = 'lobby' | 'in-game';
 
