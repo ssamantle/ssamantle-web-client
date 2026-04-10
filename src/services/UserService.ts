@@ -11,7 +11,7 @@ export interface UserService {
   isSessionValid(session: UserSession): Promise<boolean>;
 
   /** 사용자명으로 로그인하고 세션 정보를 저장합니다. */
-  login(username: string): Promise<void>;
+  login(username: string): Promise<UserSession>;
 
   /** 로그인된 사용자가 있을 경우 세션 정보를 제거합니다. */
   logout(): Promise<void>;

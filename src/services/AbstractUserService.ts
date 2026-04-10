@@ -34,9 +34,10 @@ export abstract class AbstractUserService implements UserService {
   }
 
   /** 사용자명으로 로그인하고 세션 정보를 로컬 스토리지에 저장합니다. */
-  async login(username: string): Promise<void> {
+  async login(username: string): Promise<UserSession> {
     const session = await this.fetchSession(username);
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(session));
+    return session;
   }
 
   /** 로그인된 사용자가 있을 경우 로컬 스토리지에서 세션 정보를 제거합니다. */
