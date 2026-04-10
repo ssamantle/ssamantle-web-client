@@ -17,5 +17,5 @@ export interface UserService {
   logout(): Promise<void>;
 
   /** 저장된 사용자 세션 정보를 반환합니다. 없으면 null을 반환합니다. */
-  getCurrentUser(): Promise<UserSession | null>;
+  getCurrentUser(): UserSession | null;
 }
