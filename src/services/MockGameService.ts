@@ -3,8 +3,8 @@ import { AbstractGameService } from './AbstractGameService';
 import { UserSession } from './UserService';
 
 const MOCK_ANSWER = '사과';
-const MOCK_PRE_GAME_DURATION_MS = 1.5 * 60 * 1000;
-const MOCK_IN_GAME_DURATION_MS = 10 * 60 * 1000;
+const MOCK_PRE_GAME_DURATION_MS = 10 * 1000;
+const MOCK_IN_GAME_DURATION_MS = 20 * 1000;
 
 /** 유사도가 미리 정해진 단어 목록 (테스트용) */
 const KNOWN_WORDS: Record<string, number> = {
