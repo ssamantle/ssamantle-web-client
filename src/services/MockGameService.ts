@@ -3,8 +3,8 @@ import { AbstractGameService } from './AbstractGameService';
 import { UserSession } from './UserService';
 
 const MOCK_ANSWER = '사과';
-const MOCK_PRE_GAME_DURATION_MS = 1.5 * 60 * 1000;
-const MOCK_IN_GAME_DURATION_MS = 10 * 60 * 1000;
+const MOCK_PRE_GAME_DURATION_MS = 10 * 1000;
+const MOCK_IN_GAME_DURATION_MS = 20 * 1000;
 
 /** 유사도가 미리 정해진 단어 목록 (테스트용) */
 const KNOWN_WORDS: Record<string, number> = {
@@ -52,12 +52,27 @@ export class MockGameService extends AbstractGameService {
     let result: Guess;
 
     if (word === MOCK_ANSWER) {
-      result = { label: word, similarity: 1.0, rank: 0 };
+      result = {
+        label: word,
+        similarity: 1.0,
+        rank: 0,
+        isAnswer: true,
+      };
     } else if (word in KNOWN_WORDS) {
       const similarity = KNOWN_WORDS[word];
-      result = { label: word, similarity, rank: Math.max(1, Math.round((1 - similarity) * 1000)) };
+      result = {
+        label: word,
+        similarity,
+        rank: Math.max(1, Math.round((1 - similarity) * 1000)),
+        isAnswer: false,
+      };
     } else {
-      result = { label: word, similarity: Math.random() * 0.3, rank: -1 };
+      result = {
+        label: word,
+        similarity: Math.random() * 0.3,
+        rank: -1,
+        isAnswer: false,
+      };
     }
 
     this.guessCache[word] = result;

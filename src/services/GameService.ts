@@ -16,6 +16,7 @@ export interface Guess {
   label: string;
   similarity: number;
   rank: number;
+  isAnswer: boolean;
 }
 
 export enum GameState {

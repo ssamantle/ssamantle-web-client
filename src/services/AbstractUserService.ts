@@ -34,9 +34,10 @@ export abstract class AbstractUserService implements UserService {
   }
 
   /** 사용자명으로 로그인하고 세션 정보를 로컬 스토리지에 저장합니다. */
-  async login(username: string): Promise<void> {
+  async login(username: string): Promise<UserSession> {
     const session = await this.fetchSession(username);
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(session));
+    return session;
   }
 
   /** 로그인된 사용자가 있을 경우 로컬 스토리지에서 세션 정보를 제거합니다. */
@@ -46,7 +47,7 @@ export abstract class AbstractUserService implements UserService {
   }
 
   /** 로컬 스토리지에 저장된 사용자 세션 정보를 반환합니다. 없으면 null을 반환합니다. */
-  async getCurrentUser(): Promise<UserSession | null> {
+  getCurrentUser(): UserSession | null {
     const raw = localStorage.getItem(this.STORAGE_KEY);
     if (!raw) return null;
     try {

@@ -8,13 +8,13 @@ import {
 } from "./GameService";
 
 export abstract class AbstractGameService implements GameService {
-  private gameInfo: GameInfo = {
+  protected gameInfo: GameInfo = {
     startAt: null,
     endAt: null,
     users: [],
   };
-  private guessHistory: Guess[] = [];
-  private userSession: UserSession | null = null;
+  protected guessHistory: Guess[] = [];
+  protected userSession: UserSession | null = null;
 
   /** 서버에서 게임 정보를 가져옵니다. */
   protected abstract fetchGameInfo(): Promise<GameInfo>;
