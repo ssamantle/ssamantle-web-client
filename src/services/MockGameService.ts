@@ -52,12 +52,27 @@ export class MockGameService extends AbstractGameService {
     let result: Guess;
 
     if (word === MOCK_ANSWER) {
-      result = { label: word, similarity: 1.0, rank: 0 };
+      result = {
+        label: word,
+        similarity: 1.0,
+        rank: 0,
+        isAnswer: true,
+      };
     } else if (word in KNOWN_WORDS) {
       const similarity = KNOWN_WORDS[word];
-      result = { label: word, similarity, rank: Math.max(1, Math.round((1 - similarity) * 1000)) };
+      result = {
+        label: word,
+        similarity,
+        rank: Math.max(1, Math.round((1 - similarity) * 1000)),
+        isAnswer: false,
+      };
     } else {
-      result = { label: word, similarity: Math.random() * 0.3, rank: -1 };
+      result = {
+        label: word,
+        similarity: Math.random() * 0.3,
+        rank: -1,
+        isAnswer: false,
+      };
     }
 
     this.guessCache[word] = result;
