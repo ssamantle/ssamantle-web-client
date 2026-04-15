@@ -1,6 +1,7 @@
 import { GameLayout } from "../components/game/GameLayout";
 import { GameHeader } from "../components/game/GameHeader";
 import { GameCountdownCard } from "../components/game/GameCountdownCard";
+import { WordGuessComposer } from "../components/game/WordGuessComposer";
 import { PlayerList } from "../components/game/PlayerList";
 import { useGameClock } from "../hooks/useGameClock";
 import { useGamePhase } from "../hooks/useGamePhase";
@@ -8,11 +9,16 @@ import { useGamePolling } from "../hooks/useGamePolling";
 
 interface GamePageProps {
   username: string;
+  sessionId: string;
   onLogout: () => void;
 }
 
-export default function GamePage({ username, onLogout }: GamePageProps) {
-  const { gameState, isLoading, error, lastSyncedAt } = useGamePolling(3000);
+export default function GamePage({
+  username,
+  sessionId,
+  onLogout,
+}: GamePageProps) {
+  const { gameState, isLoading, error, lastSyncedAt, refetch } = useGamePolling(3000);
   const now = useGameClock();
 
   const { phase, remainingMs, label } = useGamePhase({
@@ -45,6 +51,13 @@ export default function GamePage({ username, onLogout }: GamePageProps) {
         label={label}
         remainingMs={remainingMs}
         isLoading={isLoading}
+      />
+
+      <WordGuessComposer
+        username={username}
+        sessionId={sessionId}
+        phase={phase}
+        onSubmitted={refetch}
       />
 
       <PlayerList

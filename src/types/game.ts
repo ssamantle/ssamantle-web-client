@@ -25,3 +25,10 @@ export interface AuthState {
   username: string;
   sessionId: string;
 }
+
+export interface GuessResult {
+  isAnswer: boolean;
+  label: string;
+  rank: Rank;
+  similarity: Similarity;
+}

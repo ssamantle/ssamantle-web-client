@@ -1,5 +1,5 @@
 import { gamesApi } from "./client";
-import type { AuthState, GameState } from "../types/game";
+import type { AuthState, GameState, GuessResult } from "../types/game";
 
 
 function toDate(value: unknown): Date | null {
@@ -31,5 +31,23 @@ export async function joinGame(name: string): Promise<AuthState> {
   return {
     username: response.nickname,
     sessionId: response.sessionId,
+  };
+}
+
+export async function submitGuess(
+  sessionId: string,
+  username: string,
+  word: string,
+): Promise<GuessResult> {
+  const response = await gamesApi.guessWordApiV1GamesGuessPost(sessionId, {
+    username,
+    word,
+  });
+
+  return {
+    isAnswer: response.isAnswer,
+    label: response.label,
+    rank: response.rank,
+    similarity: response.similarity,
   };
 }

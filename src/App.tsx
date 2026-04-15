@@ -56,7 +56,13 @@ function App() {
     return <LoginPage onLogin={handleLogin} />;
   }
 
-  return <GamePage username={auth.username} onLogout={handleLogout} />;
+  return (
+    <GamePage
+      username={auth.username}
+      sessionId={auth.sessionId}
+      onLogout={handleLogout}
+    />
+  );
 }
 
 export default App;
