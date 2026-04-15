@@ -8,7 +8,7 @@ interface GameHeaderProps {
 }
 
 function formatSyncedAt(date: Date | null): string {
-  if (!date) return "동기화 전";
+  if (!date) return "동기화 대기 중";
 
   return new Intl.DateTimeFormat("ko-KR", {
     hour: "2-digit",
@@ -20,13 +20,13 @@ function formatSyncedAt(date: Date | null): string {
 function phaseBadgeClass(phase: GamePhase): string {
   switch (phase) {
     case GamePhaseEnum.PRE_GAME:
-      return "bg-amber-100 text-amber-800 border-amber-200";
+      return "border-[#f1d5a4] bg-[#fff2d8] text-[#8a5a00]";
     case GamePhaseEnum.IN_GAME:
-      return "bg-emerald-100 text-emerald-800 border-emerald-200";
+      return "border-[#b9e6c7] bg-[#ebfbf0] text-[#23734b]";
     case GamePhaseEnum.POST_GAME:
-      return "bg-slate-100 text-slate-700 border-slate-200";
+      return "border-[#cfd8e3] bg-[#f3f6f9] text-[#536273]";
     default:
-      return "bg-slate-100 text-slate-700 border-slate-200";
+      return "border-[#cfd8e3] bg-[#f3f6f9] text-[#536273]";
   }
 }
 
@@ -36,17 +36,17 @@ export function GameHeader({
   lastSyncedAt,
 }: GameHeaderProps) {
   return (
-    <header className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <header className="rounded-[3px] border border-[#d7e0ea] bg-white px-5 py-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+          <div className="flex flex-wrap items-center gap-3">
+            <h1 className="text-[1.45rem] font-semibold tracking-[-0.02em] text-[#202938]">
               싸맨틀
             </h1>
 
             <span
               className={[
-                "inline-flex items-center rounded-full border px-3 py-1 text-sm font-medium",
+                "inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold tracking-[0.08em]",
                 phaseBadgeClass(phase),
               ].join(" ")}
             >
@@ -54,24 +54,24 @@ export function GameHeader({
             </span>
           </div>
 
-          <p className="text-sm text-slate-500">
-            실시간 게임 상태와 참가자 현황을 확인할 수 있습니다.
+          <p className="text-sm text-[#5b7380]">
+            실시간 게임 상태를 참가자 현황과 함께 확인할 수 있습니다.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 md:min-w-[260px]">
-          <div className="rounded-xl bg-slate-50 p-3">
-            <div className="text-xs font-medium text-slate-500">참가자 수</div>
-            <div className="mt-1 text-lg font-semibold text-slate-900">
+        <div className="grid grid-cols-2 gap-3 md:min-w-[280px]">
+          <div className="rounded-[3px] border border-[#d7e0ea] bg-[#f8fbfe] px-3 py-2.5">
+            <div className="text-xs font-medium text-[#6c8491]">참가자 수</div>
+            <div className="mt-1 text-lg font-semibold text-[#202938]">
               {playerCount}명
             </div>
           </div>
 
-          <div className="rounded-xl bg-slate-50 p-3">
-            <div className="text-xs font-medium text-slate-500">
+          <div className="rounded-[3px] border border-[#d7e0ea] bg-[#f8fbfe] px-3 py-2.5">
+            <div className="text-xs font-medium text-[#6c8491]">
               마지막 동기화
             </div>
-            <div className="mt-1 text-lg font-semibold text-slate-900">
+            <div className="mt-1 text-lg font-semibold text-[#202938]">
               {formatSyncedAt(lastSyncedAt)}
             </div>
           </div>

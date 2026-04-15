@@ -11,9 +11,9 @@ interface GameCountdownCardProps {
 function descriptionByPhase(phase: GamePhase): string {
   switch (phase) {
     case GamePhaseEnum.PRE_GAME:
-      return "게임이 곧 시작됩니다. 시작 시각까지 대기해주세요.";
+      return "게임이 곧 시작됩니다. 시작 시각까지 잠시만 기다려 주세요.";
     case GamePhaseEnum.IN_GAME:
-      return "게임이 진행 중입니다. 종료 전까지 제출을 완료하세요.";
+      return "게임이 진행 중입니다. 종료 전까지 제출 결과를 계속 확인할 수 있습니다.";
     case GamePhaseEnum.POST_GAME:
       return "게임이 종료되었습니다.";
     default:
@@ -24,13 +24,13 @@ function descriptionByPhase(phase: GamePhase): string {
 function accentClassByPhase(phase: GamePhase): string {
   switch (phase) {
     case GamePhaseEnum.PRE_GAME:
-      return "from-amber-50 to-orange-50 border-amber-200";
+      return "border-[#ead8b5] bg-[#fff8ea]";
     case GamePhaseEnum.IN_GAME:
-      return "from-emerald-50 to-cyan-50 border-emerald-200";
+      return "border-[#cde7d7] bg-[#f2fcf5]";
     case GamePhaseEnum.POST_GAME:
-      return "from-slate-50 to-slate-100 border-slate-200";
+      return "border-[#d7e0ea] bg-[#f4f7fb]";
     default:
-      return "from-slate-50 to-slate-100 border-slate-200";
+      return "border-[#d7e0ea] bg-[#f4f7fb]";
   }
 }
 
@@ -47,21 +47,22 @@ export function GameCountdownCard({
 
   return (
     <section
-      className={[
-        "rounded-2xl border bg-gradient-to-br p-6 shadow-sm",
-        accentClassByPhase(phase),
-      ].join(" ")}
+      className={["rounded-[3px] border p-6", accentClassByPhase(phase)].join(
+        " ",
+      )}
     >
       <div className="space-y-3">
-        <div className="text-sm font-medium text-slate-600">
+        <div className="text-sm font-medium text-[#5b7380]">
           {isLoading ? "게임 정보를 불러오는 중..." : label}
         </div>
 
-        <div className="font-mono text-4xl font-bold tracking-tight text-slate-900 md:text-5xl">
+        <div className="border-y border-[#d7e0ea] py-3 font-mono text-4xl font-semibold tracking-[0.08em] text-[#202938] md:text-5xl">
           {isLoading ? "--:--:--" : formatted}
         </div>
 
-        <p className="text-sm text-slate-600">{descriptionByPhase(phase)}</p>
+        <p className="text-sm leading-6 text-[#5b7380]">
+          {descriptionByPhase(phase)}
+        </p>
       </div>
     </section>
   );

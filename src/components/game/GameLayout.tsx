@@ -1,7 +1,7 @@
 export function GameLayout({ children }: React.PropsWithChildren) {
   return (
-    <main className="mx-auto max-w-4xl p-6">
-      <div className="grid gap-6">{children}</div>
+    <main className="mx-auto min-h-screen max-w-[960px] px-4 py-6 md:px-6 md:py-8">
+      <div className="grid gap-5">{children}</div>
     </main>
   );
 }
