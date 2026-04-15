@@ -20,3 +20,8 @@ export interface GameState {
   endAt: Date | null;
   players: PlayerState[];
 }
+
+export interface AuthState {
+  username: string;
+  sessionId: string;
+}

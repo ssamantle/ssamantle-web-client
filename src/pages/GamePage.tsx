@@ -1,12 +1,16 @@
-import { useGamePolling } from "../hooks/useGamePolling";
-import { useGameClock } from "../hooks/useGameClock";
-import { useGamePhase } from "../hooks/useGamePhase";
 import { GameLayout } from "../components/game/GameLayout";
 import { GameHeader } from "../components/game/GameHeader";
 import { GameCountdownCard } from "../components/game/GameCountdownCard";
 import { PlayerList } from "../components/game/PlayerList";
+import { useGameClock } from "../hooks/useGameClock";
+import { useGamePhase } from "../hooks/useGamePhase";
+import { useGamePolling } from "../hooks/useGamePolling";
 
-export default function GamePage() {
+interface GamePageProps {
+  username: string;
+}
+
+export default function GamePage({ username }: GamePageProps) {
   const { gameState, isLoading, error, lastSyncedAt } = useGamePolling(3000);
   const now = useGameClock();
 
@@ -22,6 +26,7 @@ export default function GamePage() {
         phase={phase}
         playerCount={gameState?.players.length ?? 0}
         lastSyncedAt={lastSyncedAt}
+        username={username}
       />
 
       <GameCountdownCard

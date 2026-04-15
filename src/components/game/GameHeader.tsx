@@ -5,6 +5,7 @@ interface GameHeaderProps {
   phase: GamePhase;
   playerCount: number;
   lastSyncedAt: Date | null;
+  username: string;
 }
 
 function formatSyncedAt(date: Date | null): string {
@@ -34,6 +35,7 @@ export function GameHeader({
   phase,
   playerCount,
   lastSyncedAt,
+  username,
 }: GameHeaderProps) {
   return (
     <header className="rounded-[3px] border border-[#d7e0ea] bg-white px-5 py-4">
@@ -59,7 +61,14 @@ export function GameHeader({
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 md:min-w-[280px]">
+        <div className="grid grid-cols-1 gap-3 md:min-w-[420px] md:grid-cols-3">
+          <div className="rounded-[3px] border border-[#d7e0ea] bg-[#f8fbfe] px-3 py-2.5">
+            <div className="text-xs font-medium text-[#6c8491]">사용자명</div>
+            <div className="mt-1 truncate text-lg font-semibold text-[#202938]">
+              {username}
+            </div>
+          </div>
+
           <div className="rounded-[3px] border border-[#d7e0ea] bg-[#f8fbfe] px-3 py-2.5">
             <div className="text-xs font-medium text-[#6c8491]">참가자 수</div>
             <div className="mt-1 text-lg font-semibold text-[#202938]">
