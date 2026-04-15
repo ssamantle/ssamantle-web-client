@@ -48,11 +48,15 @@ function App() {
     setAuth(nextAuth);
   };
 
+  const handleLogout = () => {
+    setAuth(null);
+  };
+
   if (!auth) {
     return <LoginPage onLogin={handleLogin} />;
   }
 
-  return <GamePage username={auth.username} />;
+  return <GamePage username={auth.username} onLogout={handleLogout} />;
 }
 
 export default App;

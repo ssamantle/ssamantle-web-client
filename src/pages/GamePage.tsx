@@ -8,9 +8,10 @@ import { useGamePolling } from "../hooks/useGamePolling";
 
 interface GamePageProps {
   username: string;
+  onLogout: () => void;
 }
 
-export default function GamePage({ username }: GamePageProps) {
+export default function GamePage({ username, onLogout }: GamePageProps) {
   const { gameState, isLoading, error, lastSyncedAt } = useGamePolling(3000);
   const now = useGameClock();
 
@@ -22,6 +23,16 @@ export default function GamePage({ username }: GamePageProps) {
 
   return (
     <GameLayout>
+      <div className="flex justify-end">
+        <button
+          type="button"
+          onClick={onLogout}
+          className="text-xs font-medium text-[#6c8491] underline-offset-2 transition hover:text-[#202938] hover:underline focus:outline-none focus-visible:underline"
+        >
+          로그아웃
+        </button>
+      </div>
+
       <GameHeader
         phase={phase}
         playerCount={gameState?.players.length ?? 0}
