@@ -1,11 +1,15 @@
+import { useEffect, useState } from "react";
+import { fetchGuessHistory } from "../api/games";
 import { GameLayout } from "../components/game/GameLayout";
 import { GameHeader } from "../components/game/GameHeader";
 import { GameCountdownCard } from "../components/game/GameCountdownCard";
+import { GuessHistoryTable } from "../components/game/GuessHistoryTable";
 import { WordGuessComposer } from "../components/game/WordGuessComposer";
 import { PlayerList } from "../components/game/PlayerList";
 import { useGameClock } from "../hooks/useGameClock";
 import { useGamePhase } from "../hooks/useGamePhase";
 import { useGamePolling } from "../hooks/useGamePolling";
+import type { GuessResult } from "../types/game";
 
 interface GamePageProps {
   username: string;
@@ -13,11 +17,18 @@ interface GamePageProps {
   onLogout: () => void;
 }
 
+function sortGuessHistory(items: GuessResult[]): GuessResult[] {
+  return [...items].sort((a, b) => b.similarity - a.similarity);
+}
+
 export default function GamePage({
   username,
   sessionId,
   onLogout,
 }: GamePageProps) {
+  const [guessHistory, setGuessHistory] = useState<GuessResult[]>([]);
+  const [isGuessHistoryLoading, setIsGuessHistoryLoading] = useState(true);
+  const [guessHistoryError, setGuessHistoryError] = useState<Error | null>(null);
   const { gameState, isLoading, error, lastSyncedAt, refetch } = useGamePolling(3000);
   const now = useGameClock();
 
@@ -26,6 +37,41 @@ export default function GamePage({
     startAt: gameState?.startAt ?? null,
     endAt: gameState?.endAt ?? null,
   });
+
+  useEffect(() => {
+    let alive = true;
+
+    const loadGuessHistory = async () => {
+      try {
+        const nextHistory = await fetchGuessHistory(sessionId, username);
+        if (!alive) return;
+        setGuessHistory(sortGuessHistory(nextHistory));
+        setGuessHistoryError(null);
+      } catch (loadError) {
+        if (!alive) return;
+        setGuessHistoryError(
+          loadError instanceof Error
+            ? loadError
+            : new Error("Failed to fetch guess history"),
+        );
+      } finally {
+        if (alive) setIsGuessHistoryLoading(false);
+      }
+    };
+
+    setIsGuessHistoryLoading(true);
+    void loadGuessHistory();
+
+    return () => {
+      alive = false;
+    };
+  }, [sessionId, username]);
+
+  const handleGuessSubmitted = async (result: GuessResult) => {
+    setGuessHistory((current) => sortGuessHistory([...current, result]));
+    setGuessHistoryError(null);
+    await refetch();
+  };
 
   return (
     <GameLayout>
@@ -57,7 +103,13 @@ export default function GamePage({
         username={username}
         sessionId={sessionId}
         phase={phase}
-        onSubmitted={refetch}
+        onSubmitted={handleGuessSubmitted}
+      />
+
+      <GuessHistoryTable
+        items={guessHistory}
+        isLoading={isGuessHistoryLoading}
+        error={guessHistoryError}
       />
 
       <PlayerList

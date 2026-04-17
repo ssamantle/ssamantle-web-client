@@ -6,7 +6,7 @@ interface WordGuessComposerProps {
   username: string;
   sessionId: string;
   phase: GamePhase;
-  onSubmitted: () => Promise<void>;
+  onSubmitted: (result: GuessResult) => Promise<void>;
 }
 
 function toErrorMessage(error: unknown): string {
@@ -15,11 +15,6 @@ function toErrorMessage(error: unknown): string {
   }
 
   return "단어 제출에 실패했습니다. 잠시 후 다시 시도해 주세요.";
-}
-
-function formatSimilarity(value: number): string {
-  if (!Number.isFinite(value)) return "-";
-  return value.toFixed(2);
 }
 
 export function WordGuessComposer({
@@ -33,7 +28,6 @@ export function WordGuessComposer({
   const [word, setWord] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [lastResult, setLastResult] = useState<GuessResult | null>(null);
 
   const isInGame = phase === GamePhaseEnum.IN_GAME;
   const isDisabled = !isInGame || isSubmitting;
@@ -64,10 +58,9 @@ export function WordGuessComposer({
 
     try {
       const nextResult = await submitGuess(sessionId, username, trimmed);
-      setLastResult(nextResult);
       setWord("");
       shouldRestoreFocusRef.current = true;
-      await onSubmitted();
+      await onSubmitted(nextResult);
     } catch (submitError) {
       setError(toErrorMessage(submitError));
     } finally {
@@ -121,21 +114,6 @@ export function WordGuessComposer({
             </p>
           ) : null}
         </form>
-
-        {lastResult ? (
-          <div className="rounded-[3px] border border-[#d7e0ea] bg-[#f8fbfe] px-4 py-3">
-            <div className="flex flex-col gap-2 text-sm text-[#202938] md:flex-row md:items-center md:justify-between">
-              <div>
-                최근 제출어 <span className="font-semibold">{lastResult.label}</span>
-              </div>
-              <div className="flex gap-4 text-xs text-[#5b7380]">
-                <span>유사도 {formatSimilarity(lastResult.similarity)}</span>
-                <span>순위 #{lastResult.rank}</span>
-                <span>{lastResult.isAnswer ? "정답" : "계속 추측 중"}</span>
-              </div>
-            </div>
-          </div>
-        ) : null}
       </div>
     </section>
   );

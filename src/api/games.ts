@@ -51,3 +51,20 @@ export async function submitGuess(
     similarity: response.similarity,
   };
 }
+
+export async function fetchGuessHistory(
+  sessionId: string,
+  username: string,
+): Promise<GuessResult[]> {
+  const response = await gamesApi.getGuessHistoryApiV1GamesGuessesGet(
+    username,
+    sessionId,
+  );
+
+  return response.map((item) => ({
+    isAnswer: item.isAnswer,
+    label: item.label,
+    rank: item.rank,
+    similarity: item.similarity,
+  }));
+}
