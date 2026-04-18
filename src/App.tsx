@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import { LoginPage } from "./components/auth/LoginPage";
 import GamePage from "./pages/GamePage";
-import { joinGame } from "./api/games";
+import { joinGame, validateSession } from "./api/games";
 import type { AuthState } from "./types/game";
 
 const AUTH_STORAGE_KEY = "ssamantle.auth";
@@ -33,6 +33,10 @@ function readStoredAuth(): AuthState | null {
 
 function App() {
   const [auth, setAuth] = useState<AuthState | null>(() => readStoredAuth());
+  const [shouldValidateStoredAuth] = useState(() => auth !== null);
+  const [isCheckingSession, setIsCheckingSession] = useState(
+    () => auth !== null,
+  );
 
   useEffect(() => {
     if (!auth) {
@@ -43,6 +47,37 @@ function App() {
     window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
   }, [auth]);
 
+  useEffect(() => {
+    if (!shouldValidateStoredAuth || !auth) {
+      setIsCheckingSession(false);
+      return;
+    }
+
+    let alive = true;
+
+    const checkSession = async () => {
+      try {
+        const isValid = await validateSession(auth.sessionId);
+        if (!alive) return;
+
+        if (!isValid) {
+          setAuth(null);
+          return;
+        }
+      } finally {
+        if (alive) {
+          setIsCheckingSession(false);
+        }
+      }
+    };
+
+    void checkSession();
+
+    return () => {
+      alive = false;
+    };
+  }, [auth, shouldValidateStoredAuth]);
+
   const handleLogin = async (username: string) => {
     const nextAuth = await joinGame(username);
     setAuth(nextAuth);
@@ -51,6 +86,10 @@ function App() {
   const handleLogout = () => {
     setAuth(null);
   };
+
+  if (auth && isCheckingSession) {
+    return <main className="px-4 py-8">세션 확인 중...</main>;
+  }
 
   if (!auth) {
     return <LoginPage onLogin={handleLogin} />;
