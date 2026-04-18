@@ -8,6 +8,25 @@ function toDate(value: unknown): Date | null {
   return Number.isNaN(d.getTime()) ? null : d;
 }
 
+async function toApiError(error: unknown, fallbackMessage: string): Promise<Error> {
+  if (error instanceof Error && error.message.trim()) {
+    return error;
+  }
+
+  if (error instanceof Response) {
+    try {
+      const data = (await error.json()) as { detail?: unknown };
+      if (typeof data.detail === "string" && data.detail.trim()) {
+        return new Error(data.detail);
+      }
+    } catch {
+      return new Error(fallbackMessage);
+    }
+  }
+
+  return new Error(fallbackMessage);
+}
+
 
 export async function fetchGameState(): Promise<GameState> {
   const data = await gamesApi.gamePollingApiV1GamesPollingGet();
@@ -27,11 +46,18 @@ export async function fetchGameState(): Promise<GameState> {
 
 
 export async function joinGame(name: string): Promise<AuthState> {
-  const response = await gamesApi.joinGameApiV1GamesJoinPost({ nickname: name });
-  return {
-    username: response.nickname,
-    sessionId: response.sessionId,
-  };
+  try {
+    const response = await gamesApi.joinGameApiV1GamesJoinPost({ nickname: name });
+    return {
+      username: response.nickname,
+      sessionId: response.sessionId,
+    };
+  } catch (error) {
+    throw await toApiError(
+      error,
+      "게임 참가에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+    );
+  }
 }
 
 export async function validateSession(sessionId: string): Promise<boolean> {
