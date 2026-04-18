@@ -4,18 +4,7 @@ import { phaseToText } from "../../utils/game";
 interface GameHeaderProps {
   phase: GamePhase;
   playerCount: number;
-  lastSyncedAt: Date | null;
   username: string;
-}
-
-function formatSyncedAt(date: Date | null): string {
-  if (!date) return "동기화 대기 중";
-
-  return new Intl.DateTimeFormat("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  }).format(date);
 }
 
 function phaseBadgeClass(phase: GamePhase): string {
@@ -34,7 +23,6 @@ function phaseBadgeClass(phase: GamePhase): string {
 export function GameHeader({
   phase,
   playerCount,
-  lastSyncedAt,
   username,
 }: GameHeaderProps) {
   return (
@@ -61,7 +49,7 @@ export function GameHeader({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-3 md:min-w-[420px] md:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 md:min-w-[280px] md:grid-cols-2">
           <div className="rounded-[3px] border border-[#d7e0ea] bg-[#f8fbfe] px-3 py-2.5">
             <div className="text-xs font-medium text-[#6c8491]">사용자명</div>
             <div className="mt-1 truncate text-lg font-semibold text-[#202938]">
@@ -73,15 +61,6 @@ export function GameHeader({
             <div className="text-xs font-medium text-[#6c8491]">참가자 수</div>
             <div className="mt-1 text-lg font-semibold text-[#202938]">
               {playerCount}명
-            </div>
-          </div>
-
-          <div className="rounded-[3px] border border-[#d7e0ea] bg-[#f8fbfe] px-3 py-2.5">
-            <div className="text-xs font-medium text-[#6c8491]">
-              마지막 동기화
-            </div>
-            <div className="mt-1 text-lg font-semibold text-[#202938]">
-              {formatSyncedAt(lastSyncedAt)}
             </div>
           </div>
         </div>

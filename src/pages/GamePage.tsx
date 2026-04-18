@@ -6,6 +6,7 @@ import { GameCountdownCard } from "../components/game/GameCountdownCard";
 import { GuessHistoryTable } from "../components/game/GuessHistoryTable";
 import { WordGuessComposer } from "../components/game/WordGuessComposer";
 import { PlayerList } from "../components/game/PlayerList";
+import { LastSyncedAtLabel } from "../components/game/LastSyncedAtLabel";
 import { useGameClock } from "../hooks/useGameClock";
 import { useGamePhase } from "../hooks/useGamePhase";
 import { useGamePolling } from "../hooks/useGamePolling";
@@ -75,7 +76,11 @@ export default function GamePage({
 
   return (
     <GameLayout>
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
+        <LastSyncedAtLabel lastSyncedAt={lastSyncedAt} />
+        <span aria-hidden="true" className="text-xs text-[#b4bfd6]">
+          |
+        </span>
         <button
           type="button"
           onClick={onLogout}
@@ -88,7 +93,6 @@ export default function GamePage({
       <GameHeader
         phase={phase}
         playerCount={gameState?.players.length ?? 0}
-        lastSyncedAt={lastSyncedAt}
         username={username}
       />
 
