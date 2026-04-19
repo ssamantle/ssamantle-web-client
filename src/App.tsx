@@ -1,153 +1,106 @@
-import { useEffect, useState } from 'react';
-import { Header } from './components/Header';
-import { SettingsDialog } from './components/SettingsDialog';
-import { useGame } from './hooks/useGame';
-import { useSettings } from './hooks/useSettings';
-import { InGamePage } from './pages/InGamePage';
-import { LobbyPage } from './pages/LobbyPage';
-import { gameService } from './services';
+import { useEffect, useState } from "react";
+import "./App.css";
+import { LoginPage } from "./components/auth/LoginPage";
+import GamePage from "./pages/GamePage";
+import { joinGame, validateSession } from "./api/games";
+import type { AuthState } from "./types/game";
 
-type Page = 'lobby' | 'in-game';
+const AUTH_STORAGE_KEY = "ssamantle.auth";
 
-const USERNAME_STORAGE_KEY = 'username';
-const HOST_STORAGE_KEY = 'host';
+function readStoredAuth(): AuthState | null {
+  const raw = window.localStorage.getItem(AUTH_STORAGE_KEY);
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<AuthState>;
+    if (
+      typeof parsed.username !== "string" ||
+      !parsed.username.trim() ||
+      typeof parsed.sessionId !== "string" ||
+      !parsed.sessionId.trim()
+    ) {
+      return null;
+    }
+
+    return {
+      username: parsed.username.trim(),
+      sessionId: parsed.sessionId.trim(),
+    };
+  } catch {
+    return null;
+  }
+}
 
 function App() {
-  const [page, setPage] = useState<Page>('lobby');
-  const [username, setUsername] = useState(() => localStorage.getItem(USERNAME_STORAGE_KEY) || '');
-  const [host, setHost] = useState(() => localStorage.getItem(HOST_STORAGE_KEY) || '');
-  const [gameStartTime, setGameStartTime] = useState<number | null>(null);
-  const [gameEndTime, setGameEndTime] = useState<number | null>(null);
-  const [now, setNow] = useState(() => Date.now());
-  const [isLoadingGameStartTime, setIsLoadingGameStartTime] = useState(false);
-  const [pageError, setPageError] = useState('');
-  const { settings, settingsOpen, setSettingsOpen, updateSetting } = useSettings();
-  const {
-    guesses,
-    gameOver,
-    stats,
-    currentGuess,
-    error,
-    isLoading,
-    startTime,
-    endTime,
-    submitGuess,
-  } = useGame();
+  const [auth, setAuth] = useState<AuthState | null>(() => readStoredAuth());
+  const [shouldValidateStoredAuth] = useState(() => auth !== null);
+  const [isCheckingSession, setIsCheckingSession] = useState(
+    () => auth !== null,
+  );
 
   useEffect(() => {
-    if (!username) return;
-    gameService.setUsername(username);
-  }, [username]);
-
-  useEffect(() => {
-    if (!host) return;
-    gameService.setHost(host);
-  }, [host]);
-
-  useEffect(() => {
-    if (!username || !host) {
-      setPage('lobby');
-      setGameStartTime(null);
-      setGameEndTime(null);
+    if (!auth) {
+      window.localStorage.removeItem(AUTH_STORAGE_KEY);
       return;
     }
 
-    let cancelled = false;
-
-    async function loadGameTimes() {
-      setIsLoadingGameStartTime(true);
-      setPageError('');
-
-      const [nextGameStartTime, nextGameEndTime] = await Promise.all([
-        gameService.getGameStartTime(),
-        gameService.getGameEndTime(),
-      ]);
-      if (cancelled) return;
-
-      setIsLoadingGameStartTime(false);
-
-      if (nextGameStartTime === null) {
-        setPage('lobby');
-        setPageError('게임 시작 시간을 불러오지 못했습니다.');
-        return;
-      }
-
-      setGameStartTime(nextGameStartTime);
-      setGameEndTime(nextGameEndTime);
-      setNow(Date.now());
-      setPage(Date.now() >= nextGameStartTime ? 'in-game' : 'lobby');
-    }
-
-    void loadGameTimes();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [username, host]);
+    window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
+  }, [auth]);
 
   useEffect(() => {
-    if ((page !== 'lobby' && page !== 'in-game') || (gameStartTime === null && gameEndTime === null)) return;
+    if (!shouldValidateStoredAuth || !auth) {
+      setIsCheckingSession(false);
+      return;
+    }
 
-    const intervalId = window.setInterval(() => {
-      const currentTime = Date.now();
-      setNow(currentTime);
-      if (gameStartTime !== null && currentTime >= gameStartTime) {
-        setPage('in-game');
+    let alive = true;
+
+    const checkSession = async () => {
+      try {
+        const isValid = await validateSession(auth.sessionId);
+        if (!alive) return;
+
+        if (!isValid) {
+          setAuth(null);
+          return;
+        }
+      } finally {
+        if (alive) {
+          setIsCheckingSession(false);
+        }
       }
-    }, 1000);
+    };
+
+    void checkSession();
 
     return () => {
-      window.clearInterval(intervalId);
+      alive = false;
     };
-  }, [page, gameStartTime, gameEndTime]);
+  }, [auth, shouldValidateStoredAuth]);
 
-  function handleStartGame(nextUsername: string, nextHost: string) {
-    gameService.setUsername(nextUsername);
-    gameService.setHost(nextHost);
-    localStorage.setItem(USERNAME_STORAGE_KEY, nextUsername);
-    localStorage.setItem(HOST_STORAGE_KEY, nextHost.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/.*$/, ''));
-    setUsername(nextUsername);
-    setHost(nextHost.trim().replace(/^[a-z]+:\/\//i, '').replace(/\/.*$/, ''));
+  const handleLogin = async (username: string) => {
+    const nextAuth = await joinGame(username);
+    setAuth(nextAuth);
+  };
+
+  const handleLogout = () => {
+    setAuth(null);
+  };
+
+  if (auth && isCheckingSession) {
+    return <main className="px-4 py-8">세션 확인 중...</main>;
+  }
+
+  if (!auth) {
+    return <LoginPage onLogin={handleLogin} />;
   }
 
   return (
-    <div className="container">
-      <Header onSettingsClick={() => setSettingsOpen(true)} />
-      <SettingsDialog
-        open={settingsOpen}
-        settings={settings}
-        onClose={() => setSettingsOpen(false)}
-        onUpdate={updateSetting}
-      />
-
-      {(pageError || error) && <div id="error">{pageError || error}</div>}
-
-      {page === 'lobby' && (
-        <LobbyPage
-          initialUsername={username}
-          initialHost={host}
-          onStartGame={handleStartGame}
-          gameStartTime={gameStartTime}
-          now={now}
-          isLoadingGameStartTime={isLoadingGameStartTime}
-        />
-      )}
-
-      {page === 'in-game' && (
-        <InGamePage
-          guesses={guesses}
-          gameOver={gameOver}
-          stats={stats}
-          currentGuess={currentGuess}
-          isLoading={isLoading}
-          startTime={startTime}
-          endTime={endTime}
-          gameEndTime={gameEndTime}
-          now={now}
-          submitGuess={submitGuess}
-        />
-      )}
-    </div>
+    <GamePage
+      username={auth.username}
+      sessionId={auth.sessionId}
+      onLogout={handleLogout}
+    />
   );
 }
 
