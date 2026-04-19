@@ -65,7 +65,7 @@ export function WordGuessComposer({
     }
 
     if (lastSubmittedWordRef.current === validation.value) {
-      setError("같은 단어를 연속으로 제출할 수 없습니다.");
+      setError("이미 제출한 단어예요. 다른 단어를 시도해 보세요.");
       return;
     }
 
