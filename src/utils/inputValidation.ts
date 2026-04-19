@@ -2,7 +2,10 @@ export const USERNAME_MIN_LENGTH = 2;
 export const USERNAME_MAX_LENGTH = 20;
 export const GUESS_MAX_LENGTH = 30;
 
-const INVISIBLE_CHARACTERS_REGEX = /[\x00-\x1F\x7F-\x9F\u200B-\u200D\uFEFF]/g;
+const INVISIBLE_CHARACTERS_REGEX = new RegExp(
+  "[\\u0000-\\u001F\\u007F-\\u009F\\u200B-\\u200D\\uFEFF]",
+  "g",
+);
 const USERNAME_ALLOWED_REGEX = /^[A-Za-z0-9가-힣 _-]+$/;
 const GUESS_ALLOWED_REGEX = /^[A-Za-z0-9가-힣]+$/;
 
