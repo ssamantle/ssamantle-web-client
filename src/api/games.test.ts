@@ -1,9 +1,10 @@
 import { authApi, gamesApi } from "./client";
-import { joinGame, validateSession } from "./games";
+import { joinGame, submitGuess, validateSession } from "./games";
 
 jest.mock("./client", () => ({
   gamesApi: {
     joinGameApiV1GamesJoinPost: jest.fn(),
+    guessWordApiV1GamesGuessPost: jest.fn(),
   },
   authApi: {
     validateTokenAuthValidateGet: jest.fn(),
@@ -15,7 +16,13 @@ const mockedAuthApi = authApi as jest.Mocked<typeof authApi>;
 
 beforeEach(() => {
   mockedGamesApi.joinGameApiV1GamesJoinPost.mockReset();
+  mockedGamesApi.guessWordApiV1GamesGuessPost.mockReset();
   mockedAuthApi.validateTokenAuthValidateGet.mockReset();
+});
+
+test("joinGame validates username before API request", async () => {
+  await expect(joinGame("a")).rejects.toThrow("사용자명은 2자 이상이어야 합니다.");
+  expect(mockedGamesApi.joinGameApiV1GamesJoinPost).not.toHaveBeenCalled();
 });
 
 test("joinGame maps server detail to error message", async () => {
@@ -35,4 +42,12 @@ test("validateSession returns boolean response body", async () => {
   mockedAuthApi.validateTokenAuthValidateGet.mockResolvedValue(false);
 
   await expect(validateSession("expired-session")).resolves.toBe(false);
+});
+
+test("submitGuess validates word before API request", async () => {
+  await expect(submitGuess("session-1", "tester", "bad guess")).rejects.toThrow(
+    "단어에는 공백을 포함할 수 없습니다.",
+  );
+
+  expect(mockedGamesApi.guessWordApiV1GamesGuessPost).not.toHaveBeenCalled();
 });

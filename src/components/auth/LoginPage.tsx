@@ -1,11 +1,13 @@
 import { useState } from "react";
+import {
+  USERNAME_MAX_LENGTH,
+  USERNAME_MIN_LENGTH,
+  validateUsername,
+} from "../../utils/inputValidation";
 
 interface LoginPageProps {
   onLogin: (username: string) => Promise<void>;
 }
-
-const MIN_LENGTH = 2;
-const MAX_LENGTH = 20;
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message.trim()) {
@@ -23,15 +25,9 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const trimmed = username.trim();
-
-    if (trimmed.length < MIN_LENGTH) {
-      setError(`사용자명은 ${MIN_LENGTH}자 이상이어야 합니다.`);
-      return;
-    }
-
-    if (trimmed.length > MAX_LENGTH) {
-      setError(`사용자명은 ${MAX_LENGTH}자 이하여야 합니다.`);
+    const validation = validateUsername(username);
+    if (!validation.isValid) {
+      setError(validation.error ?? "사용자명을 확인해 주세요.");
       return;
     }
 
@@ -39,7 +35,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
     setError("");
 
     try {
-      await onLogin(trimmed);
+      await onLogin(validation.value);
     } catch (submitError) {
       setError(toErrorMessage(submitError));
     } finally {
@@ -77,7 +73,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 }}
                 placeholder="예: 김싸피"
                 className="w-full rounded-[3px] border border-[#c7d3df] bg-[#f8fbfe] px-4 py-3 text-[#202938] outline-none transition focus:border-[#11a4d3] focus:bg-white disabled:cursor-not-allowed disabled:opacity-70"
-                maxLength={MAX_LENGTH}
+                maxLength={USERNAME_MAX_LENGTH}
                 autoFocus
                 disabled={isSubmitting}
               />
@@ -91,7 +87,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
             <div className="flex items-center justify-between gap-4">
               <p className="text-xs text-[#6c8491]">
-                공백 제외 {MIN_LENGTH}~{MAX_LENGTH}자
+                공백 제외 {USERNAME_MIN_LENGTH}~{USERNAME_MAX_LENGTH}자
               </p>
               <button
                 type="submit"

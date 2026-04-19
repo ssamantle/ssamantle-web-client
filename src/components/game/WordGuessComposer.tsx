@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { submitGuess } from "../../api/games";
 import { GamePhaseEnum, type GamePhase, type GuessResult } from "../../types/game";
+import { validateGuessWord } from "../../utils/inputValidation";
 
 interface WordGuessComposerProps {
   username: string;
@@ -8,6 +9,8 @@ interface WordGuessComposerProps {
   phase: GamePhase;
   onSubmitted: (result: GuessResult) => Promise<void>;
 }
+
+const SUBMIT_COOLDOWN_MS = 700;
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message.trim()) {
@@ -25,6 +28,8 @@ export function WordGuessComposer({
 }: WordGuessComposerProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const shouldRestoreFocusRef = useRef(false);
+  const lastSubmittedWordRef = useRef("");
+  const lastSubmittedAtRef = useRef(0);
   const [word, setWord] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -42,14 +47,25 @@ export function WordGuessComposer({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const trimmed = word.trim();
-    if (!trimmed) {
-      setError("추측할 단어를 입력해 주세요.");
+    if (!isInGame) {
+      setError("게임 진행 중에만 단어를 제출할 수 있습니다.");
       return;
     }
 
-    if (!isInGame) {
-      setError("게임 진행 중에만 단어를 제출할 수 있습니다.");
+    const validation = validateGuessWord(word);
+    if (!validation.isValid) {
+      setError(validation.error ?? "추측할 단어를 확인해 주세요.");
+      return;
+    }
+
+    const now = Date.now();
+    if (now - lastSubmittedAtRef.current < SUBMIT_COOLDOWN_MS) {
+      setError("너무 빠르게 제출하고 있습니다. 잠시 후 다시 시도해 주세요.");
+      return;
+    }
+
+    if (lastSubmittedWordRef.current === validation.value) {
+      setError("이미 제출한 단어예요. 다른 단어를 시도해 보세요.");
       return;
     }
 
@@ -57,7 +73,9 @@ export function WordGuessComposer({
     setError("");
 
     try {
-      const nextResult = await submitGuess(sessionId, username, trimmed);
+      const nextResult = await submitGuess(sessionId, username, validation.value);
+      lastSubmittedWordRef.current = validation.value;
+      lastSubmittedAtRef.current = Date.now();
       setWord("");
       shouldRestoreFocusRef.current = true;
       await onSubmitted(nextResult);
