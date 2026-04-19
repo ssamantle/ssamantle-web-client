@@ -75,9 +75,7 @@ test("renders top info bar with synced time, username, and logout", () => {
   expect(topInfoBar).not.toBeNull();
   expect(within(topInfoBar as HTMLElement).getByText("tester")).toBeInTheDocument();
   expect(logoutButton).toBeInTheDocument();
-  expect(
-    screen.getByText("실시간 게임 상태를 참가자 현황과 함께 확인할 수 있습니다."),
-  ).toBeInTheDocument();
+  expect(screen.getByText("싸맨틀 :: 단어 추측 게임")).toBeInTheDocument();
 });
 
 test("shows waiting text before first successful sync", () => {
