@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchGuessHistory } from "../api/games";
 import { GameLayout } from "../components/game/GameLayout";
-import { GameHeader } from "../components/game/GameHeader";
 import { GameCountdownCard } from "../components/game/GameCountdownCard";
 import { GuessHistoryTable } from "../components/game/GuessHistoryTable";
 import { WordGuessComposer } from "../components/game/WordGuessComposer";
@@ -80,12 +79,6 @@ export default function GamePage({
         username={username}
         lastSyncedAt={lastSyncedAt}
         onLogout={onLogout}
-      />
-
-      <GameHeader
-        phase={phase}
-        playerCount={gameState?.players.length ?? 0}
-        username={username}
       />
 
       <GameCountdownCard
