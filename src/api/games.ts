@@ -29,7 +29,7 @@ async function toApiError(error: unknown, fallbackMessage: string): Promise<Erro
 
 
 export async function fetchGameState(): Promise<GameState> {
-  const data = await gamesApi.gamePollingApiV1GamesPollingGet();
+  const data = await gamesApi.gamePollingApiV1GamesPollingDbGet();
 
   return {
     startAt: toDate(data.startAt),
