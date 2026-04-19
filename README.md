@@ -1,46 +1,61 @@
-# Getting Started with Create React App
+# SSAMANTLE Web Client
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+싸맨들 단어 추측 게임의 프론트엔드 웹 클라이언트입니다. React + TypeScript 기반으로, 게임 호스트와 참가자 모두가 사용하는 UI를 제공합니다.
 
-## Available Scripts
+## What this app does
 
-In the project directory, you can run:
+- 관리자 화면: 오늘의 단어 설정, 게임 시간 설정, 게임 이름 설정, 초대 화면, 참가자 관리, 게임 시작/종료, 실시간 리더보드 확인
+- 사용자 화면: 초대 링크로 접속, 서버가 부여한 사용자명 확인, 참가자 목록 확인, 단어 제출, 내 순위와 제출 기록 확인
+- 서버 연동: 단어 임베딩, 제출 관리, 게임 기록 관리, 스코어보드 계산은 백엔드가 담당하고, 이 앱은 이를 표시하고 조작하는 역할을 맡습니다
+- 저장소 구조: 전형적인 3-tier 구성을 기준으로 동작하며, Redis 캐시를 통해 임베딩 결과와 스코어보드를 빠르게 조회합니다
 
-### `npm start`
+## Tech Stack
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+- React 19
+- TypeScript 4.9
+- Create React App
+- Tailwind CSS 3
+- `@ssamantle/sdk-typescript`
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+## Run locally
 
-### `npm test`
+1. 의존성 설치
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm install
+```
 
-### `npm run build`
+2. 개발 서버 실행
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm start
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+기본적으로 [http://localhost:3000](http://localhost:3000)에서 열립니다.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+주의: 이 클라이언트는 백엔드 API를 `http://<현재 호스트>:8000`으로 호출합니다. 로컬에서 실행할 때는 백엔드도 같은 호스트의 `8000` 포트에서 실행되어야 합니다.
 
-### `npm run eject`
+## Tests
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+```bash
+npm test
+```
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Production build
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+기본 빌드는 `build/` 폴더에 생성됩니다.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+```bash
+npm run build
+```
 
-## Learn More
+정적 배포용으로 `dist/` 출력을 원하면 아래처럼 실행할 수 있습니다.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+BUILD_PATH=dist npm run build
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Notes
+
+- GitHub Actions는 `main` 브랜치 푸시 시 정적 빌드를 수행하고 GitHub Pages에 배포합니다.
+- Docker 이미지는 기본적으로 빌드 산출물만 포함하도록 구성되어 있습니다.
