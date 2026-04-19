@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import GamePage from "./GamePage";
 import { GamePhaseEnum } from "../types/game";
@@ -59,7 +59,7 @@ beforeEach(() => {
   });
 });
 
-test("renders last synced time next to logout", () => {
+test("renders top info bar with synced time, username, and logout", () => {
   render(
     <GamePage
       username="tester"
@@ -70,7 +70,11 @@ test("renders last synced time next to logout", () => {
 
   expect(screen.getByText("마지막 동기화")).toBeInTheDocument();
   expect(screen.getByText("오후 12:34:56")).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "로그아웃" })).toBeInTheDocument();
+  const logoutButton = screen.getByRole("button", { name: "로그아웃" });
+  const topInfoBar = logoutButton.closest("div");
+  expect(topInfoBar).not.toBeNull();
+  expect(within(topInfoBar as HTMLElement).getByText("tester")).toBeInTheDocument();
+  expect(logoutButton).toBeInTheDocument();
   expect(
     screen.getByText("실시간 게임 상태를 참가자 현황과 함께 확인할 수 있습니다."),
   ).toBeInTheDocument();
