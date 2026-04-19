@@ -1,5 +1,10 @@
 import { authApi, gamesApi } from "./client";
 import type { AuthState, GameState, GuessResult } from "../types/game";
+import {
+  normalizeInput,
+  validateGuessWord,
+  validateUsername,
+} from "../utils/inputValidation";
 
 
 function toDate(value: unknown): Date | null {
@@ -46,8 +51,15 @@ export async function fetchGameState(): Promise<GameState> {
 
 
 export async function joinGame(name: string): Promise<AuthState> {
+  const usernameValidation = validateUsername(name);
+  if (!usernameValidation.isValid) {
+    throw new Error(usernameValidation.error ?? "사용자명을 확인해 주세요.");
+  }
+
   try {
-    const response = await gamesApi.joinGameApiV1GamesJoinPost({ nickname: name });
+    const response = await gamesApi.joinGameApiV1GamesJoinPost({
+      nickname: usernameValidation.value,
+    });
     return {
       username: response.nickname,
       sessionId: response.sessionId,
@@ -75,9 +87,14 @@ export async function submitGuess(
   username: string,
   word: string,
 ): Promise<GuessResult> {
+  const guessValidation = validateGuessWord(word);
+  if (!guessValidation.isValid) {
+    throw new Error(guessValidation.error ?? "추측할 단어를 확인해 주세요.");
+  }
+
   const response = await gamesApi.guessWordApiV1GamesGuessPost(sessionId, {
-    username,
-    word,
+    username: normalizeInput(username, { collapseWhitespace: true }),
+    word: guessValidation.value,
   });
 
   return {
