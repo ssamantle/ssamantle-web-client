@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { submitGuess } from "../../api/games";
 import { GamePhaseEnum, type GamePhase, type GuessResult } from "../../types/game";
+import { validateGuessWord } from "../../utils/inputValidation";
 
 interface WordGuessComposerProps {
   username: string;
@@ -42,14 +43,14 @@ export function WordGuessComposer({
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const trimmed = word.trim();
-    if (!trimmed) {
-      setError("추측할 단어를 입력해 주세요.");
+    if (!isInGame) {
+      setError("게임 진행 중에만 단어를 제출할 수 있습니다.");
       return;
     }
 
-    if (!isInGame) {
-      setError("게임 진행 중에만 단어를 제출할 수 있습니다.");
+    const validation = validateGuessWord(word);
+    if (!validation.isValid) {
+      setError(validation.error ?? "추측할 단어를 확인해 주세요.");
       return;
     }
 
@@ -57,7 +58,7 @@ export function WordGuessComposer({
     setError("");
 
     try {
-      const nextResult = await submitGuess(sessionId, username, trimmed);
+      const nextResult = await submitGuess(sessionId, username, validation.value);
       setWord("");
       shouldRestoreFocusRef.current = true;
       await onSubmitted(nextResult);
