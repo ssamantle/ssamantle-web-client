@@ -156,6 +156,7 @@ export default function GamePage({
 
       <RaceMapLeaderboard
         runners={raceRunners}
+        currentUsername={username}
         isVisible={isRaceMapVisible}
         onToggle={() => setIsRaceMapVisible((current) => !current)}
         bubbles={raceMapBubbles}

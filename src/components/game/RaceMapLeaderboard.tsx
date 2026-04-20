@@ -4,6 +4,7 @@ import { RACE_MAP_TICKS, mapSimilarityToTrackY } from "../../utils/raceMap";
 
 interface RaceMapLeaderboardProps {
   runners: RaceRunner[];
+  currentUsername: string;
   isVisible: boolean;
   onToggle: () => void;
   bubbles?: RaceMapSubmissionBubble[];
@@ -61,6 +62,7 @@ function runnerOffset(name: string): number {
 
 export function RaceMapLeaderboard({
   runners,
+  currentUsername,
   isVisible,
   onToggle,
   bubbles = [],
@@ -81,6 +83,20 @@ export function RaceMapLeaderboard({
 
     return map;
   }, [bubbles, now]);
+
+  const displayedRunners = useMemo(() => {
+    const normalizedCurrentUsername = currentUsername.trim().toLowerCase();
+
+    return [...runners].sort((left, right) => {
+      const leftIsCurrentUser =
+        left.name.trim().toLowerCase() === normalizedCurrentUsername;
+      const rightIsCurrentUser =
+        right.name.trim().toLowerCase() === normalizedCurrentUsername;
+
+      if (leftIsCurrentUser === rightIsCurrentUser) return 0;
+      return leftIsCurrentUser ? 1 : -1;
+    });
+  }, [currentUsername, runners]);
 
   return (
     <>
@@ -122,13 +138,16 @@ export function RaceMapLeaderboard({
               );
             })}
 
-            {runners.map((runner, index) => {
+            {displayedRunners.map((runner, index) => {
               const ratio = mapSimilarityToTrackY(runner.bestSimilarity);
               const y = `${ratio * 100}%`;
               const overlapOffset = runnerOffset(runner.name);
               const bubble = latestBubbleByPlayer.get(runner.name);
               const opacity = bubble ? bubbleOpacity(now, bubble) : 0;
               const medal = medalForRank(runner.rank);
+              const isCurrentUser =
+                runner.name.trim().toLowerCase() ===
+                currentUsername.trim().toLowerCase();
 
               return (
                 <div
@@ -137,7 +156,7 @@ export function RaceMapLeaderboard({
                   style={{
                     top: y,
                     transform: `translateY(calc(-50% + ${overlapOffset}px))`,
-                    zIndex: runners.length - index,
+                    zIndex: isCurrentUser ? displayedRunners.length + 1 : displayedRunners.length - index,
                   }}
                 >
                   <div className="relative flex items-center justify-center">
