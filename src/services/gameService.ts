@@ -1,4 +1,4 @@
-import { authApi, gamesApi } from "./client";
+import { gamesApi } from "../api/client";
 import type { AuthState, GameState, GuessResult } from "../types/game";
 import {
   normalizeInput,
@@ -6,14 +6,17 @@ import {
   validateUsername,
 } from "../utils/inputValidation";
 
-
 function toDate(value: unknown): Date | null {
   if (!value) return null;
-  const d = new Date(value as string);
-  return Number.isNaN(d.getTime()) ? null : d;
+
+  const date = new Date(value as string);
+  return Number.isNaN(date.getTime()) ? null : date;
 }
 
-async function toApiError(error: unknown, fallbackMessage: string): Promise<Error> {
+async function toApiError(
+  error: unknown,
+  fallbackMessage: string,
+): Promise<Error> {
   if (error instanceof Error && error.message.trim()) {
     return error;
   }
@@ -32,7 +35,6 @@ async function toApiError(error: unknown, fallbackMessage: string): Promise<Erro
   return new Error(fallbackMessage);
 }
 
-
 export async function fetchGameState(): Promise<GameState> {
   const data = await gamesApi.gamePollingApiV1GamesPollingDbGet();
 
@@ -40,15 +42,14 @@ export async function fetchGameState(): Promise<GameState> {
     startAt: toDate(data.startAt),
     endAt: toDate(data.endAt),
     players: [...data.users]
-      .map((u) => ({
-        name: u.name,
-        rank: u.rank,
-        bestSimilarity: u.bestSimilarity,
+      .map((user) => ({
+        name: user.name,
+        rank: user.rank,
+        bestSimilarity: user.bestSimilarity,
       }))
       .sort((a, b) => a.rank - b.rank),
   };
 }
-
 
 export async function joinGame(name: string): Promise<AuthState> {
   const usernameValidation = validateUsername(name);
@@ -60,6 +61,7 @@ export async function joinGame(name: string): Promise<AuthState> {
     const response = await gamesApi.joinGameApiV1GamesJoinPost({
       nickname: usernameValidation.value,
     });
+
     return {
       username: response.nickname,
       sessionId: response.sessionId,
@@ -72,16 +74,6 @@ export async function joinGame(name: string): Promise<AuthState> {
   }
 }
 
-export async function validateSession(sessionId: string): Promise<boolean> {
-  const response = await authApi.validateTokenAuthValidateGet(sessionId);
-
-  if (typeof response === "boolean") {
-    return response;
-  }
-
-  throw new Error("Unexpected session validation response");
-}
-
 export async function submitGuess(
   sessionId: string,
   username: string,
@@ -89,7 +81,7 @@ export async function submitGuess(
 ): Promise<GuessResult> {
   const guessValidation = validateGuessWord(word);
   if (!guessValidation.isValid) {
-    throw new Error(guessValidation.error ?? "추측할 단어를 확인해 주세요.");
+    throw new Error(guessValidation.error ?? "추측한 단어를 확인해 주세요.");
   }
 
   const response = await gamesApi.guessWordApiV1GamesGuessPost(sessionId, {

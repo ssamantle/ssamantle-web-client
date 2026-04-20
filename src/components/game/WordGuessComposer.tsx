@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { submitGuess } from "../../api/games";
+import { submitGuess } from "../../services/gameService";
 import { GamePhaseEnum, type GamePhase, type GuessResult } from "../../types/game";
 import { validateGuessWord } from "../../utils/inputValidation";
 

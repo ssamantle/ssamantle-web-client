@@ -1,23 +1,18 @@
-import { authApi, gamesApi } from "./client";
-import { joinGame, submitGuess, validateSession } from "./games";
+import { gamesApi } from "../api/client";
+import { joinGame, submitGuess } from "./gameService";
 
-jest.mock("./client", () => ({
+jest.mock("../api/client", () => ({
   gamesApi: {
     joinGameApiV1GamesJoinPost: jest.fn(),
     guessWordApiV1GamesGuessPost: jest.fn(),
   },
-  authApi: {
-    validateTokenAuthValidateGet: jest.fn(),
-  },
 }));
 
 const mockedGamesApi = gamesApi as jest.Mocked<typeof gamesApi>;
-const mockedAuthApi = authApi as jest.Mocked<typeof authApi>;
 
 beforeEach(() => {
   mockedGamesApi.joinGameApiV1GamesJoinPost.mockReset();
   mockedGamesApi.guessWordApiV1GamesGuessPost.mockReset();
-  mockedAuthApi.validateTokenAuthValidateGet.mockReset();
 });
 
 test("joinGame validates username before API request", async () => {
@@ -36,12 +31,6 @@ test("joinGame maps server detail to error message", async () => {
   );
 
   await expect(joinGame("tester")).rejects.toThrow("이미 종료된 게임입니다.");
-});
-
-test("validateSession returns boolean response body", async () => {
-  mockedAuthApi.validateTokenAuthValidateGet.mockResolvedValue(false);
-
-  await expect(validateSession("expired-session")).resolves.toBe(false);
 });
 
 test("submitGuess validates word before API request", async () => {

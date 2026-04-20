@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import GamePage from "./pages/GamePage";
 import { LoginPage } from "./pages/LoginPage";
-import { joinGame, validateSession } from "./api/games";
+import { validateSession } from "./services/authService";
+import { joinGame } from "./services/gameService";
 import type { AuthState } from "./types/game";
 
 const AUTH_STORAGE_KEY = "ssamantle.auth";

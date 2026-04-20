@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { fetchGameState } from "../api/games";
+import { fetchGameState } from "../services/gameService";
 import type { GameState } from "../types/game";
 
 interface UseGamePollingResult {

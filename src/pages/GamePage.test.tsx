@@ -2,12 +2,12 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import GamePage from "./GamePage";
 import { GamePhaseEnum } from "../types/game";
-import { fetchGuessHistory } from "../api/games";
+import { fetchGuessHistory } from "../services/gameService";
 import { useGamePolling } from "../hooks/useGamePolling";
 import { useGameClock } from "../hooks/useGameClock";
 import { useGamePhase } from "../hooks/useGamePhase";
 
-jest.mock("../api/games", () => ({
+jest.mock("../services/gameService", () => ({
   fetchGuessHistory: jest.fn(),
 }));
 
