@@ -9,17 +9,17 @@ const COLORS = ["#11a4d3", "#ffb703", "#ff6b6b", "#8cc63f", "#8d99ae", "#fb8500"
 
 // Tune these values to adjust confetti feel without touching the launch logic.
 const CONFETTI_TUNING = {
-  durationMs: 2200,
+  durationMs: 3200,
   cleanupBufferMs: 280,
   emissionCount: 16,
-  emitIntervalMs: 120,
+  emitIntervalMs: 36,
   sideParticleMin: 7,
   sideParticleMax: 28,
   sideSpreadStart: 34,
-  sideSpreadEnd: 58,
-  sideVelocityStart: 62,
-  sideVelocityEnd: 38,
-  sideGravity: 1,
+  sideSpreadEnd: 64,
+  sideVelocityStart: 80,
+  sideVelocityEnd: 32,
+  sideGravity: 1.2,
   sideTicks: 230,
   sideScalarMin: 0.78,
   sideScalarMax: 1.12,
