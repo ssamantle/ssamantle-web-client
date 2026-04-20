@@ -64,11 +64,6 @@ export function WordGuessComposer({
       return;
     }
 
-    if (lastSubmittedWordRef.current === validation.value) {
-      setError("이미 제출한 단어예요. 다른 단어를 시도해 보세요.");
-      return;
-    }
-
     setIsSubmitting(true);
     setError("");
 

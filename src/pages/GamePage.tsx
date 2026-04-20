@@ -12,6 +12,7 @@ import { useGamePhase } from "../hooks/useGamePhase";
 import { useGamePolling } from "../hooks/useGamePolling";
 import type { GuessResult, RaceMapSubmissionBubble } from "../types/game";
 import { getGuessResultKey } from "../utils/guessHistory";
+import { normalizeInput } from "../utils/inputValidation";
 import { toRaceRunners } from "../utils/raceMap";
 
 interface GamePageProps {
@@ -30,7 +31,19 @@ function readRaceMapVisiblePreference(): boolean {
 }
 
 function sortGuessHistory(items: GuessResult[]): GuessResult[] {
-  return [...items].sort((a, b) => b.similarity - a.similarity);
+  const normalizedLabels = new Set<string>();
+
+  return [...items]
+    .sort((a, b) => b.similarity - a.similarity)
+    .filter((item) => {
+      const normalizedLabel = normalizeInput(item.label);
+      if (normalizedLabels.has(normalizedLabel)) {
+        return false;
+      }
+
+      normalizedLabels.add(normalizedLabel);
+      return true;
+    });
 }
 
 export default function GamePage({
@@ -52,7 +65,6 @@ export default function GamePage({
     () => toRaceRunners(gameState?.players ?? []),
     [gameState?.players],
   );
-
   // Placeholder for real-time submission overlays from other users.
   const raceMapBubbles: RaceMapSubmissionBubble[] = [];
 
