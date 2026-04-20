@@ -50,6 +50,10 @@ function medalForRank(rank: number): string | null {
   return null;
 }
 
+function runnerOffset(index: number): number {
+  return (index % 3) * 4;
+}
+
 export function RaceMapLeaderboard({
   runners,
   isVisible,
@@ -116,16 +120,19 @@ export function RaceMapLeaderboard({
             {runners.map((runner, index) => {
               const ratio = mapSimilarityToTrackY(runner.bestSimilarity);
               const y = `${ratio * 100}%`;
-              const overlapOffset = (index % 3) * 4;
+              const overlapOffset = runnerOffset(index);
               const bubble = latestBubbleByPlayer.get(runner.name);
               const opacity = bubble ? bubbleOpacity(now, bubble) : 0;
               const medal = medalForRank(runner.rank);
 
               return (
                 <div
-                  key={`${runner.name}-${runner.rank}`}
-                  className="absolute left-0 right-0"
-                  style={{ top: y, transform: `translateY(calc(-50% + ${overlapOffset}px))` }}
+                  key={runner.name}
+                  className="absolute left-0 right-0 motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[top,transform]"
+                  style={{
+                    top: y,
+                    transform: `translateY(calc(-50% + ${overlapOffset}px))`,
+                  }}
                 >
                   <div className="relative flex items-center justify-center">
                     <div className="absolute right-[8px] h-2.5 w-2.5 rounded-full border border-white bg-[#1c87b0] shadow" />
