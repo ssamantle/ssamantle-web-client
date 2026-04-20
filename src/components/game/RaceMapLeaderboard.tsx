@@ -77,7 +77,7 @@ export function RaceMapLeaderboard({
       </button>
 
       {isVisible ? (
-        <aside className="fixed right-0 top-32 z-30 hidden h-[calc(100vh-9.5rem)] min-h-[380px] w-[210px] rounded-l-[10px] border border-r-0 border-[#c8d4e2] bg-white/88 p-3 shadow-[-12px_16px_34px_rgba(116,140,161,0.24)] backdrop-blur xl:block">
+        <aside className="fixed right-0 top-32 z-30 hidden h-[calc(100vh-9.5rem)] min-h-[380px] w-[210px] bg-transparent p-3 xl:block">
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-xs font-semibold tracking-[0.06em] text-[#486679]">
               RACE MAP
@@ -85,7 +85,7 @@ export function RaceMapLeaderboard({
             <span className="text-[11px] text-[#6f8798]">{runners.length}명</span>
           </div>
 
-          <div className="relative h-[calc(100%-1.75rem)] rounded-[4px] bg-[linear-gradient(180deg,#edf5fb_0%,#f8fcff_100%)] pl-2 pr-0">
+          <div className="relative h-[calc(100%-1.75rem)] rounded-[4px] bg-transparent pl-2 pr-0">
             <div className="absolute bottom-2 right-3 top-2 w-[2px] bg-[#7ea6be]" />
 
             {RACE_MAP_TICKS.map((tick) => {
