@@ -6,7 +6,6 @@ import { fetchGuessHistory } from "../services/gameService";
 import { useGamePolling } from "../hooks/useGamePolling";
 import { useGameClock } from "../hooks/useGameClock";
 import { useGamePhase } from "../hooks/useGamePhase";
-import { getGuessResultKey } from "../utils/guessHistory";
 
 jest.mock("../services/gameService", () => ({
   fetchGuessHistory: jest.fn(),
@@ -41,7 +40,7 @@ jest.mock("../components/game/WordGuessComposer", () => ({
       onClick={() =>
         void onSubmitted({
           isAnswer: false,
-          label: "latest-word",
+          label: "top-word",
           rank: 77,
           similarity: 14.55,
           wordRank: 245,
@@ -148,7 +147,7 @@ test("calls logout when the logout button is clicked", async () => {
   expect(onLogout).toHaveBeenCalledTimes(1);
 });
 
-test("shows the latest submitted word at the top of the guess history", async () => {
+test("shows the existing history row highlighted at the top after duplicate submission", async () => {
   mockedFetchGuessHistory.mockResolvedValue([
     {
       isAnswer: false,
@@ -178,17 +177,10 @@ test("shows the latest submitted word at the top of the guess history", async ()
   await userEvent.click(screen.getByRole("button", { name: "submit-latest-word" }));
 
   const rows = screen.getAllByRole("row").slice(1);
-  expect(rows).toHaveLength(3);
-  expect(within(rows[0]).getByText("latest-word")).toBeInTheDocument();
+  expect(rows).toHaveLength(2);
+  expect(within(rows[0]).getByText("top-word")).toBeInTheDocument();
   expect(rows[0]).toHaveAttribute("data-highlighted", "true");
   expect(rows[0]).toHaveClass("bg-[#f4eadb]");
-  expect(getGuessResultKey({
-    isAnswer: false,
-    label: "latest-word",
-    rank: 77,
-    similarity: 14.55,
-    wordRank: 245,
-  })).toBe("latest-word::77::14.550000::guess");
 });
 
 test("renders both best and latest submission bubbles on the race map", () => {

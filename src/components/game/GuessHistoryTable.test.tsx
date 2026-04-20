@@ -1,6 +1,5 @@
 import { render, screen, within } from "@testing-library/react";
 import { GuessHistoryTable } from "./GuessHistoryTable";
-import { getGuessResultKey } from "../../utils/guessHistory";
 import type { GuessResult } from "../../types/game";
 
 const items: GuessResult[] = [
@@ -31,7 +30,7 @@ test("highlights the latest submitted guess and moves it to the top", () => {
   render(
     <GuessHistoryTable
       items={items}
-      latestSubmittedGuessKey={getGuessResultKey(items[1])}
+      latestSubmittedGuessLabel="beta"
     />,
   );
 
@@ -41,6 +40,20 @@ test("highlights the latest submitted guess and moves it to the top", () => {
   expect(rows[0]).toHaveAttribute("data-highlighted", "true");
   expect(rows[0]).toHaveClass("bg-[#f4eadb]");
   expect(within(rows[1]).getByText("alpha")).toBeInTheDocument();
+});
+
+test("highlights existing row when a duplicate word is submitted", () => {
+  render(
+    <GuessHistoryTable
+      items={items}
+      latestSubmittedGuessLabel="alpha"
+    />,
+  );
+
+  const rows = screen.getAllByRole("row").slice(1);
+  expect(rows).toHaveLength(3);
+  expect(within(rows[0]).getByText("alpha")).toBeInTheDocument();
+  expect(rows[0]).toHaveAttribute("data-highlighted", "true");
 });
 
 test("shows word rank labels and fills the progress bar on a 1 to 1000 scale", () => {
