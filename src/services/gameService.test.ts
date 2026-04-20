@@ -1,9 +1,15 @@
 import { gamesApi } from "../api/client";
-import { fetchGameState, joinGame, submitGuess } from "./gameService";
+import {
+  fetchGameState,
+  fetchGuessHistory,
+  joinGame,
+  submitGuess,
+} from "./gameService";
 
 jest.mock("../api/client", () => ({
   gamesApi: {
     gamePollingApiV1GamesPollingDbGet: jest.fn(),
+    getGuessHistoryApiV1GamesGuessesGet: jest.fn(),
     joinGameApiV1GamesJoinPost: jest.fn(),
     guessWordApiV1GamesGuessPost: jest.fn(),
   },
@@ -13,6 +19,7 @@ const mockedGamesApi = gamesApi as jest.Mocked<typeof gamesApi>;
 
 beforeEach(() => {
   mockedGamesApi.gamePollingApiV1GamesPollingDbGet.mockReset();
+  mockedGamesApi.getGuessHistoryApiV1GamesGuessesGet.mockReset();
   mockedGamesApi.joinGameApiV1GamesJoinPost.mockReset();
   mockedGamesApi.guessWordApiV1GamesGuessPost.mockReset();
 });
@@ -87,4 +94,44 @@ test("submitGuess validates word before API request", async () => {
   );
 
   expect(mockedGamesApi.guessWordApiV1GamesGuessPost).not.toHaveBeenCalled();
+});
+
+test("submitGuess maps word rank from API response", async () => {
+  mockedGamesApi.guessWordApiV1GamesGuessPost.mockResolvedValue({
+    isAnswer: false,
+    label: "banana",
+    rank: 11,
+    similarity: 32.1,
+    wordRank: 154,
+  });
+
+  await expect(submitGuess("session-1", "tester", "banana")).resolves.toEqual({
+    isAnswer: false,
+    label: "banana",
+    rank: 11,
+    similarity: 32.1,
+    wordRank: 154,
+  });
+});
+
+test("fetchGuessHistory maps word rank from API response", async () => {
+  mockedGamesApi.getGuessHistoryApiV1GamesGuessesGet.mockResolvedValue([
+    {
+      isAnswer: false,
+      label: "alpha",
+      rank: 7,
+      similarity: 44.4,
+      wordRank: 73,
+    },
+  ]);
+
+  await expect(fetchGuessHistory("session-1", "tester")).resolves.toEqual([
+    {
+      isAnswer: false,
+      label: "alpha",
+      rank: 7,
+      similarity: 44.4,
+      wordRank: 73,
+    },
+  ]);
 });

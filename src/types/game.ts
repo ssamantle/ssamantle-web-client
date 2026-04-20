@@ -33,6 +33,7 @@ export interface GuessResult {
   label: string;
   rank: Rank;
   similarity: Similarity;
+  wordRank: Rank;
 }
 
 export interface PlayerSubmission {

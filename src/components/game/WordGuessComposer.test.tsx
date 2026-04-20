@@ -21,6 +21,7 @@ test("allows duplicate guesses even when the same word was submitted before", as
     label: "banana",
     rank: 12,
     similarity: 8.76,
+    wordRank: 312,
   });
   const { container } = render(
     <WordGuessComposer
@@ -40,6 +41,7 @@ test("allows duplicate guesses even when the same word was submitted before", as
     label: "banana",
     rank: 12,
     similarity: 8.76,
+    wordRank: 312,
   });
 });
 
@@ -50,6 +52,7 @@ test("submits guesses that are not in restored history", async () => {
     label: "orange",
     rank: 10,
     similarity: 12.34,
+    wordRank: 204,
   });
 
   const { container } = render(
@@ -70,5 +73,6 @@ test("submits guesses that are not in restored history", async () => {
     label: "orange",
     rank: 10,
     similarity: 12.34,
+    wordRank: 204,
   });
 });
