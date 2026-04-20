@@ -55,12 +55,15 @@ function toPlayerSubmission(value: unknown): PlayerSubmission | null {
     return null;
   }
 
-  const wordRank =
-    typeof data.wordRank === "number" &&
-    Number.isFinite(data.wordRank) &&
-    data.wordRank > 0
-      ? Math.trunc(data.wordRank)
-      : null;
+  const toPositiveRank = (rawRank: unknown): number | null => {
+    if (typeof rawRank !== "number" || !Number.isFinite(rawRank) || rawRank <= 0) {
+      return null;
+    }
+
+    return Math.trunc(rawRank);
+  };
+
+  const wordRank = toPositiveRank(data.wordRank);
 
   return {
     label: data.label,

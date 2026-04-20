@@ -248,7 +248,7 @@ export function RaceMapLeaderboard({
                 markersByPlayer.get(normalizeUsername(runner.name)) ?? [];
               const bestMarker = markerForType(runnerMarkers, "best");
               const latestMarker = markerForType(runnerMarkers, "latest");
-              const labelWordRank = bestMarker?.wordRank ?? latestMarker?.wordRank ?? runner.rank;
+              const labelWordRank = bestMarker?.wordRank ?? latestMarker?.wordRank ?? null;
               const labelY = `${mapRankProgressToTrackY(labelWordRank) * 100}%`;
               const labelZIndex = isCurrentUser
                 ? displayedRunners.length + 4
@@ -272,7 +272,7 @@ export function RaceMapLeaderboard({
                       marker={bestMarker}
                       isCurrentUser={isCurrentUser}
                       style={{
-                        top: `${mapRankProgressToTrackY(bestMarker.wordRank ?? runner.rank) * 100}%`,
+                        top: `${mapRankProgressToTrackY(bestMarker.wordRank) * 100}%`,
                         transform: `translateY(calc(-50% + ${overlapOffset - 6}px))`,
                         zIndex: labelZIndex - 1,
                         opacity: isCurrentUser ? 1 : 0.82,
@@ -280,12 +280,12 @@ export function RaceMapLeaderboard({
                     />
                   ) : null}
 
-                  {latestMarker ? (
+                  {latestMarker && latestMarker.wordRank != null ? (
                     <RaceMapSimilarityDot
                       marker={latestMarker}
                       isCurrentUser={isCurrentUser}
                       style={{
-                        top: `${mapRankProgressToTrackY(latestMarker.wordRank ?? runner.rank) * 100}%`,
+                        top: `${mapRankProgressToTrackY(latestMarker.wordRank) * 100}%`,
                         transform: `translateY(calc(-50% + ${overlapOffset + 8}px))`,
                         zIndex: labelZIndex - 2,
                         opacity: isCurrentUser ? 0.9 : 0.62,
