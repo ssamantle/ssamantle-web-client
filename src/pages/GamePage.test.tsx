@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import GamePage from "./GamePage";
 import { GamePhaseEnum } from "../types/game";
@@ -6,6 +6,17 @@ import { fetchGuessHistory } from "../services/gameService";
 import { useGamePolling } from "../hooks/useGamePolling";
 import { useGameClock } from "../hooks/useGameClock";
 import { useGamePhase } from "../hooks/useGamePhase";
+import confetti from "canvas-confetti";
+
+jest.mock("canvas-confetti", () => {
+  const create = jest.fn(() => jest.fn());
+  return {
+    __esModule: true,
+    default: {
+      create,
+    },
+  };
+});
 
 jest.mock("../services/gameService", () => ({
   fetchGuessHistory: jest.fn(),
@@ -35,20 +46,36 @@ jest.mock("../components/game/WordGuessComposer", () => ({
       wordRank: number;
     }) => Promise<void>;
   }) => (
-    <button
-      type="button"
-      onClick={() =>
-        void onSubmitted({
-          isAnswer: false,
-          label: "top-word",
-          rank: 77,
-          similarity: 14.55,
-          wordRank: 245,
-        })
-      }
-    >
-      submit-latest-word
-    </button>
+    <>
+      <button
+        type="button"
+        onClick={() =>
+          void onSubmitted({
+            isAnswer: false,
+            label: "top-word",
+            rank: 77,
+            similarity: 14.55,
+            wordRank: 245,
+          })
+        }
+      >
+        submit-latest-word
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          void onSubmitted({
+            isAnswer: true,
+            label: "answer-word",
+            rank: 1,
+            similarity: 100,
+            wordRank: 1,
+          })
+        }
+      >
+        submit-answer-word
+      </button>
+    </>
   ),
 }));
 
@@ -240,4 +267,27 @@ test("renders both best and latest similarity markers on the race map", () => {
   expect(latestMarkerLabel).toHaveTextContent("alpha");
   expect(screen.queryByText("best-alpha")).not.toBeInTheDocument();
   expect(screen.queryByText("latest-alpha")).not.toBeInTheDocument();
+});
+
+test("shows confetti with bilateral launch origins when the submitted guess is the answer", async () => {
+  const { container } = render(
+    <GamePage
+      username="tester"
+      sessionId="session-1"
+      onLogout={jest.fn()}
+    />,
+  );
+
+  await userEvent.click(screen.getByRole("button", { name: "submit-answer-word" }));
+
+  await waitFor(() => {
+    expect(
+      container.querySelector('[data-confetti-active="true"]'),
+    ).toBeInTheDocument();
+  });
+
+  const mockedConfetti = confetti as unknown as {
+    create: jest.Mock;
+  };
+  expect(mockedConfetti.create).toHaveBeenCalled();
 });
