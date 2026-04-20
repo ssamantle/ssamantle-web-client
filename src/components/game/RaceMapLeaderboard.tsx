@@ -111,8 +111,8 @@ function RaceMapRunnerMarker({
         <div
           className={`absolute rounded-full shadow ${
             isCurrentUser
-              ? "right-[7px] h-3.5 w-3.5 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
-              : "right-[8px] h-2.5 w-2.5 border border-white bg-[#1c87b0]"
+              ? "right-[6px] h-3.5 w-3.5 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
+              : "right-[7px] h-2.5 w-2.5 border border-white bg-[#1c87b0]"
           }`}
         />
 
@@ -160,7 +160,7 @@ function RaceMapSimilarityDot({
       <div
         data-similarity-marker-type={marker.type}
         data-player-name={marker.playerName}
-        className={`absolute right-[8px] rounded-full shadow ${markerClasses}`}
+        className={`absolute right-[7px] rounded-full shadow ${markerClasses}`}
         aria-label={`${marker.playerName} ${marker.type}`}
       />
 
