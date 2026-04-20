@@ -141,7 +141,7 @@ function RaceMapSimilarityDot({
   marker,
   isCurrentUser,
   style,
-: RaceMapSimilarityDotProps) {
+}: RaceMapSimilarityDotProps) {
   const markerClasses =
     marker.type === "best"
       ? isCurrentUser

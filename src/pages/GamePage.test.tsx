@@ -183,7 +183,7 @@ test("shows the existing history row highlighted at the top after duplicate subm
   expect(rows[0]).toHaveClass("bg-[#f4eadb]");
 });
 
-test("renders both best and latest submission bubbles on the race map", () => {
+test("renders both best and latest similarity markers on the race map", () => {
   mockedUseGamePolling.mockReturnValue({
     gameState: {
       startAt: null,
@@ -220,15 +220,17 @@ test("renders both best and latest submission bubbles on the race map", () => {
     />,
   );
 
-  const bestBubble = container.querySelector(
-    '[data-bubble-type="best"][data-player-name="alpha"]',
+  const bestMarker = container.querySelector(
+    '[data-similarity-marker-type="best"][data-player-name="alpha"]',
   );
-  const latestBubble = container.querySelector(
-    '[data-bubble-type="latest"][data-player-name="alpha"]',
+  const latestMarker = container.querySelector(
+    '[data-similarity-marker-type="latest"][data-player-name="alpha"]',
   );
 
-  expect(bestBubble).toHaveTextContent("best-alpha");
-  expect(bestBubble).toHaveClass("bg-white");
-  expect(latestBubble).toHaveTextContent("latest-alpha");
-  expect(latestBubble).toHaveClass("bg-white/75");
+  expect(bestMarker).toBeInTheDocument();
+  expect(bestMarker).toHaveClass("bg-[#1c87b0]");
+  expect(latestMarker).toBeInTheDocument();
+  expect(latestMarker).toHaveClass("bg-[#aacada]");
+  expect(screen.queryByText("best-alpha")).not.toBeInTheDocument();
+  expect(screen.queryByText("latest-alpha")).not.toBeInTheDocument();
 });
