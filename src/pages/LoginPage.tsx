@@ -3,7 +3,7 @@ import {
   USERNAME_MAX_LENGTH,
   USERNAME_MIN_LENGTH,
   validateUsername,
-} from "../../utils/inputValidation";
+} from "../utils/inputValidation";
 
 interface LoginPageProps {
   onLogin: (username: string) => Promise<void>;
@@ -55,7 +55,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               게임에 입장하기 전에 사용자명을 입력해 주세요.
             </h1>
             <p className="text-sm leading-6 text-[#5b7380]">
-              닉네임을 입력하면 게임 참가를 시도하고, 성공하면 바로 인게임
+              사용자명을 입력하면 게임 참가를 시도하고, 성공하면 바로 게임
               화면으로 이동합니다.
             </p>
           </div>
@@ -71,7 +71,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   setUsername(event.target.value);
                   if (error) setError("");
                 }}
-                placeholder="예: 김싸피"
+                placeholder="예: 김싸맨틀"
                 className="w-full rounded-[3px] border border-[#c7d3df] bg-[#f8fbfe] px-4 py-3 text-[#202938] outline-none transition focus:border-[#11a4d3] focus:bg-white disabled:cursor-not-allowed disabled:opacity-70"
                 maxLength={USERNAME_MAX_LENGTH}
                 autoFocus
@@ -87,7 +87,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
             <div className="flex items-center justify-between gap-4">
               <p className="text-xs text-[#6c8491]">
-                공백 제외 {USERNAME_MIN_LENGTH}~{USERNAME_MAX_LENGTH}자
+                공백 포함 {USERNAME_MIN_LENGTH}~{USERNAME_MAX_LENGTH}자
               </p>
               <button
                 type="submit"
