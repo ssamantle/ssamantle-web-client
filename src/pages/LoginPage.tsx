@@ -14,7 +14,7 @@ function toErrorMessage(error: unknown): string {
     return error.message;
   }
 
-  return "寃뚯엫 李멸????ㅽ뙣?덉뒿?덈떎. ?좎떆 ???ㅼ떆 ?쒕룄??二쇱꽭??";
+  return "게임 참가에 실패했습니다. 잠시 후 다시 시도해 주세요.";
 }
 
 export function LoginPage({ onLogin }: LoginPageProps) {
@@ -27,7 +27,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
     const validation = validateUsername(username);
     if (!validation.isValid) {
-      setError(validation.error ?? "?ъ슜?먮챸???뺤씤??二쇱꽭??");
+      setError(validation.error ?? "사용자명을 확인해 주세요.");
       return;
     }
 
@@ -52,18 +52,18 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               SSAMANTLE
             </p>
             <h1 className="text-[2rem] font-semibold tracking-[-0.03em] text-[#202938]">
-              寃뚯엫???낆옣?섍린 ?꾩뿉 ?ъ슜?먮챸???낅젰??二쇱꽭??
+              게임에 입장하기 전에 사용자명을 입력해 주세요.
             </h1>
             <p className="text-sm leading-6 text-[#5b7380]">
-              ?됰꽕?꾩쓣 ?낅젰?섎㈃ 寃뚯엫 李멸?瑜??쒕룄?섍퀬, ?깃났?섎㈃ 諛붾줈 ?멸쾶??
-              ?붾㈃?쇰줈 ?대룞?⑸땲??
+              사용자명을 입력하면 게임 참가를 시도하고, 성공하면 바로 게임
+              화면으로 이동합니다.
             </p>
           </div>
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <label className="block space-y-2">
               <span className="text-sm font-medium text-[#202938]">
-                ?ъ슜?먮챸
+                사용자명
               </span>
               <input
                 value={username}
@@ -71,7 +71,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                   setUsername(event.target.value);
                   if (error) setError("");
                 }}
-                placeholder="?? 源?명뵾"
+                placeholder="예: 김싸맨틀"
                 className="w-full rounded-[3px] border border-[#c7d3df] bg-[#f8fbfe] px-4 py-3 text-[#202938] outline-none transition focus:border-[#11a4d3] focus:bg-white disabled:cursor-not-allowed disabled:opacity-70"
                 maxLength={USERNAME_MAX_LENGTH}
                 autoFocus
@@ -87,14 +87,14 @@ export function LoginPage({ onLogin }: LoginPageProps) {
 
             <div className="flex items-center justify-between gap-4">
               <p className="text-xs text-[#6c8491]">
-                怨듬갚 ?쒖쇅 {USERNAME_MIN_LENGTH}~{USERNAME_MAX_LENGTH}??
+                공백 포함 {USERNAME_MIN_LENGTH}~{USERNAME_MAX_LENGTH}자
               </p>
               <button
                 type="submit"
                 disabled={isSubmitting}
                 className="rounded-[3px] bg-[#11a4d3] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#0e93bd] disabled:cursor-not-allowed disabled:bg-[#8ccfe3]"
               >
-                {isSubmitting ? "李멸? 以?.." : "寃뚯엫 ?쒖옉"}
+                {isSubmitting ? "참가 중..." : "게임 시작"}
               </button>
             </div>
           </form>
