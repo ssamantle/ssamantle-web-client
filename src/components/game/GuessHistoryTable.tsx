@@ -17,7 +17,13 @@ function formatSimilarity(value: number): string {
 
 function formatWordRank(rank: number): string {
   if (!Number.isFinite(rank) || rank <= 0) return "-";
-  return `#${Math.round(rank)}`;
+
+  const normalizedRank = Math.round(rank);
+  if (normalizedRank >= 1 && normalizedRank <= 999) {
+    return `${normalizedRank}위`;
+  }
+
+  return "1000위 이상";
 }
 
 function progressWidth(wordRank: number): number {
@@ -50,9 +56,8 @@ function LoadingState() {
       {Array.from({ length: 4 }).map((_, idx) => (
         <div
           key={idx}
-          className="grid grid-cols-[minmax(140px,1.4fr)_90px_90px_90px_minmax(140px,1fr)_50px] gap-3 rounded-[3px] border border-[#d7e0ea] bg-white px-4 py-3"
+          className="grid grid-cols-[minmax(160px,1.6fr)_100px_100px_minmax(160px,1fr)] gap-3 rounded-[3px] border border-[#d7e0ea] bg-white px-5 py-3"
         >
-          <div className="h-4 bg-[#e8eef4]" />
           <div className="h-4 bg-[#e8eef4]" />
           <div className="h-4 bg-[#e8eef4]" />
           <div className="h-4 bg-[#e8eef4]" />
@@ -105,17 +110,15 @@ export function GuessHistoryTable({
           <table className="min-w-full border-separate border-spacing-0 text-sm text-[#202938]">
             <thead>
               <tr className="text-left text-xs uppercase tracking-[0.06em] text-[#6c8491]">
-                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">단어</th>
+                <th className="border-b border-[#d7e0ea] pb-3 pl-3 pr-4 font-medium">단어</th>
                 <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">유사도</th>
-                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">제출 순위</th>
                 <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">단어 순위</th>
-                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">
+                <th className="border-b border-[#d7e0ea] pb-3 pl-4 pr-3 font-medium">
                   <div>랭킹 기준</div>
                   <div className="mt-1 text-[10px] normal-case tracking-normal text-[#8a9ca7]">
                     1위 = 100% / 1000위 = 0%
                   </div>
                 </th>
-                <th className="border-b border-[#d7e0ea] pb-3 font-medium">정답</th>
               </tr>
             </thead>
             <tbody>
@@ -131,7 +134,7 @@ export function GuessHistoryTable({
                     className={isLatestSubmitted ? "bg-[#f4eadb]" : undefined}
                     data-highlighted={isLatestSubmitted ? "true" : "false"}
                   >
-                    <td className={`border-b ${borderColorClassName} py-3 pr-4 font-medium`}>
+                    <td className={`border-b ${borderColorClassName} py-3 pl-3 pr-4 font-medium`}>
                       {item.label}
                     </td>
                     <td
@@ -142,20 +145,13 @@ export function GuessHistoryTable({
                       {formatSimilarity(item.similarity)}
                     </td>
                     <td
-                      className={`border-b ${borderColorClassName} py-3 pr-4 ${
-                        isLatestSubmitted ? "text-[#7a6650]" : "text-[#536273]"
-                      }`}
-                    >
-                      #{item.rank}
-                    </td>
-                    <td
                       className={`border-b ${borderColorClassName} py-3 pr-4 font-medium ${
                         isLatestSubmitted ? "text-[#7a6650]" : "text-[#355469]"
                       }`}
                     >
                       {formatWordRank(item.wordRank)}
                     </td>
-                    <td className={`border-b ${borderColorClassName} py-3 pr-4`}>
+                    <td className={`border-b ${borderColorClassName} py-3 pl-4 pr-3`}>
                       <div className="flex items-center gap-3">
                         <div
                           className={`h-2.5 w-full min-w-[140px] overflow-hidden rounded-full ${
@@ -177,15 +173,6 @@ export function GuessHistoryTable({
                           {Math.round(progressWidth(item.wordRank))}%
                         </span>
                       </div>
-                    </td>
-                    <td className={`border-b ${borderColorClassName} py-3 text-center text-base`}>
-                      <span
-                        aria-label={item.isAnswer ? "정답" : "오답"}
-                        title={item.isAnswer ? "정답" : "오답"}
-                        className={item.isAnswer ? "text-[#23734b]" : "text-[#93a4af]"}
-                      >
-                        {item.isAnswer ? "●" : "○"}
-                      </span>
                     </td>
                   </tr>
                 );
