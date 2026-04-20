@@ -12,6 +12,7 @@ import { useGamePhase } from "../hooks/useGamePhase";
 import { useGamePolling } from "../hooks/useGamePolling";
 import type { GuessResult, RaceMapSubmissionBubble } from "../types/game";
 import { getGuessResultKey } from "../utils/guessHistory";
+import { normalizeInput } from "../utils/inputValidation";
 import { toRaceRunners } from "../utils/raceMap";
 
 interface GamePageProps {
@@ -51,6 +52,10 @@ export default function GamePage({
   const raceRunners = useMemo(
     () => toRaceRunners(gameState?.players ?? []),
     [gameState?.players],
+  );
+  const submittedWords = useMemo(
+    () => guessHistory.map((item) => normalizeInput(item.label)),
+    [guessHistory],
   );
 
   // Placeholder for real-time submission overlays from other users.
@@ -125,6 +130,7 @@ export default function GamePage({
           username={username}
           sessionId={sessionId}
           phase={phase}
+          submittedWords={submittedWords}
           onSubmitted={handleGuessSubmitted}
         />
 

@@ -1,16 +1,18 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { submitGuess } from "../../services/gameService";
 import { GamePhaseEnum, type GamePhase, type GuessResult } from "../../types/game";
-import { validateGuessWord } from "../../utils/inputValidation";
+import { normalizeInput, validateGuessWord } from "../../utils/inputValidation";
 
 interface WordGuessComposerProps {
   username: string;
   sessionId: string;
   phase: GamePhase;
+  submittedWords?: string[];
   onSubmitted: (result: GuessResult) => Promise<void>;
 }
 
 const SUBMIT_COOLDOWN_MS = 700;
+const DUPLICATE_GUESS_ERROR = "You already submitted this word. Try a different one.";
 
 function toErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message.trim()) {
@@ -24,6 +26,7 @@ export function WordGuessComposer({
   username,
   sessionId,
   phase,
+  submittedWords = [],
   onSubmitted,
 }: WordGuessComposerProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -36,6 +39,10 @@ export function WordGuessComposer({
 
   const isInGame = phase === GamePhaseEnum.IN_GAME;
   const isDisabled = !isInGame || isSubmitting;
+  const normalizedSubmittedWords = useMemo(
+    () => new Set(submittedWords.map((submittedWord) => normalizeInput(submittedWord))),
+    [submittedWords],
+  );
 
   useEffect(() => {
     if (!shouldRestoreFocusRef.current || isDisabled) return;
@@ -65,7 +72,12 @@ export function WordGuessComposer({
     }
 
     if (lastSubmittedWordRef.current === validation.value) {
-      setError("이미 제출한 단어예요. 다른 단어를 시도해 보세요.");
+      setError(DUPLICATE_GUESS_ERROR);
+      return;
+    }
+
+    if (normalizedSubmittedWords.has(validation.value)) {
+      setError(DUPLICATE_GUESS_ERROR);
       return;
     }
 
