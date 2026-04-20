@@ -43,15 +43,35 @@ test("highlights the latest submitted guess and moves it to the top", () => {
   expect(within(rows[1]).getByText("alpha")).toBeInTheDocument();
 });
 
-test("shows word rank and fills the progress bar on a 1 to 1000 scale", () => {
+test("shows word rank labels and fills the progress bar on a 1 to 1000 scale", () => {
   render(<GuessHistoryTable items={items} />);
 
+  expect(screen.queryByText("제출 순위")).not.toBeInTheDocument();
+  expect(screen.queryByText("정답")).not.toBeInTheDocument();
   expect(screen.getByText("단어 순위")).toBeInTheDocument();
   expect(screen.getByText("1위 = 100% / 1000위 = 0%")).toBeInTheDocument();
-  expect(screen.getByText("#25")).toBeInTheDocument();
+  expect(screen.getByText("25위")).toBeInTheDocument();
 
   const progressLabels = screen.getAllByText(/%$/);
   expect(progressLabels[0]).toHaveTextContent("98%");
   expect(progressLabels[1]).toHaveTextContent("70%");
   expect(progressLabels[2]).toHaveTextContent("36%");
+});
+
+test("shows 1000위 이상 when word rank is outside 1 to 999", () => {
+  render(
+    <GuessHistoryTable
+      items={[
+        {
+          label: "delta",
+          similarity: 41.25,
+          rank: 200,
+          wordRank: 1300,
+          isAnswer: false,
+        },
+      ]}
+    />,
+  );
+
+  expect(screen.getByText("1000위 이상")).toBeInTheDocument();
 });
