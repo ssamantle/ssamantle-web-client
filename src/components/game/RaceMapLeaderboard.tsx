@@ -5,7 +5,7 @@ import type {
   RaceMapTick,
   RaceRunner,
 } from "../../types/game";
-import { RACE_MAP_TICKS, mapSimilarityToTrackY } from "../../utils/raceMap";
+import { RACE_MAP_TICKS, mapRankProgressToTrackY } from "../../utils/raceMap";
 
 interface RaceMapLeaderboardProps {
   runners: RaceRunner[];
@@ -248,9 +248,8 @@ export function RaceMapLeaderboard({
                 markersByPlayer.get(normalizeUsername(runner.name)) ?? [];
               const bestMarker = markerForType(runnerMarkers, "best");
               const latestMarker = markerForType(runnerMarkers, "latest");
-              const labelSimilarity =
-                bestMarker?.similarity ?? latestMarker?.similarity ?? runner.bestSimilarity;
-              const labelY = `${mapSimilarityToTrackY(labelSimilarity) * 100}%`;
+              const labelWordRank = bestMarker?.wordRank ?? latestMarker?.wordRank ?? runner.rank;
+              const labelY = `${mapRankProgressToTrackY(labelWordRank) * 100}%`;
               const labelZIndex = isCurrentUser
                 ? displayedRunners.length + 4
                 : displayedRunners.length - index + 2;
@@ -273,7 +272,7 @@ export function RaceMapLeaderboard({
                       marker={bestMarker}
                       isCurrentUser={isCurrentUser}
                       style={{
-                        top: `${mapSimilarityToTrackY(bestMarker.similarity) * 100}%`,
+                        top: `${mapRankProgressToTrackY(bestMarker.wordRank ?? runner.rank) * 100}%`,
                         transform: `translateY(calc(-50% + ${overlapOffset - 6}px))`,
                         zIndex: labelZIndex - 1,
                         opacity: isCurrentUser ? 1 : 0.82,
@@ -286,7 +285,7 @@ export function RaceMapLeaderboard({
                       marker={latestMarker}
                       isCurrentUser={isCurrentUser}
                       style={{
-                        top: `${mapSimilarityToTrackY(latestMarker.similarity) * 100}%`,
+                        top: `${mapRankProgressToTrackY(latestMarker.wordRank ?? runner.rank) * 100}%`,
                         transform: `translateY(calc(-50% + ${overlapOffset + 8}px))`,
                         zIndex: labelZIndex - 2,
                         opacity: isCurrentUser ? 0.9 : 0.62,

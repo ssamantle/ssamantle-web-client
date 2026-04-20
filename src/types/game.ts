@@ -39,6 +39,7 @@ export interface GuessResult {
 export interface PlayerSubmission {
   label: string;
   similarity: Similarity;
+  wordRank: Rank | null;
   submittedAt: Date | null;
 }
 
@@ -57,5 +58,6 @@ export interface RaceMapSimilarityMarker {
   id: string;
   playerName: string;
   similarity: Similarity;
+  wordRank: Rank | null;
   type: "best" | "latest";
 }

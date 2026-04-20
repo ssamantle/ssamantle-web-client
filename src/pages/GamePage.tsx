@@ -58,6 +58,7 @@ function toRaceMapMarkers(players: PlayerState[]): RaceMapSimilarityMarker[] {
         id: `${player.name}::best`,
         playerName: player.name,
         similarity: player.bestSubmission.similarity,
+        wordRank: player.bestSubmission.wordRank,
         type: "best",
       });
     }
@@ -67,6 +68,7 @@ function toRaceMapMarkers(players: PlayerState[]): RaceMapSimilarityMarker[] {
         id: `${player.name}::latest`,
         playerName: player.name,
         similarity: player.latestSubmission.similarity,
+        wordRank: player.latestSubmission.wordRank,
         type: "latest",
       });
     }

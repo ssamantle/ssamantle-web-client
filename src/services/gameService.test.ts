@@ -36,11 +36,13 @@ test("fetchGameState maps best and latest submissions from polling data", async 
         bestSubmission: {
           label: "best-word",
           similarity: 98.1,
+          wordRank: 4,
           submittedAt: "2026-04-20T09:30:00+09:00",
         },
         latestSubmission: {
           label: "latest-word",
           similarity: 91.4,
+          wordRank: 52,
           submittedAt: "2026-04-20T09:42:00+09:00",
         },
       },
@@ -58,11 +60,13 @@ test("fetchGameState maps best and latest submissions from polling data", async 
         bestSubmission: {
           label: "best-word",
           similarity: 98.1,
+          wordRank: 4,
           submittedAt: new Date("2026-04-20T09:30:00+09:00"),
         },
         latestSubmission: {
           label: "latest-word",
           similarity: 91.4,
+          wordRank: 52,
           submittedAt: new Date("2026-04-20T09:42:00+09:00"),
         },
       },
