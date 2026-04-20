@@ -78,13 +78,13 @@ export function RaceMapLeaderboard({
       <button
         type="button"
         onClick={onToggle}
-        className="fixed right-4 top-20 z-40 hidden rounded-full border border-[#c5d5e0] bg-white/90 px-3 py-1.5 text-xs font-semibold text-[#355469] shadow-sm backdrop-blur xl:inline-flex"
+        className="fixed right-4 top-20 z-40 hidden rounded-full border border-[#c5d5e0] bg-white/90 px-3 py-1.5 text-xs font-semibold text-[#355469] shadow-sm backdrop-blur lg:inline-flex"
       >
         {isVisible ? "레이스맵 숨기기" : "레이스맵 보기"}
       </button>
 
       {isVisible ? (
-        <aside className="fixed right-0 top-32 z-30 hidden h-[calc(100vh-9.5rem)] min-h-[380px] w-[210px] bg-transparent p-3 xl:block">
+        <aside className="fixed right-0 top-32 z-30 hidden h-[calc(100vh-9.5rem)] min-h-[380px] w-[210px] bg-transparent p-3 lg:block">
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-xs font-semibold tracking-[0.06em] text-[#486679]">
               RACE MAP
