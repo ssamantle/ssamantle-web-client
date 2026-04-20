@@ -1,20 +1,53 @@
 import type { GuessResult } from "../../types/game";
+import { normalizeInput } from "../../utils/inputValidation";
 
 interface GuessHistoryTableProps {
   items: GuessResult[];
+  latestSubmittedGuessLabel?: string | null;
   isLoading?: boolean;
   error?: Error | null;
 }
+
+const MAX_WORD_RANK = 1000;
+const MAX_SIMILARITY = 100;
+const MIN_EMPHASIS_OPACITY = 0.6;
+const MAX_EMPHASIS_OPACITY = 1;
 
 function formatSimilarity(value: number): string {
   if (!Number.isFinite(value)) return "-";
   return value.toFixed(2);
 }
 
-function progressWidth(rank: number): number {
-  if (!Number.isFinite(rank) || rank <= 0) return 0;
-  const width = ((1000 - Math.min(rank, 1000) + 1) / 1000) * 100;
+function formatWordRank(rank: number): string {
+  if (!Number.isFinite(rank) || rank <= 0) return "-";
+
+  const normalizedRank = Math.round(rank);
+  if (normalizedRank >= 1 && normalizedRank <= 999) {
+    return `${normalizedRank}위`;
+  }
+
+  return "1000위 이상";
+}
+
+function progressWidth(wordRank: number): number {
+  if (!Number.isFinite(wordRank) || wordRank <= 0) return 0;
+  const clampedRank = Math.min(wordRank, MAX_WORD_RANK);
+  const width = ((MAX_WORD_RANK - clampedRank) / (MAX_WORD_RANK - 1)) * 100;
   return Math.max(0, Math.min(width, 100));
+}
+
+function normalizeSimilarity(similarity: number): number {
+  if (!Number.isFinite(similarity)) return 0;
+  const clampedSimilarity = Math.max(0, Math.min(similarity, MAX_SIMILARITY));
+  return clampedSimilarity / MAX_SIMILARITY;
+}
+
+function emphasisOpacity(similarity: number, wordRank: number): number {
+  const similarityScore = normalizeSimilarity(similarity);
+  const wordRankScore = progressWidth(wordRank) / 100;
+  const combinedScore = (similarityScore + wordRankScore) / 2;
+  return MIN_EMPHASIS_OPACITY +
+    (MAX_EMPHASIS_OPACITY - MIN_EMPHASIS_OPACITY) * combinedScore;
 }
 
 function EmptyState() {
@@ -40,9 +73,8 @@ function LoadingState() {
       {Array.from({ length: 4 }).map((_, idx) => (
         <div
           key={idx}
-          className="grid grid-cols-[minmax(140px,1.4fr)_90px_90px_minmax(140px,1fr)_50px] gap-3 rounded-[3px] border border-[#d7e0ea] bg-white px-4 py-3"
+          className="grid grid-cols-[minmax(160px,1.6fr)_100px_100px_minmax(160px,1fr)] gap-3 rounded-[3px] border border-[#d7e0ea] bg-white px-5 py-3"
         >
-          <div className="h-4 bg-[#e8eef4]" />
           <div className="h-4 bg-[#e8eef4]" />
           <div className="h-4 bg-[#e8eef4]" />
           <div className="h-4 bg-[#e8eef4]" />
@@ -55,16 +87,27 @@ function LoadingState() {
 
 export function GuessHistoryTable({
   items,
+  latestSubmittedGuessLabel = null,
   isLoading = false,
   error = null,
 }: GuessHistoryTableProps) {
+  const sortedItems = latestSubmittedGuessLabel
+    ? [...items].sort((a, b) => {
+        const aHighlighted = normalizeInput(a.label) === latestSubmittedGuessLabel;
+        const bHighlighted = normalizeInput(b.label) === latestSubmittedGuessLabel;
+
+        if (aHighlighted === bHighlighted) return 0;
+        return aHighlighted ? -1 : 1;
+      })
+    : items;
+
   return (
     <section className="rounded-[3px] border border-[#d7e0ea] bg-white p-5">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold text-[#202938]">제출 기록</h2>
           <p className="text-sm text-[#5b7380]">
-            제출한 단어를 유사도 높은 순서대로 확인할 수 있습니다.
+            제출한 단어를 유사도와 단어 순위 기준으로 함께 확인할 수 있습니다.
           </p>
         </div>
 
@@ -84,49 +127,85 @@ export function GuessHistoryTable({
           <table className="min-w-full border-separate border-spacing-0 text-sm text-[#202938]">
             <thead>
               <tr className="text-left text-xs uppercase tracking-[0.06em] text-[#6c8491]">
-                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">단어</th>
+                <th className="border-b border-[#d7e0ea] pb-3 pl-3 pr-4 font-medium">단어</th>
                 <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">유사도</th>
-                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">순위</th>
-                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">진행도</th>
-                <th className="border-b border-[#d7e0ea] pb-3 font-medium">정답</th>
+                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">단어 순위</th>
+                <th className="border-b border-[#d7e0ea] pb-3 pl-4 pr-3 font-medium">
+                  <div>랭킹 기준</div>
+                  <div className="mt-1 text-[10px] normal-case tracking-normal text-[#8a9ca7]">
+                    1위 = 100% / 1000위 = 0%
+                  </div>
+                </th>
               </tr>
             </thead>
             <tbody>
-              {items.map((item, index) => (
-                <tr key={`${item.label}-${item.rank}-${index}`}>
-                  <td className="border-b border-[#eef3f7] py-3 pr-4 font-medium">
-                    {item.label}
-                  </td>
-                  <td className="border-b border-[#eef3f7] py-3 pr-4 font-semibold text-[#0c6887]">
-                    {formatSimilarity(item.similarity)}
-                  </td>
-                  <td className="border-b border-[#eef3f7] py-3 pr-4 text-[#536273]">
-                    #{item.rank}
-                  </td>
-                  <td className="border-b border-[#eef3f7] py-3 pr-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-2.5 w-full min-w-[140px] overflow-hidden rounded-full bg-[#e5edf3]">
-                        <div
-                          className="h-full rounded-full bg-[#11a4d3]"
-                          style={{ width: `${progressWidth(item.rank)}%` }}
-                        />
-                      </div>
-                      <span className="w-10 text-xs text-[#6c8491]">
-                        {Math.round(progressWidth(item.rank))}%
-                      </span>
-                    </div>
-                  </td>
-                  <td className="border-b border-[#eef3f7] py-3 text-center text-base">
-                    <span
-                      aria-label={item.isAnswer ? "정답" : "오답"}
-                      title={item.isAnswer ? "정답" : "오답"}
-                      className={item.isAnswer ? "text-[#23734b]" : "text-[#93a4af]"}
+              {sortedItems.map((item, index) => {
+                const isLatestSubmitted =
+                  normalizeInput(item.label) === latestSubmittedGuessLabel;
+                const borderColorClassName = isLatestSubmitted
+                  ? "border-[#eadfce]"
+                  : "border-[#eef3f7]";
+                const opacity = emphasisOpacity(item.similarity, item.wordRank);
+                const similarityColor = isLatestSubmitted
+                  ? `rgba(125, 91, 43, ${opacity})`
+                  : `rgba(12, 104, 135, ${opacity})`;
+                const wordRankColor = isLatestSubmitted
+                  ? `rgba(122, 102, 80, ${opacity})`
+                  : `rgba(53, 84, 105, ${opacity})`;
+                const progressColor = isLatestSubmitted
+                  ? `rgba(214, 181, 140, ${opacity})`
+                  : `rgba(17, 164, 211, ${opacity})`;
+                const progressLabelColor = isLatestSubmitted
+                  ? `rgba(141, 120, 94, ${opacity})`
+                  : `rgba(108, 132, 145, ${opacity})`;
+
+                return (
+                  <tr
+                    key={`${item.label}-${item.rank}-${index}`}
+                    className={isLatestSubmitted ? "bg-[#f4eadb]" : undefined}
+                    data-highlighted={isLatestSubmitted ? "true" : "false"}
+                  >
+                    <td className={`border-b ${borderColorClassName} py-3 pl-3 pr-4 font-medium`}>
+                      {item.label}
+                    </td>
+                    <td
+                      className={`border-b ${borderColorClassName} py-3 pr-4 font-semibold`}
+                      style={{ color: similarityColor }}
                     >
-                      {item.isAnswer ? "●" : "○"}
-                    </span>
-                  </td>
-                </tr>
-              ))}
+                      {formatSimilarity(item.similarity)}
+                    </td>
+                    <td
+                      className={`border-b ${borderColorClassName} py-3 pr-4 font-medium`}
+                      style={{ color: wordRankColor }}
+                    >
+                      {formatWordRank(item.wordRank)}
+                    </td>
+                    <td className={`border-b ${borderColorClassName} py-3 pl-4 pr-3`}>
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`h-2.5 w-full min-w-[140px] overflow-hidden rounded-full ${
+                            isLatestSubmitted ? "bg-[#eadfce]" : "bg-[#e5edf3]"
+                          }`}
+                        >
+                          <div
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${progressWidth(item.wordRank)}%`,
+                              backgroundColor: progressColor,
+                            }}
+                          />
+                        </div>
+                        <span
+                          className="w-10 text-xs"
+                          style={{ color: progressLabelColor }}
+                        >
+                          {Math.round(progressWidth(item.wordRank))}%
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

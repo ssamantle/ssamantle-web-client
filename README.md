@@ -37,8 +37,16 @@ npm start
 
 ## Tests
 
+일회성 실행:
+
 ```bash
 npm test
+```
+
+watch 모드 실행:
+
+```bash
+npm run test:watch
 ```
 
 ## Production build

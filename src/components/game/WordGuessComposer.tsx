@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { submitGuess } from "../../api/games";
+import { submitGuess } from "../../services/gameService";
 import { GamePhaseEnum, type GamePhase, type GuessResult } from "../../types/game";
 import { validateGuessWord } from "../../utils/inputValidation";
 
@@ -44,6 +44,17 @@ export function WordGuessComposer({
     shouldRestoreFocusRef.current = false;
   }, [isDisabled]);
 
+  const clearInputAndKeepFocus = (restoreAfterSubmit = false) => {
+    setWord("");
+
+    if (restoreAfterSubmit) {
+      shouldRestoreFocusRef.current = true;
+      return;
+    }
+
+    inputRef.current?.focus();
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -55,17 +66,14 @@ export function WordGuessComposer({
     const validation = validateGuessWord(word);
     if (!validation.isValid) {
       setError(validation.error ?? "추측할 단어를 확인해 주세요.");
+      clearInputAndKeepFocus();
       return;
     }
 
     const now = Date.now();
     if (now - lastSubmittedAtRef.current < SUBMIT_COOLDOWN_MS) {
       setError("너무 빠르게 제출하고 있습니다. 잠시 후 다시 시도해 주세요.");
-      return;
-    }
-
-    if (lastSubmittedWordRef.current === validation.value) {
-      setError("이미 제출한 단어예요. 다른 단어를 시도해 보세요.");
+      clearInputAndKeepFocus();
       return;
     }
 
@@ -76,12 +84,11 @@ export function WordGuessComposer({
       const nextResult = await submitGuess(sessionId, username, validation.value);
       lastSubmittedWordRef.current = validation.value;
       lastSubmittedAtRef.current = Date.now();
-      setWord("");
-      shouldRestoreFocusRef.current = true;
       await onSubmitted(nextResult);
     } catch (submitError) {
       setError(toErrorMessage(submitError));
     } finally {
+      clearInputAndKeepFocus(true);
       setIsSubmitting(false);
     }
   };

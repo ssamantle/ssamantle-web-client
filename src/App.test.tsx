@@ -1,14 +1,18 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
-import { joinGame, validateSession } from "./api/games";
+import { validateSession } from "./services/authService";
+import { joinGame } from "./services/gameService";
 
-jest.mock("./api/games", () => ({
+jest.mock("./services/gameService", () => ({
   joinGame: jest.fn(),
+}));
+
+jest.mock("./services/authService", () => ({
   validateSession: jest.fn(),
 }));
 
-jest.mock("./components/auth/LoginPage", () => ({
+jest.mock("./pages/LoginPage", () => ({
   LoginPage: ({ onLogin }: { onLogin: (username: string) => Promise<void> }) => (
     <div>
       <h1>게임에 입장하기 전에 사용자명을 입력해 주세요.</h1>

@@ -1,13 +1,24 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import GamePage from "./GamePage";
 import { GamePhaseEnum } from "../types/game";
-import { fetchGuessHistory } from "../api/games";
+import { fetchGuessHistory } from "../services/gameService";
 import { useGamePolling } from "../hooks/useGamePolling";
 import { useGameClock } from "../hooks/useGameClock";
 import { useGamePhase } from "../hooks/useGamePhase";
+import confetti from "canvas-confetti";
 
-jest.mock("../api/games", () => ({
+jest.mock("canvas-confetti", () => {
+  const create = jest.fn(() => jest.fn());
+  return {
+    __esModule: true,
+    default: {
+      create,
+    },
+  };
+});
+
+jest.mock("../services/gameService", () => ({
   fetchGuessHistory: jest.fn(),
 }));
 
@@ -21,6 +32,51 @@ jest.mock("../hooks/useGameClock", () => ({
 
 jest.mock("../hooks/useGamePhase", () => ({
   useGamePhase: jest.fn(),
+}));
+
+jest.mock("../components/game/WordGuessComposer", () => ({
+  WordGuessComposer: ({
+    onSubmitted,
+  }: {
+    onSubmitted: (result: {
+      isAnswer: boolean;
+      label: string;
+      rank: number;
+      similarity: number;
+      wordRank: number;
+    }) => Promise<void>;
+  }) => (
+    <>
+      <button
+        type="button"
+        onClick={() =>
+          void onSubmitted({
+            isAnswer: false,
+            label: "top-word",
+            rank: 77,
+            similarity: 14.55,
+            wordRank: 245,
+          })
+        }
+      >
+        submit-latest-word
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          void onSubmitted({
+            isAnswer: true,
+            label: "answer-word",
+            rank: 1,
+            similarity: 100,
+            wordRank: 1,
+          })
+        }
+      >
+        submit-answer-word
+      </button>
+    </>
+  ),
 }));
 
 const mockedFetchGuessHistory = fetchGuessHistory as jest.MockedFunction<
@@ -116,4 +172,122 @@ test("calls logout when the logout button is clicked", async () => {
   await userEvent.click(screen.getByRole("button", { name: "로그아웃" }));
 
   expect(onLogout).toHaveBeenCalledTimes(1);
+});
+
+test("shows the existing history row highlighted at the top after duplicate submission", async () => {
+  mockedFetchGuessHistory.mockResolvedValue([
+    {
+      isAnswer: false,
+      label: "top-word",
+      rank: 4,
+      similarity: 95.12,
+      wordRank: 44,
+    },
+    {
+      isAnswer: false,
+      label: "mid-word",
+      rank: 18,
+      similarity: 84.22,
+      wordRank: 180,
+    },
+  ]);
+
+  render(
+    <GamePage
+      username="tester"
+      sessionId="session-1"
+      onLogout={jest.fn()}
+    />,
+  );
+
+  await screen.findByText("top-word");
+  await userEvent.click(screen.getByRole("button", { name: "submit-latest-word" }));
+
+  const rows = screen.getAllByRole("row").slice(1);
+  expect(rows).toHaveLength(2);
+  expect(within(rows[0]).getByText("top-word")).toBeInTheDocument();
+  expect(rows[0]).toHaveAttribute("data-highlighted", "true");
+  expect(rows[0]).toHaveClass("bg-[#f4eadb]");
+});
+
+test("renders both best and latest similarity markers on the race map", () => {
+  mockedUseGamePolling.mockReturnValue({
+    gameState: {
+      startAt: null,
+      endAt: null,
+      players: [
+        {
+          name: "alpha",
+          rank: 1,
+          bestSimilarity: 97.3,
+          bestSubmission: {
+            label: "best-alpha",
+            similarity: 97.3,
+            wordRank: 2,
+            submittedAt: new Date("2026-04-20T09:31:00+09:00"),
+          },
+          latestSubmission: {
+            label: "latest-alpha",
+            similarity: 88.4,
+            wordRank: 84,
+            submittedAt: new Date("2026-04-20T09:35:00+09:00"),
+          },
+        },
+      ],
+    },
+    isLoading: false,
+    error: null,
+    lastSyncedAt: new Date("2026-04-17T12:34:56+09:00"),
+    refetch: jest.fn().mockResolvedValue(undefined),
+  });
+
+  const { container } = render(
+    <GamePage
+      username="tester"
+      sessionId="session-1"
+      onLogout={jest.fn()}
+    />,
+  );
+
+  const bestMarker = container.querySelector(
+    '[data-similarity-marker-type="best"][data-player-name="alpha"]',
+  );
+  const latestMarker = container.querySelector(
+    '[data-similarity-marker-type="latest"][data-player-name="alpha"]',
+  );
+  const latestMarkerLabel = container.querySelector(
+    '[data-similarity-marker-label-type="latest"][data-player-name="alpha"]',
+  );
+
+  expect(bestMarker).toBeInTheDocument();
+  expect(bestMarker).toHaveClass("bg-[#1c87b0]");
+  expect(latestMarker).toBeInTheDocument();
+  expect(latestMarker).toHaveClass("bg-[#aacada]");
+  expect(latestMarkerLabel).toBeInTheDocument();
+  expect(latestMarkerLabel).toHaveTextContent("alpha");
+  expect(screen.queryByText("best-alpha")).not.toBeInTheDocument();
+  expect(screen.queryByText("latest-alpha")).not.toBeInTheDocument();
+});
+
+test("shows confetti with bilateral launch origins when the submitted guess is the answer", async () => {
+  const { container } = render(
+    <GamePage
+      username="tester"
+      sessionId="session-1"
+      onLogout={jest.fn()}
+    />,
+  );
+
+  await userEvent.click(screen.getByRole("button", { name: "submit-answer-word" }));
+
+  await waitFor(() => {
+    expect(
+      container.querySelector('[data-confetti-active="true"]'),
+    ).toBeInTheDocument();
+  });
+
+  const mockedConfetti = confetti as unknown as {
+    create: jest.Mock;
+  };
+  expect(mockedConfetti.create).toHaveBeenCalled();
 });
