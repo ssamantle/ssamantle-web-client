@@ -38,3 +38,18 @@
     color: #11a4d3;
   }
 }
+
+.celebration-confetti-layer {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+}
+
+.celebration-confetti-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}

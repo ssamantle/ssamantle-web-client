@@ -7,6 +7,7 @@ import { WordGuessComposer } from "../components/game/WordGuessComposer";
 import { PlayerList } from "../components/game/PlayerList";
 import { GameTopInfoBar } from "../components/game/GameTopInfoBar";
 import { RaceMapLeaderboard } from "../components/game/RaceMapLeaderboard";
+import { CelebrationConfetti } from "../components/game/CelebrationConfetti";
 import { useGameClock } from "../hooks/useGameClock";
 import { useGamePhase } from "../hooks/useGamePhase";
 import { useGamePolling } from "../hooks/useGamePolling";
@@ -119,6 +120,7 @@ export default function GamePage({
   onLogout,
 }: GamePageProps) {
   const [guessHistory, setGuessHistory] = useState<GuessResult[]>([]);
+  const [celebrationBurstId, setCelebrationBurstId] = useState(0);
   const [latestSubmittedGuessLabel, setLatestSubmittedGuessLabel] = useState<string | null>(null);
   const [isGuessHistoryLoading, setIsGuessHistoryLoading] = useState(true);
   const [guessHistoryError, setGuessHistoryError] = useState<Error | null>(null);
@@ -184,6 +186,10 @@ export default function GamePage({
     setLatestSubmittedGuessLabel(normalizeInput(result.label));
     setGuessHistoryError(null);
 
+    if (result.isAnswer) {
+      setCelebrationBurstId((current) => current + 1);
+    }
+
     await refetch();
 
     try {
@@ -201,6 +207,8 @@ export default function GamePage({
 
   return (
     <>
+      <CelebrationConfetti burstId={celebrationBurstId} />
+
       <GameLayout>
         <GameTopInfoBar
           username={username}
