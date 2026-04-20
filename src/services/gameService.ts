@@ -122,6 +122,7 @@ export async function submitGuess(
     label: response.label,
     rank: response.rank,
     similarity: response.similarity,
+    wordRank: response.wordRank,
   };
 }
 
@@ -139,5 +140,6 @@ export async function fetchGuessHistory(
     label: item.label,
     rank: item.rank,
     similarity: item.similarity,
+    wordRank: item.wordRank,
   }));
 }

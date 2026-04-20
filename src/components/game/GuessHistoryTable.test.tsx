@@ -8,18 +8,21 @@ const items: GuessResult[] = [
     label: "alpha",
     similarity: 88.12,
     rank: 15,
+    wordRank: 25,
     isAnswer: false,
   },
   {
     label: "beta",
     similarity: 72.45,
     rank: 88,
+    wordRank: 300,
     isAnswer: false,
   },
   {
     label: "gamma",
     similarity: 64.1,
     rank: 133,
+    wordRank: 640,
     isAnswer: false,
   },
 ];

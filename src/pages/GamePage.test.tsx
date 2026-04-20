@@ -33,6 +33,7 @@ jest.mock("../components/game/WordGuessComposer", () => ({
       label: string;
       rank: number;
       similarity: number;
+      wordRank: number;
     }) => Promise<void>;
   }) => (
     <button
@@ -43,6 +44,7 @@ jest.mock("../components/game/WordGuessComposer", () => ({
           label: "latest-word",
           rank: 77,
           similarity: 14.55,
+          wordRank: 245,
         })
       }
     >
@@ -153,12 +155,14 @@ test("shows the latest submitted word at the top of the guess history", async ()
       label: "top-word",
       rank: 4,
       similarity: 95.12,
+      wordRank: 44,
     },
     {
       isAnswer: false,
       label: "mid-word",
       rank: 18,
       similarity: 84.22,
+      wordRank: 180,
     },
   ]);
 
@@ -183,6 +187,7 @@ test("shows the latest submitted word at the top of the guess history", async ()
     label: "latest-word",
     rank: 77,
     similarity: 14.55,
+    wordRank: 245,
   })).toBe("latest-word::77::14.550000::guess");
 });
 
