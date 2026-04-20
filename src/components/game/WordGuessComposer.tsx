@@ -44,10 +44,10 @@ export function WordGuessComposer({
     shouldRestoreFocusRef.current = false;
   }, [isDisabled]);
 
-  const clearInputAndKeepFocus = () => {
+  const clearInputAndKeepFocus = (restoreAfterSubmit = false) => {
     setWord("");
 
-    if (isDisabled) {
+    if (restoreAfterSubmit) {
       shouldRestoreFocusRef.current = true;
       return;
     }
@@ -88,7 +88,7 @@ export function WordGuessComposer({
     } catch (submitError) {
       setError(toErrorMessage(submitError));
     } finally {
-      clearInputAndKeepFocus();
+      clearInputAndKeepFocus(true);
       setIsSubmitting(false);
     }
   };
