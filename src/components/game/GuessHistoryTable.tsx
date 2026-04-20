@@ -8,14 +8,22 @@ interface GuessHistoryTableProps {
   error?: Error | null;
 }
 
+const MAX_WORD_RANK = 1000;
+
 function formatSimilarity(value: number): string {
   if (!Number.isFinite(value)) return "-";
   return value.toFixed(2);
 }
 
-function progressWidth(rank: number): number {
-  if (!Number.isFinite(rank) || rank <= 0) return 0;
-  const width = ((1000 - Math.min(rank, 1000) + 1) / 1000) * 100;
+function formatWordRank(rank: number): string {
+  if (!Number.isFinite(rank) || rank <= 0) return "-";
+  return `#${Math.round(rank)}`;
+}
+
+function progressWidth(wordRank: number): number {
+  if (!Number.isFinite(wordRank) || wordRank <= 0) return 0;
+  const clampedRank = Math.min(wordRank, MAX_WORD_RANK);
+  const width = ((MAX_WORD_RANK - clampedRank) / (MAX_WORD_RANK - 1)) * 100;
   return Math.max(0, Math.min(width, 100));
 }
 
@@ -42,7 +50,7 @@ function LoadingState() {
       {Array.from({ length: 4 }).map((_, idx) => (
         <div
           key={idx}
-          className="grid grid-cols-[minmax(140px,1.4fr)_90px_90px_minmax(140px,1fr)_50px] gap-3 rounded-[3px] border border-[#d7e0ea] bg-white px-4 py-3"
+          className="grid grid-cols-[minmax(140px,1.4fr)_90px_90px_90px_minmax(140px,1fr)_50px] gap-3 rounded-[3px] border border-[#d7e0ea] bg-white px-4 py-3"
         >
           <div className="h-4 bg-[#e8eef4]" />
           <div className="h-4 bg-[#e8eef4]" />
@@ -77,7 +85,7 @@ export function GuessHistoryTable({
         <div>
           <h2 className="text-base font-semibold text-[#202938]">제출 기록</h2>
           <p className="text-sm text-[#5b7380]">
-            제출한 단어를 유사도 높은 순서대로 확인할 수 있습니다.
+            제출한 단어를 유사도와 단어 순위 기준으로 함께 확인할 수 있습니다.
           </p>
         </div>
 
@@ -99,8 +107,14 @@ export function GuessHistoryTable({
               <tr className="text-left text-xs uppercase tracking-[0.06em] text-[#6c8491]">
                 <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">단어</th>
                 <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">유사도</th>
-                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">순위</th>
-                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">진행도</th>
+                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">제출 순위</th>
+                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">단어 순위</th>
+                <th className="border-b border-[#d7e0ea] pb-3 pr-4 font-medium">
+                  <div>랭킹 기준</div>
+                  <div className="mt-1 text-[10px] normal-case tracking-normal text-[#8a9ca7]">
+                    1위 = 100% / 1000위 = 0%
+                  </div>
+                </th>
                 <th className="border-b border-[#d7e0ea] pb-3 font-medium">정답</th>
               </tr>
             </thead>
@@ -134,6 +148,13 @@ export function GuessHistoryTable({
                     >
                       #{item.rank}
                     </td>
+                    <td
+                      className={`border-b ${borderColorClassName} py-3 pr-4 font-medium ${
+                        isLatestSubmitted ? "text-[#7a6650]" : "text-[#355469]"
+                      }`}
+                    >
+                      {formatWordRank(item.wordRank)}
+                    </td>
                     <td className={`border-b ${borderColorClassName} py-3 pr-4`}>
                       <div className="flex items-center gap-3">
                         <div
@@ -145,7 +166,7 @@ export function GuessHistoryTable({
                             className={`h-full rounded-full ${
                               isLatestSubmitted ? "bg-[#d6b58c]" : "bg-[#11a4d3]"
                             }`}
-                            style={{ width: `${progressWidth(item.rank)}%` }}
+                            style={{ width: `${progressWidth(item.wordRank)}%` }}
                           />
                         </div>
                         <span
@@ -153,7 +174,7 @@ export function GuessHistoryTable({
                             isLatestSubmitted ? "text-[#8d785e]" : "text-[#6c8491]"
                           }`}
                         >
-                          {Math.round(progressWidth(item.rank))}%
+                          {Math.round(progressWidth(item.wordRank))}%
                         </span>
                       </div>
                     </td>
