@@ -4,6 +4,7 @@ import { RACE_MAP_TICKS, mapSimilarityToTrackY } from "../../utils/raceMap";
 
 interface RaceMapLeaderboardProps {
   runners: RaceRunner[];
+  currentUsername: string;
   isVisible: boolean;
   onToggle: () => void;
   bubbles?: RaceMapSubmissionBubble[];
@@ -61,11 +62,13 @@ function runnerOffset(name: string): number {
 
 export function RaceMapLeaderboard({
   runners,
+  currentUsername,
   isVisible,
   onToggle,
   bubbles = [],
 }: RaceMapLeaderboardProps) {
   const now = useAnimationNow(isVisible && bubbles.length > 0);
+  const normalizedCurrentUsername = currentUsername.trim().toLowerCase();
 
   const latestBubbleByPlayer = useMemo(() => {
     const map = new Map<string, RaceMapSubmissionBubble>();
@@ -81,6 +84,18 @@ export function RaceMapLeaderboard({
 
     return map;
   }, [bubbles, now]);
+
+  const displayedRunners = useMemo(() => {
+    return [...runners].sort((left, right) => {
+      const leftIsCurrentUser =
+        left.name.trim().toLowerCase() === normalizedCurrentUsername;
+      const rightIsCurrentUser =
+        right.name.trim().toLowerCase() === normalizedCurrentUsername;
+
+      if (leftIsCurrentUser === rightIsCurrentUser) return 0;
+      return leftIsCurrentUser ? 1 : -1;
+    });
+  }, [normalizedCurrentUsername, runners]);
 
   return (
     <>
@@ -122,13 +137,16 @@ export function RaceMapLeaderboard({
               );
             })}
 
-            {runners.map((runner, index) => {
+            {displayedRunners.map((runner, index) => {
               const ratio = mapSimilarityToTrackY(runner.bestSimilarity);
               const y = `${ratio * 100}%`;
               const overlapOffset = runnerOffset(runner.name);
               const bubble = latestBubbleByPlayer.get(runner.name);
               const opacity = bubble ? bubbleOpacity(now, bubble) : 0;
               const medal = medalForRank(runner.rank);
+              const isCurrentUser =
+                runner.name.trim().toLowerCase() === normalizedCurrentUsername;
+              const markerOpacity = isCurrentUser ? 1 : 0.8;
 
               return (
                 <div
@@ -137,13 +155,30 @@ export function RaceMapLeaderboard({
                   style={{
                     top: y,
                     transform: `translateY(calc(-50% + ${overlapOffset}px))`,
-                    zIndex: runners.length - index,
+                    zIndex: isCurrentUser
+                      ? displayedRunners.length + 1
+                      : displayedRunners.length - index,
                   }}
                 >
-                  <div className="relative flex items-center justify-center">
-                    <div className="absolute right-[8px] h-2.5 w-2.5 rounded-full border border-white bg-[#1c87b0] shadow" />
+                  <div
+                    className="relative flex items-center justify-center"
+                    style={{ opacity: markerOpacity }}
+                  >
+                    <div
+                      className={`absolute rounded-full shadow ${
+                        isCurrentUser
+                          ? "right-[7px] h-3.5 w-3.5 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
+                          : "right-[8px] h-2.5 w-2.5 border border-white bg-[#1c87b0]"
+                      }`}
+                    />
 
-                    <span className="absolute right-[28px] flex max-w-[144px] items-center gap-1 truncate rounded-full border border-[#b9d0df] bg-white px-2 py-0.5 text-[10px] font-medium text-[#25475a] shadow-sm">
+                    <span
+                      className={`absolute right-[28px] flex max-w-[144px] items-center gap-1 truncate rounded-full bg-white px-2 py-0.5 text-[10px] font-medium shadow-sm ${
+                        isCurrentUser
+                          ? "border border-[#6fa6bc] text-[#123f55]"
+                          : "border border-[#b9d0df] text-[#25475a]"
+                      }`}
+                    >
                       {medal ? <span aria-hidden="true">{medal}</span> : null}
                       <span className="truncate">{runner.name}</span>
                     </span>
@@ -151,7 +186,7 @@ export function RaceMapLeaderboard({
                     {bubble ? (
                       <span
                         className="pointer-events-none absolute right-[28px] top-[-1.55rem] max-w-[144px] truncate rounded-[4px] border border-[#d6dee6] bg-white px-2 py-0.5 text-[10px] text-[#3e5b6e] shadow transition-opacity"
-                        style={{ opacity }}
+                        style={{ opacity: opacity * markerOpacity }}
                         title={bubble.word}
                       >
                         {bubble.word}
