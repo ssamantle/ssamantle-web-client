@@ -1,9 +1,9 @@
 import type { GuessResult } from "../../types/game";
-import { getGuessResultKey } from "../../utils/guessHistory";
+import { normalizeInput } from "../../utils/inputValidation";
 
 interface GuessHistoryTableProps {
   items: GuessResult[];
-  latestSubmittedGuessKey?: string | null;
+  latestSubmittedGuessLabel?: string | null;
   isLoading?: boolean;
   error?: Error | null;
 }
@@ -87,14 +87,14 @@ function LoadingState() {
 
 export function GuessHistoryTable({
   items,
-  latestSubmittedGuessKey = null,
+  latestSubmittedGuessLabel = null,
   isLoading = false,
   error = null,
 }: GuessHistoryTableProps) {
-  const sortedItems = latestSubmittedGuessKey
+  const sortedItems = latestSubmittedGuessLabel
     ? [...items].sort((a, b) => {
-        const aHighlighted = getGuessResultKey(a) === latestSubmittedGuessKey;
-        const bHighlighted = getGuessResultKey(b) === latestSubmittedGuessKey;
+        const aHighlighted = normalizeInput(a.label) === latestSubmittedGuessLabel;
+        const bHighlighted = normalizeInput(b.label) === latestSubmittedGuessLabel;
 
         if (aHighlighted === bHighlighted) return 0;
         return aHighlighted ? -1 : 1;
@@ -140,7 +140,8 @@ export function GuessHistoryTable({
             </thead>
             <tbody>
               {sortedItems.map((item, index) => {
-                const isLatestSubmitted = getGuessResultKey(item) === latestSubmittedGuessKey;
+                const isLatestSubmitted =
+                  normalizeInput(item.label) === latestSubmittedGuessLabel;
                 const borderColorClassName = isLatestSubmitted
                   ? "border-[#eadfce]"
                   : "border-[#eef3f7]";
