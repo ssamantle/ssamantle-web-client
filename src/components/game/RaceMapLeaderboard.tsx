@@ -142,6 +142,7 @@ function RaceMapSimilarityDot({
   isCurrentUser,
   style,
 }: RaceMapSimilarityDotProps) {
+  const showLatestLabel = marker.type === "latest";
   const markerClasses =
     marker.type === "best"
       ? isCurrentUser
@@ -162,6 +163,20 @@ function RaceMapSimilarityDot({
         className={`absolute right-[8px] rounded-full shadow ${markerClasses}`}
         aria-label={`${marker.playerName} ${marker.type}`}
       />
+
+      {showLatestLabel ? (
+        <span
+          data-similarity-marker-label-type={marker.type}
+          data-player-name={marker.playerName}
+          className={`absolute right-[28px] max-w-[144px] truncate rounded-full bg-white/90 px-2 py-0.5 text-[10px] shadow-sm ${
+            isCurrentUser
+              ? "border border-[#a7c8d8] text-[#2f5f75]"
+              : "border border-[#c8dbe6] text-[#587283]"
+          }`}
+        >
+          {marker.playerName}
+        </span>
+      ) : null}
     </div>
   );
 }

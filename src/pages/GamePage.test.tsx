@@ -226,11 +226,16 @@ test("renders both best and latest similarity markers on the race map", () => {
   const latestMarker = container.querySelector(
     '[data-similarity-marker-type="latest"][data-player-name="alpha"]',
   );
+  const latestMarkerLabel = container.querySelector(
+    '[data-similarity-marker-label-type="latest"][data-player-name="alpha"]',
+  );
 
   expect(bestMarker).toBeInTheDocument();
   expect(bestMarker).toHaveClass("bg-[#1c87b0]");
   expect(latestMarker).toBeInTheDocument();
   expect(latestMarker).toHaveClass("bg-[#aacada]");
+  expect(latestMarkerLabel).toBeInTheDocument();
+  expect(latestMarkerLabel).toHaveTextContent("alpha");
   expect(screen.queryByText("best-alpha")).not.toBeInTheDocument();
   expect(screen.queryByText("latest-alpha")).not.toBeInTheDocument();
 });
