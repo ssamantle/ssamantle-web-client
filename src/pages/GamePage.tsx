@@ -13,7 +13,7 @@ import { useGamePolling } from "../hooks/useGamePolling";
 import type {
   GuessResult,
   PlayerState,
-  RaceMapSubmissionBubble,
+  RaceMapSimilarityMarker,
 } from "../types/game";
 import { normalizeInput } from "../utils/inputValidation";
 import { toRaceRunners } from "../utils/raceMap";
@@ -49,31 +49,29 @@ function sortGuessHistory(items: GuessResult[]): GuessResult[] {
     });
 }
 
-function toRaceMapBubbles(players: PlayerState[]): RaceMapSubmissionBubble[] {
+function toRaceMapMarkers(players: PlayerState[]): RaceMapSimilarityMarker[] {
   return players.flatMap((player) => {
-    const bubbles: RaceMapSubmissionBubble[] = [];
+    const markers: RaceMapSimilarityMarker[] = [];
 
     if (player.bestSubmission) {
-      bubbles.push({
+      markers.push({
         id: `${player.name}::best`,
         playerName: player.name,
-        word: player.bestSubmission.label,
         similarity: player.bestSubmission.similarity,
         type: "best",
       });
     }
 
     if (player.latestSubmission) {
-      bubbles.push({
+      markers.push({
         id: `${player.name}::latest`,
         playerName: player.name,
-        word: player.latestSubmission.label,
         similarity: player.latestSubmission.similarity,
         type: "latest",
       });
     }
 
-    return bubbles;
+    return markers;
   });
 }
 
@@ -96,8 +94,8 @@ export default function GamePage({
     () => toRaceRunners(gameState?.players ?? []),
     [gameState?.players],
   );
-  const raceMapBubbles = useMemo(
-    () => toRaceMapBubbles(gameState?.players ?? []),
+  const raceMapMarkers = useMemo(
+    () => toRaceMapMarkers(gameState?.players ?? []),
     [gameState?.players],
   );
 
@@ -192,7 +190,7 @@ export default function GamePage({
         currentUsername={username}
         isVisible={isRaceMapVisible}
         onToggle={() => setIsRaceMapVisible((current) => !current)}
-        bubbles={raceMapBubbles}
+        markers={raceMapMarkers}
       />
     </>
   );

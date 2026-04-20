@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type {
-  RaceMapSubmissionBubble,
+  RaceMapSimilarityMarker,
   RaceMapTick,
   RaceRunner,
 } from "../../types/game";
@@ -12,7 +12,7 @@ interface RaceMapLeaderboardProps {
   currentUsername: string;
   isVisible: boolean;
   onToggle: () => void;
-  bubbles?: RaceMapSubmissionBubble[];
+  markers?: RaceMapSimilarityMarker[];
 }
 
 function normalizeUsername(value: string): string {
@@ -36,8 +36,8 @@ function runnerOffset(name: string): number {
 }
 
 function compareBubbleType(
-  left: RaceMapSubmissionBubble,
-  right: RaceMapSubmissionBubble,
+  left: RaceMapSimilarityMarker,
+  right: RaceMapSimilarityMarker,
 ): number {
   if (left.type === right.type) return 0;
   return left.type === "best" ? -1 : 1;
@@ -125,16 +125,16 @@ function RaceMapRunnerMarker({
 }
 
 interface RaceMapSubmissionBubbleItemProps {
-  bubble: RaceMapSubmissionBubble;
+  marker: RaceMapSimilarityMarker;
   style: CSSProperties;
 }
 
 function RaceMapSubmissionBubbleItem({
-  bubble,
+  marker,
   style,
 }: RaceMapSubmissionBubbleItemProps) {
   const bubbleClasses =
-    bubble.type === "best"
+    marker.type === "best"
       ? "border-[#d6dee6] bg-white text-[#3e5b6e]"
       : "border-[#d5dfe7] bg-white/75 text-[#587283]";
 
@@ -144,12 +144,12 @@ function RaceMapSubmissionBubbleItem({
       style={style}
     >
       <span
-        data-bubble-type={bubble.type}
-        data-player-name={bubble.playerName}
+        data-marker-type={marker.type}
+        data-player-name={marker.playerName}
         className={`absolute right-[28px] max-w-[144px] truncate rounded-[4px] border px-2 py-0.5 text-[10px] shadow ${bubbleClasses}`}
-        title={bubble.word}
+        title={`${marker.playerName} ${marker.type}`}
       >
-        {bubble.word}
+        {marker.playerName}
       </span>
     </div>
   );
@@ -160,17 +160,17 @@ export function RaceMapLeaderboard({
   currentUsername,
   isVisible,
   onToggle,
-  bubbles = [],
+  markers = [],
 }: RaceMapLeaderboardProps) {
   const normalizedCurrentUsername = normalizeUsername(currentUsername);
 
-  const bubblesByPlayer = useMemo(() => {
-    const map = new Map<string, RaceMapSubmissionBubble[]>();
+  const markersByPlayer = useMemo(() => {
+    const map = new Map<string, RaceMapSimilarityMarker[]>();
 
-    bubbles.forEach((bubble) => {
-      const key = normalizeUsername(bubble.playerName);
+    markers.forEach((marker) => {
+      const key = normalizeUsername(marker.playerName);
       const current = map.get(key) ?? [];
-      current.push(bubble);
+      current.push(marker);
       map.set(key, current);
     });
 
@@ -179,7 +179,7 @@ export function RaceMapLeaderboard({
     });
 
     return map;
-  }, [bubbles]);
+  }, [markers]);
 
   const displayedRunners = useMemo(() => {
     return [...runners].sort((left, right) => {
@@ -219,8 +219,8 @@ export function RaceMapLeaderboard({
               const medal = medalForRank(runner.rank);
               const isCurrentUser =
                 normalizeUsername(runner.name) === normalizedCurrentUsername;
-              const runnerBubbles =
-                bubblesByPlayer.get(normalizeUsername(runner.name)) ?? [];
+              const runnerMarkers =
+                markersByPlayer.get(normalizeUsername(runner.name)) ?? [];
 
               return (
                 <div key={runner.name}>
@@ -237,12 +237,12 @@ export function RaceMapLeaderboard({
                     }}
                   />
 
-                  {runnerBubbles.map((bubble) => {
-                    const bubbleY = `${mapSimilarityToTrackY(bubble.similarity) * 100}%`;
+                  {runnerMarkers.map((marker) => {
+                    const bubbleY = `${mapSimilarityToTrackY(marker.similarity) * 100}%`;
                     const bubbleOffset =
-                      overlapOffset + (bubble.type === "best" ? -14 : 10);
+                      overlapOffset + (marker.type === "best" ? -14 : 10);
                     const bubbleOpacity =
-                      bubble.type === "best"
+                      marker.type === "best"
                         ? isCurrentUser
                           ? 1
                           : 0.8
@@ -250,16 +250,16 @@ export function RaceMapLeaderboard({
 
                     return (
                       <RaceMapSubmissionBubbleItem
-                        key={bubble.id}
-                        bubble={bubble}
+                        key={marker.id}
+                        marker={marker}
                         style={{
                           top: bubbleY,
                           transform: `translateY(calc(-50% + ${bubbleOffset}px))`,
                           zIndex: isCurrentUser
-                            ? displayedRunners.length + (bubble.type === "best" ? 2 : 1)
+                            ? displayedRunners.length + (marker.type === "best" ? 2 : 1)
                             : displayedRunners.length -
                               index +
-                              (bubble.type === "best" ? 1 : 0),
+                              (marker.type === "best" ? 1 : 0),
                           opacity: bubbleOpacity,
                         }}
                       />
