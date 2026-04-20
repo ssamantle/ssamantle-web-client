@@ -46,6 +46,7 @@ function toPlayerSubmission(value: unknown): PlayerSubmission | null {
   const data = value as {
     label?: unknown;
     similarity?: unknown;
+    wordRank?: unknown;
     submittedAt?: unknown;
   };
 
@@ -54,9 +55,20 @@ function toPlayerSubmission(value: unknown): PlayerSubmission | null {
     return null;
   }
 
+  const toPositiveRank = (rawRank: unknown): number | null => {
+    if (typeof rawRank !== "number" || !Number.isFinite(rawRank) || rawRank <= 0) {
+      return null;
+    }
+
+    return Math.trunc(rawRank);
+  };
+
+  const wordRank = toPositiveRank(data.wordRank);
+
   return {
     label: data.label,
     similarity: data.similarity,
+    wordRank,
     submittedAt: toDate(data.submittedAt),
   };
 }

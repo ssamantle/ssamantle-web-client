@@ -196,11 +196,13 @@ test("renders both best and latest similarity markers on the race map", () => {
           bestSubmission: {
             label: "best-alpha",
             similarity: 97.3,
+            wordRank: 2,
             submittedAt: new Date("2026-04-20T09:31:00+09:00"),
           },
           latestSubmission: {
             label: "latest-alpha",
             similarity: 88.4,
+            wordRank: 84,
             submittedAt: new Date("2026-04-20T09:35:00+09:00"),
           },
         },

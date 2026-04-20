@@ -36,11 +36,13 @@ test("fetchGameState maps best and latest submissions from polling data", async 
         bestSubmission: {
           label: "best-word",
           similarity: 98.1,
+          wordRank: 4,
           submittedAt: "2026-04-20T09:30:00+09:00",
         },
         latestSubmission: {
           label: "latest-word",
           similarity: 91.4,
+          wordRank: 52,
           submittedAt: "2026-04-20T09:42:00+09:00",
         },
       },
@@ -58,11 +60,13 @@ test("fetchGameState maps best and latest submissions from polling data", async 
         bestSubmission: {
           label: "best-word",
           similarity: 98.1,
+          wordRank: 4,
           submittedAt: new Date("2026-04-20T09:30:00+09:00"),
         },
         latestSubmission: {
           label: "latest-word",
           similarity: 91.4,
+          wordRank: 52,
           submittedAt: new Date("2026-04-20T09:42:00+09:00"),
         },
       },
@@ -70,6 +74,55 @@ test("fetchGameState maps best and latest submissions from polling data", async 
   });
 });
 
+test("fetchGameState ignores legacy submission rank field", async () => {
+  mockedGamesApi.gamePollingApiV1GamesPollingDbGet.mockResolvedValue({
+    startAt: "2026-04-20T09:00:00+09:00",
+    endAt: "2026-04-20T10:00:00+09:00",
+    users: [
+      {
+        name: "runner",
+        rank: 1,
+        bestSimilarity: 100,
+        bestSubmission: {
+          label: "answer",
+          similarity: 100,
+          rank: 1,
+          submittedAt: "2026-04-20T09:59:00+09:00",
+        },
+        latestSubmission: {
+          label: "answer",
+          similarity: 100,
+          rank: 1,
+          submittedAt: "2026-04-20T09:59:00+09:00",
+        },
+      },
+    ],
+  });
+
+  await expect(fetchGameState()).resolves.toEqual({
+    startAt: new Date("2026-04-20T09:00:00+09:00"),
+    endAt: new Date("2026-04-20T10:00:00+09:00"),
+    players: [
+      {
+        name: "runner",
+        rank: 1,
+        bestSimilarity: 100,
+        bestSubmission: {
+          label: "answer",
+          similarity: 100,
+          wordRank: null,
+          submittedAt: new Date("2026-04-20T09:59:00+09:00"),
+        },
+        latestSubmission: {
+          label: "answer",
+          similarity: 100,
+          wordRank: null,
+          submittedAt: new Date("2026-04-20T09:59:00+09:00"),
+        },
+      },
+    ],
+  });
+});
 test("joinGame validates username before API request", async () => {
   await expect(joinGame("a")).rejects.toThrow("사용자명은 2자 이상이어야 합니다.");
   expect(mockedGamesApi.joinGameApiV1GamesJoinPost).not.toHaveBeenCalled();

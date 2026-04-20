@@ -49,15 +49,49 @@ function sortGuessHistory(items: GuessResult[]): GuessResult[] {
     });
 }
 
-function toRaceMapMarkers(players: PlayerState[]): RaceMapSimilarityMarker[] {
+function normalizePlayerName(value: string): string {
+  return value.trim().toLowerCase();
+}
+
+function findWordRankInHistory(
+  history: GuessResult[],
+  label: string,
+): number | null {
+  const normalizedLabel = normalizeInput(label);
+  const matched = history.find(
+    (item) => normalizeInput(item.label) === normalizedLabel,
+  );
+
+  return matched?.wordRank ?? null;
+}
+
+function toRaceMapMarkers(
+  players: PlayerState[],
+  currentUsername: string,
+  guessHistory: GuessResult[],
+): RaceMapSimilarityMarker[] {
+  const normalizedCurrentUsername = normalizePlayerName(currentUsername);
+
   return players.flatMap((player) => {
     const markers: RaceMapSimilarityMarker[] = [];
+    const isCurrentUser =
+      normalizePlayerName(player.name) === normalizedCurrentUsername;
+
+    const toMarkerWordRank = (label: string, wordRank: number | null): number | null => {
+      if (wordRank != null) return wordRank;
+      if (!isCurrentUser) return null;
+      return findWordRankInHistory(guessHistory, label);
+    };
 
     if (player.bestSubmission) {
       markers.push({
         id: `${player.name}::best`,
         playerName: player.name,
         similarity: player.bestSubmission.similarity,
+        wordRank: toMarkerWordRank(
+          player.bestSubmission.label,
+          player.bestSubmission.wordRank,
+        ),
         type: "best",
       });
     }
@@ -67,6 +101,10 @@ function toRaceMapMarkers(players: PlayerState[]): RaceMapSimilarityMarker[] {
         id: `${player.name}::latest`,
         playerName: player.name,
         similarity: player.latestSubmission.similarity,
+        wordRank: toMarkerWordRank(
+          player.latestSubmission.label,
+          player.latestSubmission.wordRank,
+        ),
         type: "latest",
       });
     }
@@ -95,8 +133,8 @@ export default function GamePage({
     [gameState?.players],
   );
   const raceMapMarkers = useMemo(
-    () => toRaceMapMarkers(gameState?.players ?? []),
-    [gameState?.players],
+    () => toRaceMapMarkers(gameState?.players ?? [], username, guessHistory),
+    [gameState?.players, guessHistory, username],
   );
 
   const { phase, remainingMs, label } = useGamePhase({
@@ -145,7 +183,20 @@ export default function GamePage({
     setGuessHistory((current) => sortGuessHistory([...current, result]));
     setLatestSubmittedGuessLabel(normalizeInput(result.label));
     setGuessHistoryError(null);
+
     await refetch();
+
+    try {
+      const nextHistory = await fetchGuessHistory(sessionId, username);
+      setGuessHistory(sortGuessHistory(nextHistory));
+      setGuessHistoryError(null);
+    } catch (loadError) {
+      setGuessHistoryError(
+        loadError instanceof Error
+          ? loadError
+          : new Error("Failed to fetch guess history"),
+      );
+    }
   };
 
   return (
