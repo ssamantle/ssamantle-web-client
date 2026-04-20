@@ -52,10 +52,10 @@ test("shows word rank labels and fills the progress bar on a 1 to 1000 scale", (
   expect(screen.getByText("1위 = 100% / 1000위 = 0%")).toBeInTheDocument();
   expect(screen.getByText("25위")).toBeInTheDocument();
 
-  const progressLabels = screen.getAllByText(/%$/);
-  expect(progressLabels[0]).toHaveTextContent("98%");
-  expect(progressLabels[1]).toHaveTextContent("70%");
-  expect(progressLabels[2]).toHaveTextContent("36%");
+  const rows = screen.getAllByRole("row").slice(1);
+  expect(within(rows[0]).getByText("98%")).toBeInTheDocument();
+  expect(within(rows[1]).getByText("70%")).toBeInTheDocument();
+  expect(within(rows[2]).getByText("36%")).toBeInTheDocument();
 });
 
 test("shows 1000위 이상 when word rank is outside 1 to 999", () => {
@@ -74,4 +74,41 @@ test("shows 1000위 이상 when word rank is outside 1 to 999", () => {
   );
 
   expect(screen.getByText("1000위 이상")).toBeInTheDocument();
+});
+
+test("applies opacity between 0.6 and 1.0 from similarity and word rank", () => {
+  render(
+    <GuessHistoryTable
+      items={[
+        {
+          label: "max-emphasis",
+          similarity: 100,
+          rank: 1,
+          wordRank: 1,
+          isAnswer: false,
+        },
+        {
+          label: "min-emphasis",
+          similarity: 0,
+          rank: 500,
+          wordRank: 1000,
+          isAnswer: false,
+        },
+      ]}
+    />,
+  );
+
+  expect(screen.getByText("100.00").closest("td")).toHaveStyle({
+    color: "rgba(12, 104, 135, 1)",
+  });
+  expect(screen.getByText("1위").closest("td")).toHaveStyle({
+    color: "rgba(53, 84, 105, 1)",
+  });
+
+  expect(screen.getByText("0.00").closest("td")).toHaveStyle({
+    color: "rgba(12, 104, 135, 0.6)",
+  });
+  expect(screen.getByText("1000위 이상").closest("td")).toHaveStyle({
+    color: "rgba(53, 84, 105, 0.6)",
+  });
 });
