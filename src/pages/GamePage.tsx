@@ -10,7 +10,11 @@ import { RaceMapLeaderboard } from "../components/game/RaceMapLeaderboard";
 import { useGameClock } from "../hooks/useGameClock";
 import { useGamePhase } from "../hooks/useGamePhase";
 import { useGamePolling } from "../hooks/useGamePolling";
-import type { GuessResult, RaceMapSubmissionBubble } from "../types/game";
+import type {
+  GuessResult,
+  PlayerState,
+  RaceMapSubmissionBubble,
+} from "../types/game";
 import { getGuessResultKey } from "../utils/guessHistory";
 import { normalizeInput } from "../utils/inputValidation";
 import { toRaceRunners } from "../utils/raceMap";
@@ -46,6 +50,34 @@ function sortGuessHistory(items: GuessResult[]): GuessResult[] {
     });
 }
 
+function toRaceMapBubbles(players: PlayerState[]): RaceMapSubmissionBubble[] {
+  return players.flatMap((player) => {
+    const bubbles: RaceMapSubmissionBubble[] = [];
+
+    if (player.bestSubmission) {
+      bubbles.push({
+        id: `${player.name}::best`,
+        playerName: player.name,
+        word: player.bestSubmission.label,
+        similarity: player.bestSubmission.similarity,
+        type: "best",
+      });
+    }
+
+    if (player.latestSubmission) {
+      bubbles.push({
+        id: `${player.name}::latest`,
+        playerName: player.name,
+        word: player.latestSubmission.label,
+        similarity: player.latestSubmission.similarity,
+        type: "latest",
+      });
+    }
+
+    return bubbles;
+  });
+}
+
 export default function GamePage({
   username,
   sessionId,
@@ -65,8 +97,10 @@ export default function GamePage({
     () => toRaceRunners(gameState?.players ?? []),
     [gameState?.players],
   );
-  // Placeholder for real-time submission overlays from other users.
-  const raceMapBubbles: RaceMapSubmissionBubble[] = [];
+  const raceMapBubbles = useMemo(
+    () => toRaceMapBubbles(gameState?.players ?? []),
+    [gameState?.players],
+  );
 
   const { phase, remainingMs, label } = useGamePhase({
     now,
