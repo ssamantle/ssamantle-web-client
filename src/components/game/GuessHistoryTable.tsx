@@ -9,6 +9,9 @@ interface GuessHistoryTableProps {
 }
 
 const MAX_WORD_RANK = 1000;
+const MAX_SIMILARITY = 100;
+const MIN_EMPHASIS_OPACITY = 0.6;
+const MAX_EMPHASIS_OPACITY = 1;
 
 function formatSimilarity(value: number): string {
   if (!Number.isFinite(value)) return "-";
@@ -31,6 +34,20 @@ function progressWidth(wordRank: number): number {
   const clampedRank = Math.min(wordRank, MAX_WORD_RANK);
   const width = ((MAX_WORD_RANK - clampedRank) / (MAX_WORD_RANK - 1)) * 100;
   return Math.max(0, Math.min(width, 100));
+}
+
+function normalizeSimilarity(similarity: number): number {
+  if (!Number.isFinite(similarity)) return 0;
+  const clampedSimilarity = Math.max(0, Math.min(similarity, MAX_SIMILARITY));
+  return clampedSimilarity / MAX_SIMILARITY;
+}
+
+function emphasisOpacity(similarity: number, wordRank: number): number {
+  const similarityScore = normalizeSimilarity(similarity);
+  const wordRankScore = progressWidth(wordRank) / 100;
+  const combinedScore = (similarityScore + wordRankScore) / 2;
+  return MIN_EMPHASIS_OPACITY +
+    (MAX_EMPHASIS_OPACITY - MIN_EMPHASIS_OPACITY) * combinedScore;
 }
 
 function EmptyState() {
@@ -127,6 +144,19 @@ export function GuessHistoryTable({
                 const borderColorClassName = isLatestSubmitted
                   ? "border-[#eadfce]"
                   : "border-[#eef3f7]";
+                const opacity = emphasisOpacity(item.similarity, item.wordRank);
+                const similarityColor = isLatestSubmitted
+                  ? `rgba(125, 91, 43, ${opacity})`
+                  : `rgba(12, 104, 135, ${opacity})`;
+                const wordRankColor = isLatestSubmitted
+                  ? `rgba(122, 102, 80, ${opacity})`
+                  : `rgba(53, 84, 105, ${opacity})`;
+                const progressColor = isLatestSubmitted
+                  ? `rgba(214, 181, 140, ${opacity})`
+                  : `rgba(17, 164, 211, ${opacity})`;
+                const progressLabelColor = isLatestSubmitted
+                  ? `rgba(141, 120, 94, ${opacity})`
+                  : `rgba(108, 132, 145, ${opacity})`;
 
                 return (
                   <tr
@@ -138,16 +168,14 @@ export function GuessHistoryTable({
                       {item.label}
                     </td>
                     <td
-                      className={`border-b ${borderColorClassName} py-3 pr-4 font-semibold ${
-                        isLatestSubmitted ? "text-[#7d5b2b]" : "text-[#0c6887]"
-                      }`}
+                      className={`border-b ${borderColorClassName} py-3 pr-4 font-semibold`}
+                      style={{ color: similarityColor }}
                     >
                       {formatSimilarity(item.similarity)}
                     </td>
                     <td
-                      className={`border-b ${borderColorClassName} py-3 pr-4 font-medium ${
-                        isLatestSubmitted ? "text-[#7a6650]" : "text-[#355469]"
-                      }`}
+                      className={`border-b ${borderColorClassName} py-3 pr-4 font-medium`}
+                      style={{ color: wordRankColor }}
                     >
                       {formatWordRank(item.wordRank)}
                     </td>
@@ -159,16 +187,16 @@ export function GuessHistoryTable({
                           }`}
                         >
                           <div
-                            className={`h-full rounded-full ${
-                              isLatestSubmitted ? "bg-[#d6b58c]" : "bg-[#11a4d3]"
-                            }`}
-                            style={{ width: `${progressWidth(item.wordRank)}%` }}
+                            className="h-full rounded-full"
+                            style={{
+                              width: `${progressWidth(item.wordRank)}%`,
+                              backgroundColor: progressColor,
+                            }}
                           />
                         </div>
                         <span
-                          className={`w-10 text-xs ${
-                            isLatestSubmitted ? "text-[#8d785e]" : "text-[#6c8491]"
-                          }`}
+                          className="w-10 text-xs"
+                          style={{ color: progressLabelColor }}
                         >
                           {Math.round(progressWidth(item.wordRank))}%
                         </span>
