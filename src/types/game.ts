@@ -53,10 +53,9 @@ export interface RaceMapTick {
   ratio: number;
 }
 
-export interface RaceMapSubmissionBubble {
+export interface RaceMapSimilarityMarker {
   id: string;
   playerName: string;
-  word: string;
   similarity: Similarity;
   type: "best" | "latest";
 }

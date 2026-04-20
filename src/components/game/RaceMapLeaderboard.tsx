@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { CSSProperties, ReactNode } from "react";
 import type {
-  RaceMapSubmissionBubble,
+  RaceMapSimilarityMarker,
   RaceMapTick,
   RaceRunner,
 } from "../../types/game";
@@ -12,7 +12,7 @@ interface RaceMapLeaderboardProps {
   currentUsername: string;
   isVisible: boolean;
   onToggle: () => void;
-  bubbles?: RaceMapSubmissionBubble[];
+  markers?: RaceMapSimilarityMarker[];
 }
 
 function normalizeUsername(value: string): string {
@@ -35,12 +35,19 @@ function runnerOffset(name: string): number {
   return (seed % 3) * 4;
 }
 
-function compareBubbleType(
-  left: RaceMapSubmissionBubble,
-  right: RaceMapSubmissionBubble,
+function compareMarkerType(
+  left: RaceMapSimilarityMarker,
+  right: RaceMapSimilarityMarker,
 ): number {
   if (left.type === right.type) return 0;
   return left.type === "best" ? -1 : 1;
+}
+
+function markerForType(
+  markers: RaceMapSimilarityMarker[],
+  type: "best" | "latest",
+): RaceMapSimilarityMarker | null {
+  return markers.find((marker) => marker.type === type) ?? null;
 }
 
 interface RaceMapTrackProps {
@@ -124,33 +131,52 @@ function RaceMapRunnerMarker({
   );
 }
 
-interface RaceMapSubmissionBubbleItemProps {
-  bubble: RaceMapSubmissionBubble;
+interface RaceMapSimilarityDotProps {
+  marker: RaceMapSimilarityMarker;
+  isCurrentUser: boolean;
   style: CSSProperties;
 }
 
-function RaceMapSubmissionBubbleItem({
-  bubble,
+function RaceMapSimilarityDot({
+  marker,
+  isCurrentUser,
   style,
-}: RaceMapSubmissionBubbleItemProps) {
-  const bubbleClasses =
-    bubble.type === "best"
-      ? "border-[#d6dee6] bg-white text-[#3e5b6e]"
-      : "border-[#d5dfe7] bg-white/75 text-[#587283]";
+}: RaceMapSimilarityDotProps) {
+  const showLatestLabel = marker.type === "latest";
+  const markerClasses =
+    marker.type === "best"
+      ? isCurrentUser
+        ? "h-4 w-4 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
+        : "h-3 w-3 border border-white bg-[#1c87b0]"
+      : isCurrentUser
+        ? "h-3.5 w-3.5 border-2 border-white bg-[#85b7cf]"
+        : "h-2.5 w-2.5 border border-white bg-[#aacada]";
 
   return (
     <div
       className="pointer-events-none absolute left-0 right-0 motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[top,transform,opacity]"
       style={style}
     >
-      <span
-        data-bubble-type={bubble.type}
-        data-player-name={bubble.playerName}
-        className={`absolute right-[28px] max-w-[144px] truncate rounded-[4px] border px-2 py-0.5 text-[10px] shadow ${bubbleClasses}`}
-        title={bubble.word}
-      >
-        {bubble.word}
-      </span>
+      <div
+        data-similarity-marker-type={marker.type}
+        data-player-name={marker.playerName}
+        className={`absolute right-[8px] rounded-full shadow ${markerClasses}`}
+        aria-label={`${marker.playerName} ${marker.type}`}
+      />
+
+      {showLatestLabel ? (
+        <span
+          data-similarity-marker-label-type={marker.type}
+          data-player-name={marker.playerName}
+          className={`absolute right-[28px] max-w-[144px] truncate rounded-full bg-white/90 px-2 py-0.5 text-[10px] shadow-sm ${
+            isCurrentUser
+              ? "border border-[#a7c8d8] text-[#2f5f75]"
+              : "border border-[#c8dbe6] text-[#587283]"
+          }`}
+        >
+          {marker.playerName}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -160,26 +186,26 @@ export function RaceMapLeaderboard({
   currentUsername,
   isVisible,
   onToggle,
-  bubbles = [],
+  markers = [],
 }: RaceMapLeaderboardProps) {
   const normalizedCurrentUsername = normalizeUsername(currentUsername);
 
-  const bubblesByPlayer = useMemo(() => {
-    const map = new Map<string, RaceMapSubmissionBubble[]>();
+  const markersByPlayer = useMemo(() => {
+    const map = new Map<string, RaceMapSimilarityMarker[]>();
 
-    bubbles.forEach((bubble) => {
-      const key = normalizeUsername(bubble.playerName);
+    markers.forEach((marker) => {
+      const key = normalizeUsername(marker.playerName);
       const current = map.get(key) ?? [];
-      current.push(bubble);
+      current.push(marker);
       map.set(key, current);
     });
 
     map.forEach((playerBubbles) => {
-      playerBubbles.sort(compareBubbleType);
+      playerBubbles.sort(compareMarkerType);
     });
 
     return map;
-  }, [bubbles]);
+  }, [markers]);
 
   const displayedRunners = useMemo(() => {
     return [...runners].sort((left, right) => {
@@ -214,13 +240,20 @@ export function RaceMapLeaderboard({
 
           <RaceMapTrack ticks={RACE_MAP_TICKS} runnerCount={runners.length}>
             {displayedRunners.map((runner, index) => {
-              const markerY = `${mapSimilarityToTrackY(runner.bestSimilarity) * 100}%`;
               const overlapOffset = runnerOffset(runner.name);
               const medal = medalForRank(runner.rank);
               const isCurrentUser =
                 normalizeUsername(runner.name) === normalizedCurrentUsername;
-              const runnerBubbles =
-                bubblesByPlayer.get(normalizeUsername(runner.name)) ?? [];
+              const runnerMarkers =
+                markersByPlayer.get(normalizeUsername(runner.name)) ?? [];
+              const bestMarker = markerForType(runnerMarkers, "best");
+              const latestMarker = markerForType(runnerMarkers, "latest");
+              const labelSimilarity =
+                bestMarker?.similarity ?? latestMarker?.similarity ?? runner.bestSimilarity;
+              const labelY = `${mapSimilarityToTrackY(labelSimilarity) * 100}%`;
+              const labelZIndex = isCurrentUser
+                ? displayedRunners.length + 4
+                : displayedRunners.length - index + 2;
 
               return (
                 <div key={runner.name}>
@@ -229,42 +262,37 @@ export function RaceMapLeaderboard({
                     medal={medal}
                     isCurrentUser={isCurrentUser}
                     style={{
-                      top: markerY,
+                      top: labelY,
                       transform: `translateY(calc(-50% + ${overlapOffset}px))`,
-                      zIndex: isCurrentUser
-                        ? displayedRunners.length + 3
-                        : displayedRunners.length - index + 2,
+                      zIndex: labelZIndex,
                     }}
                   />
 
-                  {runnerBubbles.map((bubble) => {
-                    const bubbleY = `${mapSimilarityToTrackY(bubble.similarity) * 100}%`;
-                    const bubbleOffset =
-                      overlapOffset + (bubble.type === "best" ? -14 : 10);
-                    const bubbleOpacity =
-                      bubble.type === "best"
-                        ? isCurrentUser
-                          ? 1
-                          : 0.8
-                        : Math.max(0.42, (isCurrentUser ? 1 : 0.8) * 0.58);
+                  {bestMarker ? (
+                    <RaceMapSimilarityDot
+                      marker={bestMarker}
+                      isCurrentUser={isCurrentUser}
+                      style={{
+                        top: `${mapSimilarityToTrackY(bestMarker.similarity) * 100}%`,
+                        transform: `translateY(calc(-50% + ${overlapOffset - 6}px))`,
+                        zIndex: labelZIndex - 1,
+                        opacity: isCurrentUser ? 1 : 0.82,
+                      }}
+                    />
+                  ) : null}
 
-                    return (
-                      <RaceMapSubmissionBubbleItem
-                        key={bubble.id}
-                        bubble={bubble}
-                        style={{
-                          top: bubbleY,
-                          transform: `translateY(calc(-50% + ${bubbleOffset}px))`,
-                          zIndex: isCurrentUser
-                            ? displayedRunners.length + (bubble.type === "best" ? 2 : 1)
-                            : displayedRunners.length -
-                              index +
-                              (bubble.type === "best" ? 1 : 0),
-                          opacity: bubbleOpacity,
-                        }}
-                      />
-                    );
-                  })}
+                  {latestMarker ? (
+                    <RaceMapSimilarityDot
+                      marker={latestMarker}
+                      isCurrentUser={isCurrentUser}
+                      style={{
+                        top: `${mapSimilarityToTrackY(latestMarker.similarity) * 100}%`,
+                        transform: `translateY(calc(-50% + ${overlapOffset + 8}px))`,
+                        zIndex: labelZIndex - 2,
+                        opacity: isCurrentUser ? 0.9 : 0.62,
+                      }}
+                    />
+                  ) : null}
                 </div>
               );
             })}
