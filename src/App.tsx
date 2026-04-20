@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import { LoginPage } from "./components/auth/LoginPage";
 import GamePage from "./pages/GamePage";
+import { LoginPage } from "./pages/LoginPage";
 import { joinGame, validateSession } from "./api/games";
 import type { AuthState } from "./types/game";
 
