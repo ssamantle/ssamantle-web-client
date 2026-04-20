@@ -1,5 +1,10 @@
 import { useMemo } from "react";
-import type { RaceMapSubmissionBubble, RaceRunner } from "../../types/game";
+import type { CSSProperties, ReactNode } from "react";
+import type {
+  RaceMapSubmissionBubble,
+  RaceMapTick,
+  RaceRunner,
+} from "../../types/game";
 import { RACE_MAP_TICKS, mapSimilarityToTrackY } from "../../utils/raceMap";
 
 interface RaceMapLeaderboardProps {
@@ -30,6 +35,126 @@ function runnerOffset(name: string): number {
   return (seed % 3) * 4;
 }
 
+function compareBubbleType(
+  left: RaceMapSubmissionBubble,
+  right: RaceMapSubmissionBubble,
+): number {
+  if (left.type === right.type) return 0;
+  return left.type === "best" ? -1 : 1;
+}
+
+interface RaceMapTrackProps {
+  ticks: RaceMapTick[];
+  runnerCount: number;
+  children: ReactNode;
+}
+
+function tickTop(tick: RaceMapTick): string {
+  return `${(1 - tick.ratio) * 100}%`;
+}
+
+function RaceMapTrack({ ticks, runnerCount, children }: RaceMapTrackProps) {
+  return (
+    <div className="relative h-[calc(100%-1.75rem)] rounded-[4px] bg-transparent pl-2 pr-0">
+      <div className="absolute bottom-2 right-3 top-2 w-[2px] bg-[#7ea6be]" />
+
+      {ticks.map((tick) => (
+        <div
+          key={tick.label}
+          className="absolute left-0 right-0"
+          style={{ top: tickTop(tick) }}
+        >
+          <div className="relative -translate-y-1/2">
+            <div className="absolute right-2 h-[1px] w-6 bg-[#7094a9]" />
+            <span className="absolute left-1 text-[10px] font-semibold text-[#4f6f82]">
+              {tick.label}
+            </span>
+          </div>
+        </div>
+      ))}
+
+      <div className="absolute left-0 right-0 top-0 h-full">{children}</div>
+      <span className="sr-only">레이스맵에 {runnerCount}명의 참가자가 표시됩니다.</span>
+    </div>
+  );
+}
+
+interface RaceMapRunnerMarkerProps {
+  name: string;
+  medal: string | null;
+  isCurrentUser: boolean;
+  style: CSSProperties;
+}
+
+function RaceMapRunnerMarker({
+  name,
+  medal,
+  isCurrentUser,
+  style,
+}: RaceMapRunnerMarkerProps) {
+  return (
+    <div
+      className="absolute left-0 right-0 motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[top,transform]"
+      style={style}
+    >
+      <div
+        className="relative flex items-center justify-center"
+        style={{ opacity: isCurrentUser ? 1 : 0.8 }}
+      >
+        <div
+          className={`absolute rounded-full shadow ${
+            isCurrentUser
+              ? "right-[7px] h-3.5 w-3.5 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
+              : "right-[8px] h-2.5 w-2.5 border border-white bg-[#1c87b0]"
+          }`}
+        />
+
+        <span
+          className={`absolute right-[28px] flex max-w-[144px] items-center gap-1 truncate rounded-full bg-white px-2 py-0.5 text-[10px] font-medium shadow-sm ${
+            isCurrentUser
+              ? "border border-[#6fa6bc] text-[#123f55]"
+              : "border border-[#b9d0df] text-[#25475a]"
+          }`}
+        >
+          {medal ? <span aria-hidden="true">{medal}</span> : null}
+          <span className="truncate">{name}</span>
+        </span>
+      </div>
+    </div>
+  );
+}
+
+interface RaceMapSubmissionBubbleItemProps {
+  bubble: RaceMapSubmissionBubble;
+  style: CSSProperties;
+}
+
+function RaceMapSubmissionBubbleItem({
+  bubble,
+  style,
+}: RaceMapSubmissionBubbleItemProps) {
+  const bubbleClasses =
+    bubble.type === "best"
+      ? "border-[#d6dee6] bg-white text-[#3e5b6e]"
+      : "border-[#d5dfe7] bg-white/75 text-[#587283]";
+
+  return (
+    <div
+      className="pointer-events-none absolute left-0 right-0 motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[top,transform,opacity]"
+      style={style}
+    >
+      <span
+        data-bubble-type={bubble.type}
+        data-player-name={bubble.playerName}
+        className={`absolute right-[28px] max-w-[144px] truncate rounded-[4px] border px-2 py-0.5 text-[10px] shadow ${bubbleClasses}`}
+        title={bubble.word}
+      >
+        {bubble.word}
+      </span>
+    </div>
+  );
+}
+
 export function RaceMapLeaderboard({
   runners,
   currentUsername,
@@ -50,10 +175,7 @@ export function RaceMapLeaderboard({
     });
 
     map.forEach((playerBubbles) => {
-      playerBubbles.sort((left, right) => {
-        if (left.type === right.type) return 0;
-        return left.type === "best" ? -1 : 1;
-      });
+      playerBubbles.sort(compareBubbleType);
     });
 
     return map;
@@ -90,41 +212,22 @@ export function RaceMapLeaderboard({
             <span className="text-[11px] text-[#6f8798]">{runners.length}명</span>
           </div>
 
-          <div className="relative h-[calc(100%-1.75rem)] rounded-[4px] bg-transparent pl-2 pr-0">
-            <div className="absolute bottom-2 right-3 top-2 w-[2px] bg-[#7ea6be]" />
-
-            {RACE_MAP_TICKS.map((tick) => {
-              const y = `${(1 - tick.ratio) * 100}%`;
-              return (
-                <div
-                  key={tick.label}
-                  className="absolute left-0 right-0"
-                  style={{ top: y }}
-                >
-                  <div className="relative -translate-y-1/2">
-                    <div className="absolute right-2 h-[1px] w-6 bg-[#7094a9]" />
-                    <span className="absolute left-1 text-[10px] font-semibold text-[#4f6f82]">
-                      {tick.label}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
-
+          <RaceMapTrack ticks={RACE_MAP_TICKS} runnerCount={runners.length}>
             {displayedRunners.map((runner, index) => {
               const markerY = `${mapSimilarityToTrackY(runner.bestSimilarity) * 100}%`;
               const overlapOffset = runnerOffset(runner.name);
               const medal = medalForRank(runner.rank);
               const isCurrentUser =
                 normalizeUsername(runner.name) === normalizedCurrentUsername;
-              const markerOpacity = isCurrentUser ? 1 : 0.8;
               const runnerBubbles =
                 bubblesByPlayer.get(normalizeUsername(runner.name)) ?? [];
 
               return (
                 <div key={runner.name}>
-                  <div
-                    className="absolute left-0 right-0 motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[top,transform]"
+                  <RaceMapRunnerMarker
+                    name={runner.name}
+                    medal={medal}
+                    isCurrentUser={isCurrentUser}
                     style={{
                       top: markerY,
                       transform: `translateY(calc(-50% + ${overlapOffset}px))`,
@@ -132,31 +235,7 @@ export function RaceMapLeaderboard({
                         ? displayedRunners.length + 3
                         : displayedRunners.length - index + 2,
                     }}
-                  >
-                    <div
-                      className="relative flex items-center justify-center"
-                      style={{ opacity: markerOpacity }}
-                    >
-                      <div
-                        className={`absolute rounded-full shadow ${
-                          isCurrentUser
-                            ? "right-[7px] h-3.5 w-3.5 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
-                            : "right-[8px] h-2.5 w-2.5 border border-white bg-[#1c87b0]"
-                        }`}
-                      />
-
-                      <span
-                        className={`absolute right-[28px] flex max-w-[144px] items-center gap-1 truncate rounded-full bg-white px-2 py-0.5 text-[10px] font-medium shadow-sm ${
-                          isCurrentUser
-                            ? "border border-[#6fa6bc] text-[#123f55]"
-                            : "border border-[#b9d0df] text-[#25475a]"
-                        }`}
-                      >
-                        {medal ? <span aria-hidden="true">{medal}</span> : null}
-                        <span className="truncate">{runner.name}</span>
-                      </span>
-                    </div>
-                  </div>
+                  />
 
                   {runnerBubbles.map((bubble) => {
                     const bubbleY = `${mapSimilarityToTrackY(bubble.similarity) * 100}%`;
@@ -164,17 +243,15 @@ export function RaceMapLeaderboard({
                       overlapOffset + (bubble.type === "best" ? -14 : 10);
                     const bubbleOpacity =
                       bubble.type === "best"
-                        ? markerOpacity
-                        : Math.max(0.42, markerOpacity * 0.58);
-                    const bubbleClasses =
-                      bubble.type === "best"
-                        ? "border-[#d6dee6] bg-white text-[#3e5b6e]"
-                        : "border-[#d5dfe7] bg-white/75 text-[#587283]";
+                        ? isCurrentUser
+                          ? 1
+                          : 0.8
+                        : Math.max(0.42, (isCurrentUser ? 1 : 0.8) * 0.58);
 
                     return (
-                      <div
+                      <RaceMapSubmissionBubbleItem
                         key={bubble.id}
-                        className="pointer-events-none absolute left-0 right-0 motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[top,transform,opacity]"
+                        bubble={bubble}
                         style={{
                           top: bubbleY,
                           transform: `translateY(calc(-50% + ${bubbleOffset}px))`,
@@ -185,22 +262,13 @@ export function RaceMapLeaderboard({
                               (bubble.type === "best" ? 1 : 0),
                           opacity: bubbleOpacity,
                         }}
-                      >
-                        <span
-                          data-bubble-type={bubble.type}
-                          data-player-name={bubble.playerName}
-                          className={`absolute right-[28px] max-w-[144px] truncate rounded-[4px] border px-2 py-0.5 text-[10px] shadow ${bubbleClasses}`}
-                          title={bubble.word}
-                        >
-                          {bubble.word}
-                        </span>
-                      </div>
+                      />
                     );
                   })}
                 </div>
               );
             })}
-          </div>
+          </RaceMapTrack>
         </aside>
       ) : null}
     </>
