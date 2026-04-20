@@ -6,8 +6,38 @@ interface CelebrationConfettiProps {
 }
 
 const COLORS = ["#11a4d3", "#ffb703", "#ff6b6b", "#8cc63f", "#8d99ae", "#fb8500"];
-const BURST_DURATION_MS = 2200;
-const CLEANUP_BUFFER_MS = 280;
+
+// Tune these values to adjust confetti feel without touching the launch logic.
+const CONFETTI_TUNING = {
+  durationMs: 2200,
+  cleanupBufferMs: 280,
+  emissionCount: 16,
+  emitIntervalMs: 120,
+  sideParticleMin: 7,
+  sideParticleMax: 28,
+  sideSpreadStart: 34,
+  sideSpreadEnd: 58,
+  sideVelocityStart: 62,
+  sideVelocityEnd: 38,
+  sideGravity: 1,
+  sideTicks: 230,
+  sideScalarMin: 0.78,
+  sideScalarMax: 1.12,
+  sideAngleJitter: 8,
+  sideDriftMin: -0.18,
+  sideDriftMax: 0.18,
+  centerBurstUntilProgress: 0.55,
+  centerParticleMin: 4,
+  centerParticleMax: 11,
+  centerAngleJitter: 16,
+  centerSpread: 55,
+  centerVelocity: 38,
+  centerGravity: 1.05,
+  centerTicks: 185,
+  centerScalarMin: 0.72,
+  centerScalarMax: 0.92,
+  centerOriginJitter: 0.06,
+} as const;
 
 function randomInRange(min: number, max: number): number {
   return min + Math.random() * (max - min);
@@ -43,6 +73,7 @@ export function CelebrationConfetti({ burstId }: CelebrationConfettiProps) {
 
     const startAt = Date.now();
     let frameId = 0;
+    let emissionIndex = 0;
     let isCancelled = false;
 
     const launch = () => {
@@ -51,12 +82,24 @@ export function CelebrationConfetti({ burstId }: CelebrationConfettiProps) {
       }
 
       const elapsed = Date.now() - startAt;
-      const progress = Math.min(1, elapsed / BURST_DURATION_MS);
+      const progressByTime = Math.min(1, elapsed / CONFETTI_TUNING.durationMs);
+      const progressByEmission =
+        CONFETTI_TUNING.emissionCount > 1
+          ? emissionIndex / (CONFETTI_TUNING.emissionCount - 1)
+          : 1;
+      const progress = Math.min(1, Math.max(progressByTime, progressByEmission));
 
       const burstStrength = 1 - progress;
-      const particleCount = Math.max(7, Math.round(28 * burstStrength));
-      const spread = 34 + progress * 24;
-      const velocity = 62 - progress * 24;
+      const particleCount = Math.max(
+        CONFETTI_TUNING.sideParticleMin,
+        Math.round(CONFETTI_TUNING.sideParticleMax * burstStrength),
+      );
+      const spread =
+        CONFETTI_TUNING.sideSpreadStart
+        + progress * (CONFETTI_TUNING.sideSpreadEnd - CONFETTI_TUNING.sideSpreadStart);
+      const velocity =
+        CONFETTI_TUNING.sideVelocityStart
+        - progress * (CONFETTI_TUNING.sideVelocityStart - CONFETTI_TUNING.sideVelocityEnd);
 
       [
         { x: 0.08, angle: 60 },
@@ -64,34 +107,41 @@ export function CelebrationConfetti({ burstId }: CelebrationConfettiProps) {
       ].forEach((origin) => {
         fireRef.current?.({
           particleCount,
-          angle: origin.angle + randomInRange(-8, 8),
+          angle: origin.angle + randomInRange(-CONFETTI_TUNING.sideAngleJitter, CONFETTI_TUNING.sideAngleJitter),
           spread,
           startVelocity: velocity,
-          gravity: 1.0,
-          drift: randomInRange(-0.18, 0.18),
-          scalar: randomInRange(0.78, 1.12),
-          ticks: 230,
+          gravity: CONFETTI_TUNING.sideGravity,
+          drift: randomInRange(CONFETTI_TUNING.sideDriftMin, CONFETTI_TUNING.sideDriftMax),
+          scalar: randomInRange(CONFETTI_TUNING.sideScalarMin, CONFETTI_TUNING.sideScalarMax),
+          ticks: CONFETTI_TUNING.sideTicks,
           origin: { x: origin.x, y: 0.98 },
           colors: COLORS,
         });
       });
 
-      if (progress < 0.55) {
+      if (progress < CONFETTI_TUNING.centerBurstUntilProgress) {
         fireRef.current({
-          particleCount: Math.max(4, Math.round(11 * burstStrength)),
-          angle: 90 + randomInRange(-16, 16),
-          spread: 55,
-          startVelocity: 38,
-          gravity: 1.05,
-          scalar: randomInRange(0.72, 0.92),
-          ticks: 185,
-          origin: { x: 0.5 + randomInRange(-0.06, 0.06), y: 0.94 },
+          particleCount: Math.max(
+            CONFETTI_TUNING.centerParticleMin,
+            Math.round(CONFETTI_TUNING.centerParticleMax * burstStrength),
+          ),
+          angle: 90 + randomInRange(-CONFETTI_TUNING.centerAngleJitter, CONFETTI_TUNING.centerAngleJitter),
+          spread: CONFETTI_TUNING.centerSpread,
+          startVelocity: CONFETTI_TUNING.centerVelocity,
+          gravity: CONFETTI_TUNING.centerGravity,
+          scalar: randomInRange(CONFETTI_TUNING.centerScalarMin, CONFETTI_TUNING.centerScalarMax),
+          ticks: CONFETTI_TUNING.centerTicks,
+          origin: {
+            x: 0.5 + randomInRange(-CONFETTI_TUNING.centerOriginJitter, CONFETTI_TUNING.centerOriginJitter),
+            y: 0.94,
+          },
           colors: COLORS,
         });
       }
 
-      if (progress < 1) {
-        frameId = window.setTimeout(launch, 120);
+      emissionIndex += 1;
+      if (progress < 1 && emissionIndex < CONFETTI_TUNING.emissionCount) {
+        frameId = window.setTimeout(launch, CONFETTI_TUNING.emitIntervalMs);
       }
     };
 
@@ -99,7 +149,7 @@ export function CelebrationConfetti({ burstId }: CelebrationConfettiProps) {
 
     const timeoutId = window.setTimeout(
       () => setIsVisible(false),
-      BURST_DURATION_MS + CLEANUP_BUFFER_MS,
+      CONFETTI_TUNING.durationMs + CONFETTI_TUNING.cleanupBufferMs,
     );
 
     return () => {
