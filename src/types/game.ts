@@ -13,6 +13,8 @@ export interface PlayerState {
   name: string;
   rank: Rank;
   bestSimilarity: Similarity;
+  bestSubmission: PlayerSubmission | null;
+  latestSubmission: PlayerSubmission | null;
 }
 
 export interface GameState {
@@ -33,6 +35,12 @@ export interface GuessResult {
   similarity: Similarity;
 }
 
+export interface PlayerSubmission {
+  label: string;
+  similarity: Similarity;
+  submittedAt: Date | null;
+}
+
 export interface RaceRunner {
   name: string;
   bestSimilarity: Similarity;
@@ -48,6 +56,6 @@ export interface RaceMapSubmissionBubble {
   id: string;
   playerName: string;
   word: string;
-  createdAt: number;
-  expiresAt: number;
+  similarity: Similarity;
+  type: "best" | "latest";
 }

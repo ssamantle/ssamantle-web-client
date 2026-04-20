@@ -1,5 +1,10 @@
 import { gamesApi } from "../api/client";
-import type { AuthState, GameState, GuessResult } from "../types/game";
+import type {
+  AuthState,
+  GameState,
+  GuessResult,
+  PlayerSubmission,
+} from "../types/game";
 import {
   normalizeInput,
   validateGuessWord,
@@ -35,6 +40,27 @@ async function toApiError(
   return new Error(fallbackMessage);
 }
 
+function toPlayerSubmission(value: unknown): PlayerSubmission | null {
+  if (!value || typeof value !== "object") return null;
+
+  const data = value as {
+    label?: unknown;
+    similarity?: unknown;
+    submittedAt?: unknown;
+  };
+
+  if (typeof data.label !== "string") return null;
+  if (typeof data.similarity !== "number" || !Number.isFinite(data.similarity)) {
+    return null;
+  }
+
+  return {
+    label: data.label,
+    similarity: data.similarity,
+    submittedAt: toDate(data.submittedAt),
+  };
+}
+
 export async function fetchGameState(): Promise<GameState> {
   const data = await gamesApi.gamePollingApiV1GamesPollingDbGet();
 
@@ -46,6 +72,8 @@ export async function fetchGameState(): Promise<GameState> {
         name: user.name,
         rank: user.rank,
         bestSimilarity: user.bestSimilarity,
+        bestSubmission: toPlayerSubmission(user.bestSubmission),
+        latestSubmission: toPlayerSubmission(user.latestSubmission),
       }))
       .sort((a, b) => a.rank - b.rank),
   };

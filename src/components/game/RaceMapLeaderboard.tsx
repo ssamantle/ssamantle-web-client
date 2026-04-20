@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { RaceMapSubmissionBubble, RaceRunner } from "../../types/game";
 import { RACE_MAP_TICKS, mapSimilarityToTrackY } from "../../utils/raceMap";
 
@@ -10,38 +10,8 @@ interface RaceMapLeaderboardProps {
   bubbles?: RaceMapSubmissionBubble[];
 }
 
-function bubbleOpacity(now: number, bubble: RaceMapSubmissionBubble): number {
-  const lifespan = bubble.expiresAt - bubble.createdAt;
-  if (lifespan <= 0) return 0;
-
-  const elapsed = now - bubble.createdAt;
-  const progress = Math.max(0, Math.min(1, elapsed / lifespan));
-
-  if (progress < 0.1) {
-    return progress / 0.1;
-  }
-
-  if (progress > 0.75) {
-    return Math.max(0, (1 - progress) / 0.25);
-  }
-
-  return 1;
-}
-
-function useAnimationNow(active: boolean): number {
-  const [now, setNow] = useState(() => Date.now());
-
-  useEffect(() => {
-    if (!active) return;
-
-    const id = window.setInterval(() => {
-      setNow(Date.now());
-    }, 250);
-
-    return () => window.clearInterval(id);
-  }, [active]);
-
-  return now;
+function normalizeUsername(value: string): string {
+  return value.trim().toLowerCase();
 }
 
 function medalForRank(rank: number): string | null {
@@ -67,30 +37,34 @@ export function RaceMapLeaderboard({
   onToggle,
   bubbles = [],
 }: RaceMapLeaderboardProps) {
-  const now = useAnimationNow(isVisible && bubbles.length > 0);
-  const normalizedCurrentUsername = currentUsername.trim().toLowerCase();
+  const normalizedCurrentUsername = normalizeUsername(currentUsername);
 
-  const latestBubbleByPlayer = useMemo(() => {
-    const map = new Map<string, RaceMapSubmissionBubble>();
+  const bubblesByPlayer = useMemo(() => {
+    const map = new Map<string, RaceMapSubmissionBubble[]>();
 
     bubbles.forEach((bubble) => {
-      if (bubble.expiresAt <= now) return;
+      const key = normalizeUsername(bubble.playerName);
+      const current = map.get(key) ?? [];
+      current.push(bubble);
+      map.set(key, current);
+    });
 
-      const current = map.get(bubble.playerName);
-      if (!current || current.createdAt < bubble.createdAt) {
-        map.set(bubble.playerName, bubble);
-      }
+    map.forEach((playerBubbles) => {
+      playerBubbles.sort((left, right) => {
+        if (left.type === right.type) return 0;
+        return left.type === "best" ? -1 : 1;
+      });
     });
 
     return map;
-  }, [bubbles, now]);
+  }, [bubbles]);
 
   const displayedRunners = useMemo(() => {
     return [...runners].sort((left, right) => {
       const leftIsCurrentUser =
-        left.name.trim().toLowerCase() === normalizedCurrentUsername;
+        normalizeUsername(left.name) === normalizedCurrentUsername;
       const rightIsCurrentUser =
-        right.name.trim().toLowerCase() === normalizedCurrentUsername;
+        normalizeUsername(right.name) === normalizedCurrentUsername;
 
       if (leftIsCurrentUser === rightIsCurrentUser) return 0;
       return leftIsCurrentUser ? 1 : -1;
@@ -138,61 +112,91 @@ export function RaceMapLeaderboard({
             })}
 
             {displayedRunners.map((runner, index) => {
-              const ratio = mapSimilarityToTrackY(runner.bestSimilarity);
-              const y = `${ratio * 100}%`;
+              const markerY = `${mapSimilarityToTrackY(runner.bestSimilarity) * 100}%`;
               const overlapOffset = runnerOffset(runner.name);
-              const bubble = latestBubbleByPlayer.get(runner.name);
-              const opacity = bubble ? bubbleOpacity(now, bubble) : 0;
               const medal = medalForRank(runner.rank);
               const isCurrentUser =
-                runner.name.trim().toLowerCase() === normalizedCurrentUsername;
+                normalizeUsername(runner.name) === normalizedCurrentUsername;
               const markerOpacity = isCurrentUser ? 1 : 0.8;
+              const runnerBubbles =
+                bubblesByPlayer.get(normalizeUsername(runner.name)) ?? [];
 
               return (
-                <div
-                  key={runner.name}
-                  className="absolute left-0 right-0 motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[top,transform]"
-                  style={{
-                    top: y,
-                    transform: `translateY(calc(-50% + ${overlapOffset}px))`,
-                    zIndex: isCurrentUser
-                      ? displayedRunners.length + 1
-                      : displayedRunners.length - index,
-                  }}
-                >
+                <div key={runner.name}>
                   <div
-                    className="relative flex items-center justify-center"
-                    style={{ opacity: markerOpacity }}
+                    className="absolute left-0 right-0 motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[top,transform]"
+                    style={{
+                      top: markerY,
+                      transform: `translateY(calc(-50% + ${overlapOffset}px))`,
+                      zIndex: isCurrentUser
+                        ? displayedRunners.length + 3
+                        : displayedRunners.length - index + 2,
+                    }}
                   >
                     <div
-                      className={`absolute rounded-full shadow ${
-                        isCurrentUser
-                          ? "right-[7px] h-3.5 w-3.5 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
-                          : "right-[8px] h-2.5 w-2.5 border border-white bg-[#1c87b0]"
-                      }`}
-                    />
-
-                    <span
-                      className={`absolute right-[28px] flex max-w-[144px] items-center gap-1 truncate rounded-full bg-white px-2 py-0.5 text-[10px] font-medium shadow-sm ${
-                        isCurrentUser
-                          ? "border border-[#6fa6bc] text-[#123f55]"
-                          : "border border-[#b9d0df] text-[#25475a]"
-                      }`}
+                      className="relative flex items-center justify-center"
+                      style={{ opacity: markerOpacity }}
                     >
-                      {medal ? <span aria-hidden="true">{medal}</span> : null}
-                      <span className="truncate">{runner.name}</span>
-                    </span>
+                      <div
+                        className={`absolute rounded-full shadow ${
+                          isCurrentUser
+                            ? "right-[7px] h-3.5 w-3.5 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
+                            : "right-[8px] h-2.5 w-2.5 border border-white bg-[#1c87b0]"
+                        }`}
+                      />
 
-                    {bubble ? (
                       <span
-                        className="pointer-events-none absolute right-[28px] top-[-1.55rem] max-w-[144px] truncate rounded-[4px] border border-[#d6dee6] bg-white px-2 py-0.5 text-[10px] text-[#3e5b6e] shadow transition-opacity"
-                        style={{ opacity: opacity * markerOpacity }}
-                        title={bubble.word}
+                        className={`absolute right-[28px] flex max-w-[144px] items-center gap-1 truncate rounded-full bg-white px-2 py-0.5 text-[10px] font-medium shadow-sm ${
+                          isCurrentUser
+                            ? "border border-[#6fa6bc] text-[#123f55]"
+                            : "border border-[#b9d0df] text-[#25475a]"
+                        }`}
                       >
-                        {bubble.word}
+                        {medal ? <span aria-hidden="true">{medal}</span> : null}
+                        <span className="truncate">{runner.name}</span>
                       </span>
-                    ) : null}
+                    </div>
                   </div>
+
+                  {runnerBubbles.map((bubble) => {
+                    const bubbleY = `${mapSimilarityToTrackY(bubble.similarity) * 100}%`;
+                    const bubbleOffset =
+                      overlapOffset + (bubble.type === "best" ? -14 : 10);
+                    const bubbleOpacity =
+                      bubble.type === "best"
+                        ? markerOpacity
+                        : Math.max(0.42, markerOpacity * 0.58);
+                    const bubbleClasses =
+                      bubble.type === "best"
+                        ? "border-[#d6dee6] bg-white text-[#3e5b6e]"
+                        : "border-[#d5dfe7] bg-white/75 text-[#587283]";
+
+                    return (
+                      <div
+                        key={bubble.id}
+                        className="pointer-events-none absolute left-0 right-0 motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)] motion-safe:transition-[top,transform,opacity]"
+                        style={{
+                          top: bubbleY,
+                          transform: `translateY(calc(-50% + ${bubbleOffset}px))`,
+                          zIndex: isCurrentUser
+                            ? displayedRunners.length + (bubble.type === "best" ? 2 : 1)
+                            : displayedRunners.length -
+                              index +
+                              (bubble.type === "best" ? 1 : 0),
+                          opacity: bubbleOpacity,
+                        }}
+                      >
+                        <span
+                          data-bubble-type={bubble.type}
+                          data-player-name={bubble.playerName}
+                          className={`absolute right-[28px] max-w-[144px] truncate rounded-[4px] border px-2 py-0.5 text-[10px] shadow ${bubbleClasses}`}
+                          title={bubble.word}
+                        >
+                          {bubble.word}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               );
             })}
