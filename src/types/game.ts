@@ -32,3 +32,22 @@ export interface GuessResult {
   rank: Rank;
   similarity: Similarity;
 }
+
+export interface RaceRunner {
+  name: string;
+  bestSimilarity: Similarity;
+  rank: Rank;
+}
+
+export interface RaceMapTick {
+  label: string;
+  ratio: number;
+}
+
+export interface RaceMapSubmissionBubble {
+  id: string;
+  playerName: string;
+  word: string;
+  createdAt: number;
+  expiresAt: number;
+}

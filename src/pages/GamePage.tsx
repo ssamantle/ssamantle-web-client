@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { fetchGuessHistory } from "../services/gameService";
 import { GameLayout } from "../components/game/GameLayout";
 import { GameCountdownCard } from "../components/game/GameCountdownCard";
@@ -6,15 +6,26 @@ import { GuessHistoryTable } from "../components/game/GuessHistoryTable";
 import { WordGuessComposer } from "../components/game/WordGuessComposer";
 import { PlayerList } from "../components/game/PlayerList";
 import { GameTopInfoBar } from "../components/game/GameTopInfoBar";
+import { RaceMapLeaderboard } from "../components/game/RaceMapLeaderboard";
 import { useGameClock } from "../hooks/useGameClock";
 import { useGamePhase } from "../hooks/useGamePhase";
 import { useGamePolling } from "../hooks/useGamePolling";
-import type { GuessResult } from "../types/game";
+import type { GuessResult, RaceMapSubmissionBubble } from "../types/game";
+import { toRaceRunners } from "../utils/raceMap";
 
 interface GamePageProps {
   username: string;
   sessionId: string;
   onLogout: () => void;
+}
+
+const RACE_MAP_TOGGLE_STORAGE_KEY = "ssamantle.raceMap.visible";
+
+function readRaceMapVisiblePreference(): boolean {
+  const raw = window.localStorage.getItem(RACE_MAP_TOGGLE_STORAGE_KEY);
+  if (raw === "hidden") return false;
+  if (raw === "visible") return true;
+  return true;
 }
 
 function sortGuessHistory(items: GuessResult[]): GuessResult[] {
@@ -29,8 +40,19 @@ export default function GamePage({
   const [guessHistory, setGuessHistory] = useState<GuessResult[]>([]);
   const [isGuessHistoryLoading, setIsGuessHistoryLoading] = useState(true);
   const [guessHistoryError, setGuessHistoryError] = useState<Error | null>(null);
+  const [isRaceMapVisible, setIsRaceMapVisible] = useState(
+    () => readRaceMapVisiblePreference(),
+  );
   const { gameState, isLoading, error, lastSyncedAt, refetch } = useGamePolling(3000);
   const now = useGameClock();
+
+  const raceRunners = useMemo(
+    () => toRaceRunners(gameState?.players ?? []),
+    [gameState?.players],
+  );
+
+  // Placeholder for real-time submission overlays from other users.
+  const raceMapBubbles: RaceMapSubmissionBubble[] = [];
 
   const { phase, remainingMs, label } = useGamePhase({
     now,
@@ -67,6 +89,13 @@ export default function GamePage({
     };
   }, [sessionId, username]);
 
+  useEffect(() => {
+    window.localStorage.setItem(
+      RACE_MAP_TOGGLE_STORAGE_KEY,
+      isRaceMapVisible ? "visible" : "hidden",
+    );
+  }, [isRaceMapVisible]);
+
   const handleGuessSubmitted = async (result: GuessResult) => {
     setGuessHistory((current) => sortGuessHistory([...current, result]));
     setGuessHistoryError(null);
@@ -74,38 +103,47 @@ export default function GamePage({
   };
 
   return (
-    <GameLayout>
-      <GameTopInfoBar
-        username={username}
-        lastSyncedAt={lastSyncedAt}
-        onLogout={onLogout}
-      />
+    <>
+      <GameLayout>
+        <GameTopInfoBar
+          username={username}
+          lastSyncedAt={lastSyncedAt}
+          onLogout={onLogout}
+        />
 
-      <GameCountdownCard
-        phase={phase}
-        label={label}
-        remainingMs={remainingMs}
-        isLoading={isLoading}
-      />
+        <GameCountdownCard
+          phase={phase}
+          label={label}
+          remainingMs={remainingMs}
+          isLoading={isLoading}
+        />
 
-      <WordGuessComposer
-        username={username}
-        sessionId={sessionId}
-        phase={phase}
-        onSubmitted={handleGuessSubmitted}
-      />
+        <WordGuessComposer
+          username={username}
+          sessionId={sessionId}
+          phase={phase}
+          onSubmitted={handleGuessSubmitted}
+        />
 
-      <GuessHistoryTable
-        items={guessHistory}
-        isLoading={isGuessHistoryLoading}
-        error={guessHistoryError}
-      />
+        <GuessHistoryTable
+          items={guessHistory}
+          isLoading={isGuessHistoryLoading}
+          error={guessHistoryError}
+        />
 
-      <PlayerList
-        players={gameState?.players ?? []}
-        isLoading={isLoading}
-        error={error}
+        <PlayerList
+          players={gameState?.players ?? []}
+          isLoading={isLoading}
+          error={error}
+        />
+      </GameLayout>
+
+      <RaceMapLeaderboard
+        runners={raceRunners}
+        isVisible={isRaceMapVisible}
+        onToggle={() => setIsRaceMapVisible((current) => !current)}
+        bubbles={raceMapBubbles}
       />
-    </GameLayout>
+    </>
   );
 }
