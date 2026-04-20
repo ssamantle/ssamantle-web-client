@@ -43,6 +43,13 @@ function useAnimationNow(active: boolean): number {
   return now;
 }
 
+function medalForRank(rank: number): string | null {
+  if (rank === 1) return "🥇";
+  if (rank === 2) return "🥈";
+  if (rank === 3) return "🥉";
+  return null;
+}
+
 export function RaceMapLeaderboard({
   runners,
   isVisible,
@@ -112,6 +119,7 @@ export function RaceMapLeaderboard({
               const overlapOffset = (index % 3) * 4;
               const bubble = latestBubbleByPlayer.get(runner.name);
               const opacity = bubble ? bubbleOpacity(now, bubble) : 0;
+              const medal = medalForRank(runner.rank);
 
               return (
                 <div
@@ -120,10 +128,11 @@ export function RaceMapLeaderboard({
                   style={{ top: y, transform: `translateY(calc(-50% + ${overlapOffset}px))` }}
                 >
                   <div className="relative flex items-center justify-center">
-                    <div className="absolute right-[11px] h-2.5 w-2.5 rounded-full border border-white bg-[#1c87b0] shadow" />
+                    <div className="absolute right-[8px] h-2.5 w-2.5 rounded-full border border-white bg-[#1c87b0] shadow" />
 
-                    <span className="absolute right-[28px] max-w-[144px] truncate rounded-full border border-[#b9d0df] bg-white px-2 py-0.5 text-[10px] font-medium text-[#25475a] shadow-sm">
-                      {runner.name}
+                    <span className="absolute right-[28px] flex max-w-[144px] items-center gap-1 truncate rounded-full border border-[#b9d0df] bg-white px-2 py-0.5 text-[10px] font-medium text-[#25475a] shadow-sm">
+                      {medal ? <span aria-hidden="true">{medal}</span> : null}
+                      <span className="truncate">{runner.name}</span>
                     </span>
 
                     {bubble ? (

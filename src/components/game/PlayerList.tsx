@@ -18,6 +18,13 @@ function rankBadgeClass(rank: number): string {
   return "bg-[#f3f6f9] text-[#60727f]";
 }
 
+function medalForRank(rank: number): string | null {
+  if (rank === 1) return "🥇";
+  if (rank === 2) return "🥈";
+  if (rank === 3) return "🥉";
+  return null;
+}
+
 function EmptyState() {
   return (
     <div className="rounded-[3px] border border-dashed border-[#c7d3df] bg-[#f8fbfe] px-4 py-8 text-center text-sm text-[#60727f]">
@@ -52,6 +59,8 @@ function LoadingState() {
 }
 
 function PlayerRow({ player }: { player: PlayerState }) {
+  const medal = medalForRank(player.rank);
+
   return (
     <li className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 border-t border-[#e8f0f4] py-3 first:border-t-0 first:pt-0 last:pb-0">
       <span
@@ -64,8 +73,9 @@ function PlayerRow({ player }: { player: PlayerState }) {
       </span>
 
       <div className="min-w-0">
-        <div className="truncate text-sm font-medium text-[#202938]">
-          {player.name}
+        <div className="flex items-center gap-1 text-sm font-medium text-[#202938]">
+          {medal ? <span aria-hidden="true">{medal}</span> : null}
+          <span className="truncate">{player.name}</span>
         </div>
         <div className="text-xs text-[#6c8491]">최고 유사도 제출 기록</div>
       </div>
