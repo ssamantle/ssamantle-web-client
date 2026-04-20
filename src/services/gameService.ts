@@ -47,6 +47,7 @@ function toPlayerSubmission(value: unknown): PlayerSubmission | null {
     label?: unknown;
     similarity?: unknown;
     wordRank?: unknown;
+    rank?: unknown;
     submittedAt?: unknown;
   };
 
@@ -63,7 +64,8 @@ function toPlayerSubmission(value: unknown): PlayerSubmission | null {
     return Math.trunc(rawRank);
   };
 
-  const wordRank = toPositiveRank(data.wordRank);
+  const wordRank =
+    toPositiveRank(data.wordRank) ?? toPositiveRank(data.rank);
 
   return {
     label: data.label,
