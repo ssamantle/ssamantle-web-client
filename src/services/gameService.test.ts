@@ -1,8 +1,9 @@
 import { gamesApi } from "../api/client";
-import { joinGame, submitGuess } from "./gameService";
+import { fetchGameState, joinGame, submitGuess } from "./gameService";
 
 jest.mock("../api/client", () => ({
   gamesApi: {
+    gamePollingApiV1GamesPollingDbGet: jest.fn(),
     joinGameApiV1GamesJoinPost: jest.fn(),
     guessWordApiV1GamesGuessPost: jest.fn(),
   },
@@ -11,8 +12,55 @@ jest.mock("../api/client", () => ({
 const mockedGamesApi = gamesApi as jest.Mocked<typeof gamesApi>;
 
 beforeEach(() => {
+  mockedGamesApi.gamePollingApiV1GamesPollingDbGet.mockReset();
   mockedGamesApi.joinGameApiV1GamesJoinPost.mockReset();
   mockedGamesApi.guessWordApiV1GamesGuessPost.mockReset();
+});
+
+test("fetchGameState maps best and latest submissions from polling data", async () => {
+  mockedGamesApi.gamePollingApiV1GamesPollingDbGet.mockResolvedValue({
+    startAt: "2026-04-20T09:00:00+09:00",
+    endAt: "2026-04-20T10:00:00+09:00",
+    users: [
+      {
+        name: "runner",
+        rank: 1,
+        bestSimilarity: 98.1,
+        bestSubmission: {
+          label: "best-word",
+          similarity: 98.1,
+          submittedAt: "2026-04-20T09:30:00+09:00",
+        },
+        latestSubmission: {
+          label: "latest-word",
+          similarity: 91.4,
+          submittedAt: "2026-04-20T09:42:00+09:00",
+        },
+      },
+    ],
+  });
+
+  await expect(fetchGameState()).resolves.toEqual({
+    startAt: new Date("2026-04-20T09:00:00+09:00"),
+    endAt: new Date("2026-04-20T10:00:00+09:00"),
+    players: [
+      {
+        name: "runner",
+        rank: 1,
+        bestSimilarity: 98.1,
+        bestSubmission: {
+          label: "best-word",
+          similarity: 98.1,
+          submittedAt: new Date("2026-04-20T09:30:00+09:00"),
+        },
+        latestSubmission: {
+          label: "latest-word",
+          similarity: 91.4,
+          submittedAt: new Date("2026-04-20T09:42:00+09:00"),
+        },
+      },
+    ],
+  });
 });
 
 test("joinGame validates username before API request", async () => {

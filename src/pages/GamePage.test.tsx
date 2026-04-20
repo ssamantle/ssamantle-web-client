@@ -185,3 +185,53 @@ test("shows the latest submitted word at the top of the guess history", async ()
     similarity: 14.55,
   })).toBe("latest-word::77::14.550000::guess");
 });
+
+test("renders both best and latest submission bubbles on the race map", () => {
+  mockedUseGamePolling.mockReturnValue({
+    gameState: {
+      startAt: null,
+      endAt: null,
+      players: [
+        {
+          name: "alpha",
+          rank: 1,
+          bestSimilarity: 97.3,
+          bestSubmission: {
+            label: "best-alpha",
+            similarity: 97.3,
+            submittedAt: new Date("2026-04-20T09:31:00+09:00"),
+          },
+          latestSubmission: {
+            label: "latest-alpha",
+            similarity: 88.4,
+            submittedAt: new Date("2026-04-20T09:35:00+09:00"),
+          },
+        },
+      ],
+    },
+    isLoading: false,
+    error: null,
+    lastSyncedAt: new Date("2026-04-17T12:34:56+09:00"),
+    refetch: jest.fn().mockResolvedValue(undefined),
+  });
+
+  const { container } = render(
+    <GamePage
+      username="tester"
+      sessionId="session-1"
+      onLogout={jest.fn()}
+    />,
+  );
+
+  const bestBubble = container.querySelector(
+    '[data-bubble-type="best"][data-player-name="alpha"]',
+  );
+  const latestBubble = container.querySelector(
+    '[data-bubble-type="latest"][data-player-name="alpha"]',
+  );
+
+  expect(bestBubble).toHaveTextContent("best-alpha");
+  expect(bestBubble).toHaveClass("bg-white");
+  expect(latestBubble).toHaveTextContent("latest-alpha");
+  expect(latestBubble).toHaveClass("bg-white/75");
+});
