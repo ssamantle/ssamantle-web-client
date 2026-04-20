@@ -17,7 +17,13 @@ function formatSimilarity(value: number): string {
 
 function formatWordRank(rank: number): string {
   if (!Number.isFinite(rank) || rank <= 0) return "-";
-  return `#${Math.round(rank)}`;
+
+  const normalizedRank = Math.round(rank);
+  if (normalizedRank >= 1 && normalizedRank <= 999) {
+    return `${normalizedRank}위`;
+  }
+
+  return "1000위 이상";
 }
 
 function progressWidth(wordRank: number): number {
