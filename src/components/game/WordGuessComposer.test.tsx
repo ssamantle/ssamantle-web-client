@@ -14,14 +14,19 @@ beforeEach(() => {
   mockedSubmitGuess.mockReset();
 });
 
-test("blocks duplicate guesses restored from previous history", async () => {
+test("allows duplicate guesses even when the same word was submitted before", async () => {
   const onSubmitted = jest.fn().mockResolvedValue(undefined);
+  mockedSubmitGuess.mockResolvedValue({
+    isAnswer: false,
+    label: "banana",
+    rank: 12,
+    similarity: 8.76,
+  });
   const { container } = render(
     <WordGuessComposer
       username="tester"
       sessionId="session-1"
       phase={GamePhaseEnum.IN_GAME}
-      submittedWords={["banana"]}
       onSubmitted={onSubmitted}
     />,
   );
@@ -29,9 +34,13 @@ test("blocks duplicate guesses restored from previous history", async () => {
   await userEvent.type(screen.getByRole("textbox"), "banana");
   await userEvent.click(container.querySelector('button[type="submit"]') as HTMLButtonElement);
 
-  expect(mockedSubmitGuess).not.toHaveBeenCalled();
-  expect(onSubmitted).not.toHaveBeenCalled();
-  expect(screen.getByDisplayValue("banana")).toBeInTheDocument();
+  expect(mockedSubmitGuess).toHaveBeenCalledWith("session-1", "tester", "banana");
+  expect(onSubmitted).toHaveBeenCalledWith({
+    isAnswer: false,
+    label: "banana",
+    rank: 12,
+    similarity: 8.76,
+  });
 });
 
 test("submits guesses that are not in restored history", async () => {
@@ -48,7 +57,6 @@ test("submits guesses that are not in restored history", async () => {
       username="tester"
       sessionId="session-1"
       phase={GamePhaseEnum.IN_GAME}
-      submittedWords={["banana"]}
       onSubmitted={onSubmitted}
     />,
   );

@@ -31,7 +31,19 @@ function readRaceMapVisiblePreference(): boolean {
 }
 
 function sortGuessHistory(items: GuessResult[]): GuessResult[] {
-  return [...items].sort((a, b) => b.similarity - a.similarity);
+  const normalizedLabels = new Set<string>();
+
+  return [...items]
+    .sort((a, b) => b.similarity - a.similarity)
+    .filter((item) => {
+      const normalizedLabel = normalizeInput(item.label);
+      if (normalizedLabels.has(normalizedLabel)) {
+        return false;
+      }
+
+      normalizedLabels.add(normalizedLabel);
+      return true;
+    });
 }
 
 export default function GamePage({
@@ -53,11 +65,6 @@ export default function GamePage({
     () => toRaceRunners(gameState?.players ?? []),
     [gameState?.players],
   );
-  const submittedWords = useMemo(
-    () => guessHistory.map((item) => normalizeInput(item.label)),
-    [guessHistory],
-  );
-
   // Placeholder for real-time submission overlays from other users.
   const raceMapBubbles: RaceMapSubmissionBubble[] = [];
 
@@ -130,7 +137,6 @@ export default function GamePage({
           username={username}
           sessionId={sessionId}
           phase={phase}
-          submittedWords={submittedWords}
           onSubmitted={handleGuessSubmitted}
         />
 
