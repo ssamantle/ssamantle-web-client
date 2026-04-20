@@ -1,10 +1,14 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import App from "./App";
-import { joinGame, validateSession } from "./api/games";
+import { validateSession } from "./services/authService";
+import { joinGame } from "./services/gameService";
 
-jest.mock("./api/games", () => ({
+jest.mock("./services/gameService", () => ({
   joinGame: jest.fn(),
+}));
+
+jest.mock("./services/authService", () => ({
   validateSession: jest.fn(),
 }));
 

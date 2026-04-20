@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchGuessHistory } from "../api/games";
+import { fetchGuessHistory } from "../services/gameService";
 import { GameLayout } from "../components/game/GameLayout";
 import { GameCountdownCard } from "../components/game/GameCountdownCard";
 import { GuessHistoryTable } from "../components/game/GuessHistoryTable";
