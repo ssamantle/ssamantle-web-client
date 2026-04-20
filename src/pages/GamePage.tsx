@@ -11,6 +11,7 @@ import { useGameClock } from "../hooks/useGameClock";
 import { useGamePhase } from "../hooks/useGamePhase";
 import { useGamePolling } from "../hooks/useGamePolling";
 import type { GuessResult, RaceMapSubmissionBubble } from "../types/game";
+import { getGuessResultKey } from "../utils/guessHistory";
 import { toRaceRunners } from "../utils/raceMap";
 
 interface GamePageProps {
@@ -38,6 +39,7 @@ export default function GamePage({
   onLogout,
 }: GamePageProps) {
   const [guessHistory, setGuessHistory] = useState<GuessResult[]>([]);
+  const [latestSubmittedGuessKey, setLatestSubmittedGuessKey] = useState<string | null>(null);
   const [isGuessHistoryLoading, setIsGuessHistoryLoading] = useState(true);
   const [guessHistoryError, setGuessHistoryError] = useState<Error | null>(null);
   const [isRaceMapVisible, setIsRaceMapVisible] = useState(
@@ -98,6 +100,7 @@ export default function GamePage({
 
   const handleGuessSubmitted = async (result: GuessResult) => {
     setGuessHistory((current) => sortGuessHistory([...current, result]));
+    setLatestSubmittedGuessKey(getGuessResultKey(result));
     setGuessHistoryError(null);
     await refetch();
   };
@@ -127,6 +130,7 @@ export default function GamePage({
 
         <GuessHistoryTable
           items={guessHistory}
+          latestSubmittedGuessKey={latestSubmittedGuessKey}
           isLoading={isGuessHistoryLoading}
           error={guessHistoryError}
         />
