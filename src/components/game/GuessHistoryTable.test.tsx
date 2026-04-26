@@ -1,6 +1,13 @@
 import { render, screen, within } from "@testing-library/react";
 import { GuessHistoryTable } from "./GuessHistoryTable";
 import type { GuessResult } from "../../types/game";
+import { WORD_RANK_VOCAB_SIZE } from "../../utils/raceMap";
+
+const formattedVocabSize = WORD_RANK_VOCAB_SIZE.toLocaleString();
+
+function expectedProgressLabel(wordRank: number): string {
+  return `${Math.round((1 - wordRank / WORD_RANK_VOCAB_SIZE) * 100)}%`;
+}
 
 const items: GuessResult[] = [
   {
@@ -56,22 +63,24 @@ test("highlights existing row when a duplicate word is submitted", () => {
   expect(rows[0]).toHaveAttribute("data-highlighted", "true");
 });
 
-test("shows word rank labels and fills the progress bar on a 1 to 1000 scale", () => {
+test("shows word rank labels and fills the progress bar on the configured word scale", () => {
   render(<GuessHistoryTable items={items} />);
 
   expect(screen.queryByText("제출 순위")).not.toBeInTheDocument();
   expect(screen.queryByText("정답")).not.toBeInTheDocument();
   expect(screen.getByText("단어 순위")).toBeInTheDocument();
-  expect(screen.getByText("1위 = 100% / 1000위 = 0%")).toBeInTheDocument();
+  expect(
+    screen.getByText(`0위 = 100% / ${formattedVocabSize}위 = 0%`),
+  ).toBeInTheDocument();
   expect(screen.getByText("25위")).toBeInTheDocument();
 
   const rows = screen.getAllByRole("row").slice(1);
-  expect(within(rows[0]).getByText("98%")).toBeInTheDocument();
-  expect(within(rows[1]).getByText("70%")).toBeInTheDocument();
-  expect(within(rows[2]).getByText("36%")).toBeInTheDocument();
+  expect(within(rows[0]).getByText(expectedProgressLabel(25))).toBeInTheDocument();
+  expect(within(rows[1]).getByText(expectedProgressLabel(300))).toBeInTheDocument();
+  expect(within(rows[2]).getByText(expectedProgressLabel(640))).toBeInTheDocument();
 });
 
-test("shows 1000위 이상 when word rank is outside 1 to 999", () => {
+test("shows vocabulary size threshold when word rank is outside the vocabulary size", () => {
   render(
     <GuessHistoryTable
       items={[
@@ -79,14 +88,14 @@ test("shows 1000위 이상 when word rank is outside 1 to 999", () => {
           label: "delta",
           similarity: 41.25,
           rank: 200,
-          wordRank: 1300,
+          wordRank: WORD_RANK_VOCAB_SIZE,
           isAnswer: false,
         },
       ]}
     />,
   );
 
-  expect(screen.getByText("1000위 이상")).toBeInTheDocument();
+  expect(screen.getByText(`${formattedVocabSize}위 이상`)).toBeInTheDocument();
 });
 
 test("applies opacity between 0.6 and 1.0 from similarity and word rank", () => {
@@ -104,7 +113,7 @@ test("applies opacity between 0.6 and 1.0 from similarity and word rank", () => 
           label: "min-emphasis",
           similarity: 0,
           rank: 500,
-          wordRank: 1000,
+          wordRank: WORD_RANK_VOCAB_SIZE,
           isAnswer: false,
         },
       ]}
@@ -121,7 +130,7 @@ test("applies opacity between 0.6 and 1.0 from similarity and word rank", () => 
   expect(screen.getByText("0.00").closest("td")).toHaveStyle({
     color: "rgba(12, 104, 135, 0.6)",
   });
-  expect(screen.getByText("1000위 이상").closest("td")).toHaveStyle({
+  expect(screen.getByText(`${formattedVocabSize}위 이상`).closest("td")).toHaveStyle({
     color: "rgba(53, 84, 105, 0.6)",
   });
 });

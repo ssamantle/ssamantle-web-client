@@ -37,10 +37,8 @@ export interface GuessResult {
 }
 
 export interface PlayerSubmission {
-  label: string;
   similarity: Similarity;
   wordRank: Rank | null;
-  submittedAt: Date | null;
 }
 
 export interface RaceRunner {

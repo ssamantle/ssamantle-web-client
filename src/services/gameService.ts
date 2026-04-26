@@ -44,39 +44,30 @@ function toPlayerSubmission(value: unknown): PlayerSubmission | null {
   if (!value || typeof value !== "object") return null;
 
   const data = value as {
-    label?: unknown;
     similarity?: unknown;
     wordRank?: unknown;
-    rank?: unknown;
-    submittedAt?: unknown;
   };
 
-  if (typeof data.label !== "string") return null;
   if (typeof data.similarity !== "number" || !Number.isFinite(data.similarity)) {
     return null;
   }
 
-  const toPositiveRank = (rawRank: unknown): number | null => {
-    if (typeof rawRank !== "number" || !Number.isFinite(rawRank) || rawRank <= 0) {
+  const toValidRank = (rawRank: unknown): number | null => {
+    if (typeof rawRank !== "number" || !Number.isFinite(rawRank) || rawRank < 0) {
       return null;
     }
 
     return Math.trunc(rawRank);
   };
 
-  const wordRank =
-    toPositiveRank(data.wordRank) ?? toPositiveRank(data.rank);
-
   return {
-    label: data.label,
     similarity: data.similarity,
-    wordRank,
-    submittedAt: toDate(data.submittedAt),
+    wordRank: toValidRank(data.wordRank),
   };
 }
 
 export async function fetchGameState(): Promise<GameState> {
-  const data = await gamesApi.gamePollingApiV1GamesPollingDbGet();
+  const data = await gamesApi.gamePollingApiV1GamesPollingGet();
 
   return {
     startAt: toDate(data.startAt),
