@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchGameState } from "../services/gameService";
 import type { GameState } from "../types/game";
 
@@ -20,7 +20,7 @@ export function useGamePolling(intervalMs = 3000): UseGamePollingResult {
   const fetchingRef = useRef(false);
   const queuedRefetchRef = useRef(false);
 
-  const refetch = async () => {
+  const refetch = useCallback(async () => {
     if (fetchingRef.current) {
       queuedRefetchRef.current = true;
       return;
@@ -46,7 +46,7 @@ export function useGamePolling(intervalMs = 3000): UseGamePollingResult {
         void refetch();
       }
     }
-  };
+  }, []);
 
   useEffect(() => {
     aliveRef.current = true;
@@ -61,7 +61,7 @@ export function useGamePolling(intervalMs = 3000): UseGamePollingResult {
       queuedRefetchRef.current = false;
       window.clearInterval(id);
     };
-  }, [intervalMs]);
+  }, [intervalMs, refetch]);
 
   return { gameState, isLoading, error, lastSyncedAt, refetch };
 }
