@@ -203,11 +203,13 @@ test("shows the existing history row highlighted at the top after duplicate subm
   await screen.findByText("top-word");
   await userEvent.click(screen.getByRole("button", { name: "submit-latest-word" }));
 
-  const rows = screen.getAllByRole("row").slice(1);
-  expect(rows).toHaveLength(2);
-  expect(within(rows[0]).getByText("top-word")).toBeInTheDocument();
-  expect(rows[0]).toHaveAttribute("data-highlighted", "true");
-  expect(rows[0]).toHaveClass("bg-[#f4eadb]");
+  await waitFor(() => {
+    const rows = screen.getAllByRole("row").slice(1);
+    expect(rows).toHaveLength(2);
+    expect(within(rows[0]).getByText("top-word")).toBeInTheDocument();
+    expect(rows[0]).toHaveAttribute("data-highlighted", "true");
+    expect(rows[0]).toHaveClass("bg-[#f4eadb]");
+  });
 });
 
 test("renders both best and latest similarity markers on the race map", () => {
@@ -221,16 +223,12 @@ test("renders both best and latest similarity markers on the race map", () => {
           rank: 1,
           bestSimilarity: 97.3,
           bestSubmission: {
-            label: "best-alpha",
             similarity: 97.3,
             wordRank: 2,
-            submittedAt: new Date("2026-04-20T09:31:00+09:00"),
           },
           latestSubmission: {
-            label: "latest-alpha",
             similarity: 88.4,
             wordRank: 84,
-            submittedAt: new Date("2026-04-20T09:35:00+09:00"),
           },
         },
       ],
@@ -265,8 +263,6 @@ test("renders both best and latest similarity markers on the race map", () => {
   expect(latestMarker).toHaveClass("bg-[#aacada]");
   expect(latestMarkerLabel).toBeInTheDocument();
   expect(latestMarkerLabel).toHaveTextContent("alpha");
-  expect(screen.queryByText("best-alpha")).not.toBeInTheDocument();
-  expect(screen.queryByText("latest-alpha")).not.toBeInTheDocument();
 });
 
 test("shows confetti with bilateral launch origins when the submitted guess is the answer", async () => {

@@ -8,7 +8,7 @@ import {
 
 jest.mock("../api/client", () => ({
   gamesApi: {
-    gamePollingApiV1GamesPollingDbGet: jest.fn(),
+    gamePollingApiV1GamesPollingGet: jest.fn(),
     getGuessHistoryApiV1GamesGuessesGet: jest.fn(),
     joinGameApiV1GamesJoinPost: jest.fn(),
     guessWordApiV1GamesGuessPost: jest.fn(),
@@ -18,14 +18,14 @@ jest.mock("../api/client", () => ({
 const mockedGamesApi = gamesApi as jest.Mocked<typeof gamesApi>;
 
 beforeEach(() => {
-  mockedGamesApi.gamePollingApiV1GamesPollingDbGet.mockReset();
+  mockedGamesApi.gamePollingApiV1GamesPollingGet.mockReset();
   mockedGamesApi.getGuessHistoryApiV1GamesGuessesGet.mockReset();
   mockedGamesApi.joinGameApiV1GamesJoinPost.mockReset();
   mockedGamesApi.guessWordApiV1GamesGuessPost.mockReset();
 });
 
 test("fetchGameState maps best and latest submissions from polling data", async () => {
-  mockedGamesApi.gamePollingApiV1GamesPollingDbGet.mockResolvedValue({
+  mockedGamesApi.gamePollingApiV1GamesPollingGet.mockResolvedValue({
     startAt: "2026-04-20T09:00:00+09:00",
     endAt: "2026-04-20T10:00:00+09:00",
     users: [
@@ -34,16 +34,12 @@ test("fetchGameState maps best and latest submissions from polling data", async 
         rank: 1,
         bestSimilarity: 98.1,
         bestSubmission: {
-          label: "best-word",
           similarity: 98.1,
           wordRank: 4,
-          submittedAt: "2026-04-20T09:30:00+09:00",
         },
         latestSubmission: {
-          label: "latest-word",
           similarity: 91.4,
           wordRank: 52,
-          submittedAt: "2026-04-20T09:42:00+09:00",
         },
       },
     ],
@@ -58,24 +54,20 @@ test("fetchGameState maps best and latest submissions from polling data", async 
         rank: 1,
         bestSimilarity: 98.1,
         bestSubmission: {
-          label: "best-word",
           similarity: 98.1,
           wordRank: 4,
-          submittedAt: new Date("2026-04-20T09:30:00+09:00"),
         },
         latestSubmission: {
-          label: "latest-word",
           similarity: 91.4,
           wordRank: 52,
-          submittedAt: new Date("2026-04-20T09:42:00+09:00"),
         },
       },
     ],
   });
 });
 
-test("fetchGameState ignores legacy submission rank field", async () => {
-  mockedGamesApi.gamePollingApiV1GamesPollingDbGet.mockResolvedValue({
+test("fetchGameState keeps submissions with missing word rank", async () => {
+  mockedGamesApi.gamePollingApiV1GamesPollingGet.mockResolvedValue({
     startAt: "2026-04-20T09:00:00+09:00",
     endAt: "2026-04-20T10:00:00+09:00",
     users: [
@@ -84,16 +76,10 @@ test("fetchGameState ignores legacy submission rank field", async () => {
         rank: 1,
         bestSimilarity: 100,
         bestSubmission: {
-          label: "answer",
           similarity: 100,
-          rank: 1,
-          submittedAt: "2026-04-20T09:59:00+09:00",
         },
         latestSubmission: {
-          label: "answer",
           similarity: 100,
-          rank: 1,
-          submittedAt: "2026-04-20T09:59:00+09:00",
         },
       },
     ],
@@ -108,16 +94,50 @@ test("fetchGameState ignores legacy submission rank field", async () => {
         rank: 1,
         bestSimilarity: 100,
         bestSubmission: {
-          label: "answer",
           similarity: 100,
           wordRank: null,
-          submittedAt: new Date("2026-04-20T09:59:00+09:00"),
         },
         latestSubmission: {
-          label: "answer",
           similarity: 100,
           wordRank: null,
-          submittedAt: new Date("2026-04-20T09:59:00+09:00"),
+        },
+      },
+    ],
+  });
+});
+
+test("fetchGameState drops malformed submission objects", async () => {
+  mockedGamesApi.gamePollingApiV1GamesPollingGet.mockResolvedValue({
+    startAt: "2026-04-20T09:00:00+09:00",
+    endAt: "2026-04-20T10:00:00+09:00",
+    users: [
+      {
+        name: "runner",
+        rank: 1,
+        bestSimilarity: 100,
+        bestSubmission: {
+          wordRank: 4,
+        },
+        latestSubmission: {
+          similarity: 100,
+          wordRank: -1,
+        },
+      },
+    ],
+  });
+
+  await expect(fetchGameState()).resolves.toEqual({
+    startAt: new Date("2026-04-20T09:00:00+09:00"),
+    endAt: new Date("2026-04-20T10:00:00+09:00"),
+    players: [
+      {
+        name: "runner",
+        rank: 1,
+        bestSimilarity: 100,
+        bestSubmission: null,
+        latestSubmission: {
+          similarity: 100,
+          wordRank: null,
         },
       },
     ],

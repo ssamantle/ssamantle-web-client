@@ -32,7 +32,7 @@ function runnerOffset(name: string): number {
     0,
   );
 
-  return (seed % 3) * 4;
+  return (seed % 5) * 2;
 }
 
 function compareMarkerType(
@@ -111,13 +111,13 @@ function RaceMapRunnerMarker({
         <div
           className={`absolute rounded-full shadow ${
             isCurrentUser
-              ? "right-[7px] h-3.5 w-3.5 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
-              : "right-[8px] h-2.5 w-2.5 border border-white bg-[#1c87b0]"
+              ? "right-[6px] h-3 w-3 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
+              : "right-[8px] h-2 w-2 border border-white bg-[#1c87b0]"
           }`}
         />
 
         <span
-          className={`absolute right-[28px] flex max-w-[144px] items-center gap-1 truncate rounded-full bg-white px-2 py-0.5 text-[10px] font-medium shadow-sm ${
+          className={`absolute right-[22px] flex max-w-[96px] items-center gap-0.5 truncate rounded-full bg-white px-1.5 py-px text-[9px] font-medium leading-4 shadow-sm ${
             isCurrentUser
               ? "border border-[#6fa6bc] text-[#123f55]"
               : "border border-[#b9d0df] text-[#25475a]"
@@ -146,11 +146,11 @@ function RaceMapSimilarityDot({
   const markerClasses =
     marker.type === "best"
       ? isCurrentUser
-        ? "h-4 w-4 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
-        : "h-3 w-3 border border-white bg-[#1c87b0]"
+        ? "h-3.5 w-3.5 border-2 border-white bg-[#0f6f93] ring-2 ring-[#d7edf6]"
+        : "h-2.5 w-2.5 border border-white bg-[#1c87b0]"
       : isCurrentUser
-        ? "h-3.5 w-3.5 border-2 border-white bg-[#85b7cf]"
-        : "h-2.5 w-2.5 border border-white bg-[#aacada]";
+        ? "h-3 w-3 border-2 border-white bg-[#85b7cf]"
+        : "h-2 w-2 border border-white bg-[#aacada]";
 
   return (
     <div
@@ -168,7 +168,7 @@ function RaceMapSimilarityDot({
         <span
           data-similarity-marker-label-type={marker.type}
           data-player-name={marker.playerName}
-          className={`absolute right-[28px] max-w-[144px] truncate rounded-full bg-white/90 px-2 py-0.5 text-[10px] shadow-sm ${
+          className={`absolute right-[22px] max-w-[96px] truncate rounded-full bg-white/90 px-1.5 py-px text-[9px] leading-4 shadow-sm ${
             isCurrentUser
               ? "border border-[#a7c8d8] text-[#2f5f75]"
               : "border border-[#c8dbe6] text-[#587283]"
@@ -230,7 +230,7 @@ export function RaceMapLeaderboard({
       </button>
 
       {isVisible ? (
-        <aside className="fixed right-0 top-32 z-30 hidden h-[calc(100vh-9.5rem)] min-h-[380px] w-[210px] bg-transparent p-3 lg:block">
+        <aside className="fixed right-0 top-32 z-30 hidden h-[calc(100vh-9.5rem)] min-h-[380px] w-[170px] bg-transparent p-2 lg:block">
           <div className="mb-2 flex items-center justify-between">
             <h3 className="text-xs font-semibold tracking-[0.06em] text-[#486679]">
               RACE MAP
@@ -273,7 +273,7 @@ export function RaceMapLeaderboard({
                       isCurrentUser={isCurrentUser}
                       style={{
                         top: `${mapRankProgressToTrackY(bestMarker.wordRank) * 100}%`,
-                        transform: `translateY(calc(-50% + ${overlapOffset - 6}px))`,
+                        transform: `translateY(calc(-50% + ${overlapOffset - 4}px))`,
                         zIndex: labelZIndex - 1,
                         opacity: isCurrentUser ? 1 : 0.82,
                       }}
@@ -286,7 +286,7 @@ export function RaceMapLeaderboard({
                       isCurrentUser={isCurrentUser}
                       style={{
                         top: `${mapRankProgressToTrackY(latestMarker.wordRank) * 100}%`,
-                        transform: `translateY(calc(-50% + ${overlapOffset + 8}px))`,
+                        transform: `translateY(calc(-50% + ${overlapOffset + 5}px))`,
                         zIndex: labelZIndex - 2,
                         opacity: isCurrentUser ? 0.9 : 0.62,
                       }}

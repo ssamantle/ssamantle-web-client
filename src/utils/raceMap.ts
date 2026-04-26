@@ -11,9 +11,7 @@ export const RACE_MAP_TICKS: RaceMapTick[] = [
   { label: "START", ratio: 0 },
 ];
 
-const TOP_RANK = 1;
-const THOUSANDTH_RANK = 1000;
-const TOP_RANK_PROGRESS_PERCENT = 100;
+export const WORD_RANK_VOCAB_SIZE = 10000;
 
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
@@ -34,23 +32,16 @@ export function mapSimilarityToTrackY(similarity: Similarity): number {
   return 1 - normalized;
 }
 
-function progressPercentForRank(rank: number): number {
-  const normalizedRank = Math.max(TOP_RANK, Math.trunc(rank));
-
-  if (normalizedRank >= THOUSANDTH_RANK) {
-    return 0;
-  }
-
-  const ratio = (normalizedRank - TOP_RANK) / (THOUSANDTH_RANK - TOP_RANK);
-  return TOP_RANK_PROGRESS_PERCENT - ratio * TOP_RANK_PROGRESS_PERCENT;
-}
-
-export function mapRankProgressToTrackY(rank: number | null | undefined): number {
-  if (typeof rank !== "number" || !Number.isFinite(rank) || rank <= 0) {
+export function normalizeWordRankRatio(rank: number | null | undefined): number {
+  if (typeof rank !== "number" || !Number.isFinite(rank)) {
     return 1;
   }
 
-  return 1 - progressPercentForRank(rank) / 100;
+  return clamp01(Math.max(rank / WORD_RANK_VOCAB_SIZE, 0));
+}
+
+export function mapRankProgressToTrackY(rank: number | null | undefined): number {
+  return normalizeWordRankRatio(rank);
 }
 
 export function toRaceRunners(players: PlayerState[]): RaceRunner[] {

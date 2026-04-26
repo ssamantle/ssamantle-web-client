@@ -50,49 +50,18 @@ function sortGuessHistory(items: GuessResult[]): GuessResult[] {
     });
 }
 
-function normalizePlayerName(value: string): string {
-  return value.trim().toLowerCase();
-}
-
-function findWordRankInHistory(
-  history: GuessResult[],
-  label: string,
-): number | null {
-  const normalizedLabel = normalizeInput(label);
-  const matched = history.find(
-    (item) => normalizeInput(item.label) === normalizedLabel,
-  );
-
-  return matched?.wordRank ?? null;
-}
-
 function toRaceMapMarkers(
   players: PlayerState[],
-  currentUsername: string,
-  guessHistory: GuessResult[],
 ): RaceMapSimilarityMarker[] {
-  const normalizedCurrentUsername = normalizePlayerName(currentUsername);
-
   return players.flatMap((player) => {
     const markers: RaceMapSimilarityMarker[] = [];
-    const isCurrentUser =
-      normalizePlayerName(player.name) === normalizedCurrentUsername;
-
-    const toMarkerWordRank = (label: string, wordRank: number | null): number | null => {
-      if (wordRank != null) return wordRank;
-      if (!isCurrentUser) return null;
-      return findWordRankInHistory(guessHistory, label);
-    };
 
     if (player.bestSubmission) {
       markers.push({
         id: `${player.name}::best`,
         playerName: player.name,
         similarity: player.bestSubmission.similarity,
-        wordRank: toMarkerWordRank(
-          player.bestSubmission.label,
-          player.bestSubmission.wordRank,
-        ),
+        wordRank: player.bestSubmission.wordRank,
         type: "best",
       });
     }
@@ -102,10 +71,7 @@ function toRaceMapMarkers(
         id: `${player.name}::latest`,
         playerName: player.name,
         similarity: player.latestSubmission.similarity,
-        wordRank: toMarkerWordRank(
-          player.latestSubmission.label,
-          player.latestSubmission.wordRank,
-        ),
+        wordRank: player.latestSubmission.wordRank,
         type: "latest",
       });
     }
@@ -135,8 +101,8 @@ export default function GamePage({
     [gameState?.players],
   );
   const raceMapMarkers = useMemo(
-    () => toRaceMapMarkers(gameState?.players ?? [], username, guessHistory),
-    [gameState?.players, guessHistory, username],
+    () => toRaceMapMarkers(gameState?.players ?? []),
+    [gameState?.players],
   );
 
   const { phase, remainingMs, label } = useGamePhase({
