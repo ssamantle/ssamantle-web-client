@@ -74,7 +74,7 @@ test("fetchGameState maps best and latest submissions from polling data", async 
   });
 });
 
-test("fetchGameState ignores legacy submission rank field", async () => {
+test("fetchGameState falls back to legacy submission rank when wordRank is missing", async () => {
   mockedGamesApi.gamePollingApiV1GamesPollingDbGet.mockResolvedValue({
     startAt: "2026-04-20T09:00:00+09:00",
     endAt: "2026-04-20T10:00:00+09:00",
@@ -110,14 +110,66 @@ test("fetchGameState ignores legacy submission rank field", async () => {
         bestSubmission: {
           label: "answer",
           similarity: 100,
-          wordRank: null,
+          wordRank: 1,
           submittedAt: new Date("2026-04-20T09:59:00+09:00"),
         },
         latestSubmission: {
           label: "answer",
           similarity: 100,
-          wordRank: null,
+          wordRank: 1,
           submittedAt: new Date("2026-04-20T09:59:00+09:00"),
+        },
+      },
+    ],
+  });
+});
+
+test("fetchGameState prioritizes wordRank over legacy submission rank", async () => {
+  mockedGamesApi.gamePollingApiV1GamesPollingDbGet.mockResolvedValue({
+    startAt: "2026-04-20T09:00:00+09:00",
+    endAt: "2026-04-20T10:00:00+09:00",
+    users: [
+      {
+        name: "runner",
+        rank: 1,
+        bestSimilarity: 100,
+        bestSubmission: {
+          label: "answer",
+          similarity: 100,
+          wordRank: 4,
+          rank: 1,
+          submittedAt: "2026-04-20T09:59:00+09:00",
+        },
+        latestSubmission: {
+          label: "answer",
+          similarity: 100,
+          wordRank: 7,
+          rank: 1,
+          submittedAt: "2026-04-20T09:59:30+09:00",
+        },
+      },
+    ],
+  });
+
+  await expect(fetchGameState()).resolves.toEqual({
+    startAt: new Date("2026-04-20T09:00:00+09:00"),
+    endAt: new Date("2026-04-20T10:00:00+09:00"),
+    players: [
+      {
+        name: "runner",
+        rank: 1,
+        bestSimilarity: 100,
+        bestSubmission: {
+          label: "answer",
+          similarity: 100,
+          wordRank: 4,
+          submittedAt: new Date("2026-04-20T09:59:00+09:00"),
+        },
+        latestSubmission: {
+          label: "answer",
+          similarity: 100,
+          wordRank: 7,
+          submittedAt: new Date("2026-04-20T09:59:30+09:00"),
         },
       },
     ],
