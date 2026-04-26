@@ -1,0 +1,11 @@
+*
+
+!package.json
+!package-lock.json
+!public/
+!public/**
+!src/
+!src/**
+!tailwind.config.js
+!tsconfig.json
+!nginx.conf

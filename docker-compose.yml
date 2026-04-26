@@ -1,0 +1,10 @@
+services:
+  web:
+    image: ssamantle-web-client:dev
+    container_name: ssamantle-web-client-dev
+    build:
+      context: .
+      args:
+        API_BASE_URL: ${API_BASE_URL:?API_BASE_URL is required}
+    ports:
+      - "80:80"
